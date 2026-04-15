@@ -1,0 +1,76 @@
+{
+  "home_pose": {
+    "openarm_left_joint1": -1.7277,
+    "openarm_left_joint2": 0.1,
+    "openarm_left_joint3": 0.0,
+    "openarm_left_joint4": -1.32,
+    "openarm_left_joint5": 0.0,
+    "openarm_left_joint6": 0.0,
+    "openarm_left_joint7": 0.0,
+    "openarm_right_joint1": 1.7277,
+    "openarm_right_joint2": -0.1,
+    "openarm_right_joint3": 0.0,
+    "openarm_right_joint4": 1.32,
+    "openarm_right_joint5": 0.0,
+    "openarm_right_joint6": 0.0,
+    "openarm_right_joint7": 0.0,
+    "openarm_left_finger_joint1": 0.0,
+    "openarm_left_finger_joint2": 0.0,
+    "openarm_right_finger_joint1": 0.0,
+    "openarm_right_finger_joint2": 0.0
+  },
+  "link_colors": {
+    "world": "0x444444",
+    "openarm_body_link0": "0x888888",
+    "openarm_left_link0": "0x333333",
+    "openarm_left_link1": "0x4488FF",
+    "openarm_left_link2": "0x4488FF",
+    "openarm_left_link3": "0x4488FF",
+    "openarm_left_link4": "0x4488FF",
+    "openarm_left_link5": "0x4488FF",
+    "openarm_left_link6": "0x4488FF",
+    "openarm_left_link7": "0x4488FF",
+    "openarm_left_hand": "0x22CCFF",
+    "openarm_left_left_finger": "0x22CCFF",
+    "openarm_left_right_finger": "0x22CCFF",
+    "openarm_right_link0": "0x333333",
+    "openarm_right_link1": "0xFF8844",
+    "openarm_right_link2": "0xFF8844",
+    "openarm_right_link3": "0xFF8844",
+    "openarm_right_link4": "0xFF8844",
+    "openarm_right_link5": "0xFF8844",
+    "openarm_right_link6": "0xFF8844",
+    "openarm_right_link7": "0xFF8844",
+    "openarm_right_hand": "0xFFCC22",
+    "openarm_right_left_finger": "0xFFCC22",
+    "openarm_right_right_finger": "0xFFCC22"
+  },
+  "rotation": [
+    0,
+    0,
+    90
+  ],
+  "position": [
+    0,
+    0,
+    0
+  ],
+  "scale": [
+    1,
+    1,
+    1
+  ],
+  "dmp_scale": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "dmp_offset": [
+    0.35,
+    0.0,
+    0.30
+  ],
+  "dmp_rotation_z": -90.0,
+  "flip_z": true,
+  "arm_reach": 0.5
+}

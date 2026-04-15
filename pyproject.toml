@@ -1,0 +1,64 @@
+[project]
+name = "igenius"
+version = "0.1.0"
+description = "Open-source visual imitation learning toolkit with Vulcanexus integration"
+readme = "README.md"
+license = { text = "MIT License" }
+requires-python = ">=3.10,<3.13"
+
+dependencies = [
+    "streamlit>=1.37.1",
+    "python-dotenv>=1.0.1",
+    "numpy>=1.21,<1.27",
+    "imageio>=2.35.1",
+    "stqdm>=0.0.5",
+    "requests>=2.31.0",
+    "streamlit-post-message @ git+https://github.com/GitMarco27/streamlit_post_message.git",
+    "st-clickable-images>=0.0.3",
+    "streamlit_clickable_images",
+    "scikit-learn",
+    "Pillow",
+    "opencv-python-headless",
+    "mediapipe",
+    "ikpy",
+    "plotly",
+    "ultralytics",
+    "urdfpy",
+    "trimesh",
+    "pycollada",
+    "shapely",
+    "scipy",
+    "networkx>=3.2",
+    "pyzed",
+    "cyclonedds",
+]
+
+[project.optional-dependencies]
+realsense = [
+    "pyrealsense2==2.56.5.9235"
+]
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+packages = ["src/streamlit_template"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["streamlit_template"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv]
+dev-dependencies = [
+    "pre-commit>=3.8.0"
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pre-commit>=3.8.0",
+    "jupyterlab>=4.4.10"
+]

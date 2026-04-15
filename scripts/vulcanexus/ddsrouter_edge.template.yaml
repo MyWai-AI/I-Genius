@@ -1,0 +1,19 @@
+version: v4.0
+
+allowlist:
+  - name: rt/chatter
+    type: std_msgs::msg::dds_::String_
+  - name: rt/learned_trajectory
+    type: geometry_msgs::msg::dds_::PoseArray_
+
+participants:
+  - name: ROS_2_Edge
+    kind: local
+    domain: 42
+
+  - name: Router_Client
+    kind: wan
+    connection-addresses:
+      - ip: CHANGE_ME_CLOUD_PUBLIC_IP
+        port: 45678
+        transport: tcp

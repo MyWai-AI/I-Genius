@@ -1,0 +1,22 @@
+[Unit]
+Description=Igenius Vulcanexus Edge Receiver
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/igenius
+Environment=ROS_DOMAIN_ID=42
+Environment=RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+Environment=ROS_LOCALHOST_ONLY=0
+Environment=ROS_DISCOVERY_SERVER=192.168.0.10:14520
+Environment=OUTPUT_DIR=/var/lib/vilma-edge/receiver
+Environment=ARTIFACT_PREFIX=latest_received
+ExecStart=/opt/igenius/scripts/vulcanexus/run_edge_receiver.sh
+Restart=always
+RestartSec=3
+User=robot
+Group=robot
+
+[Install]
+WantedBy=multi-user.target

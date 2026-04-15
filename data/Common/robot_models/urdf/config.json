@@ -1,0 +1,45 @@
+{
+    "home_pose": {
+        "Joint_1": 3.14,
+        "Joint_2": -0.52,
+        "Joint_3": 1.57,
+        "Joint_4": 0,
+        "Joint_5": -1.57,
+        "Joint_6": 0
+    },
+    "link_colors": {
+        "base_link": "0x333333",
+        "Link_1": "0xFFA500",
+        "Link_2": "0x00FF00",
+        "Link_3": "0x0000FF",
+        "Link_4": "0xFF0000",
+        "Link_5": "0x00FFFF",
+        "Link_6": "0xFF00FF"
+    },
+    "rotation": [
+        270,
+        0,
+        0
+    ],
+    "position": [
+        0,
+        0,
+        0
+    ],
+    "scale": [
+        1,
+        1,
+        1
+    ],
+    "dmp_scale": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "dmp_offset": [
+        0.4,
+        0.0,
+        0.8
+    ],
+    "dmp_rotation_z": 90.0
+}

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+CONTAINER="${VULCANEXUS_SUB_CONTAINER:-vulcanexus_humble}"
+HOST_WORKSPACE="${HOST_WORKSPACE:-/home/vvijaykumar/vilma-agent}"
+CONTAINER_WORKSPACE="${CONTAINER_WORKSPACE:-/workspace/vilma-agent}"
+TOPIC="${TOPIC:-/learned_trajectory}"
+SETUP_FILE="${ROS_SETUP_FILE:-/opt/ros/humble/setup.bash}"
+NODE_NAME="${NODE_NAME:-traj_pose_array_sub}"
+
+CONTAINER_SCRIPT_PATH="$CONTAINER_WORKSPACE/scripts/vulcanexus/traj_pose_array_sub.py"
+FALLBACK_CONTAINER_DIR="/tmp/vilma-agent-vulcanexus-sub"
+
+if [ ! -f "$HOST_WORKSPACE/scripts/vulcanexus/traj_pose_array_sub.py" ]; then
+  echo "Host subscriber script not found: $HOST_WORKSPACE/scripts/vulcanexus/traj_pose_array_sub.py" >&2
+  exit 1
+fi
+
+if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER")" != "true" ]; then
+  echo "Starting container $CONTAINER"
+  docker start "$CONTAINER" >/dev/null
+fi
+
+if docker exec -i "$CONTAINER" test -f "$CONTAINER_SCRIPT_PATH"; then
+  EFFECTIVE_CONTAINER_SCRIPT_PATH="$CONTAINER_SCRIPT_PATH"
+else
+  EFFECTIVE_CONTAINER_DIR="$FALLBACK_CONTAINER_DIR"
+  EFFECTIVE_CONTAINER_SCRIPT_PATH="$EFFECTIVE_CONTAINER_DIR/traj_pose_array_sub.py"
+
+  echo "Container does not have the workspace mounted at $CONTAINER_WORKSPACE."
+  echo "Copying the subscriber script into $CONTAINER:$EFFECTIVE_CONTAINER_DIR"
+
+  docker exec -i "$CONTAINER" mkdir -p "$EFFECTIVE_CONTAINER_DIR"
+  docker cp "$HOST_WORKSPACE/scripts/vulcanexus/traj_pose_array_sub.py" \
+    "$CONTAINER:$EFFECTIVE_CONTAINER_SCRIPT_PATH"
+fi
+
+echo "Container: $CONTAINER"
+echo "Subscriber script: $EFFECTIVE_CONTAINER_SCRIPT_PATH"
+echo "Topic: $TOPIC"
+echo "ROS setup: $SETUP_FILE"
+echo "ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}"
+echo "RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}"
+echo "ROS_LOCALHOST_ONLY=${ROS_LOCALHOST_ONLY:-0}"
+if [ -n "${ROS_DISCOVERY_SERVER:-}" ]; then
+  echo "ROS_DISCOVERY_SERVER=$ROS_DISCOVERY_SERVER"
+fi
+
+docker exec -it "$CONTAINER" bash -lc "
+source '$SETUP_FILE'
+export ROS_DOMAIN_ID='${ROS_DOMAIN_ID:-42}'
+export RMW_IMPLEMENTATION='${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}'
+export ROS_LOCALHOST_ONLY='${ROS_LOCALHOST_ONLY:-0}'
+if [ -n '${ROS_DISCOVERY_SERVER:-}' ]; then
+  export ROS_DISCOVERY_SERVER='${ROS_DISCOVERY_SERVER:-}'
+fi
+python3 '$EFFECTIVE_CONTAINER_SCRIPT_PATH' \
+  --topic '$TOPIC' \
+  --node-name '$NODE_NAME'
+"

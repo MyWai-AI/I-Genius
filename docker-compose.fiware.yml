@@ -1,0 +1,31 @@
+services:
+  fiware-mongo:
+    image: mongo:4.2
+    container_name: fiware-mongo
+    command: ["--bind_ip_all", "--nojournal"]
+    restart: unless-stopped
+    volumes:
+      - fiware-mongo-data:/data/db
+
+  fiware-orion-ld:
+    image: quay.io/fiware/orion-ld:1.10.0
+    container_name: fiware-orion-ld
+    depends_on:
+      - fiware-mongo
+    ports:
+      - "1026:1026"
+    command:
+      - "-dbhost"
+      - "fiware-mongo"
+      - "-db"
+      - "orionld"
+      - "-port"
+      - "1026"
+      - "-logLevel"
+      - "INFO"
+      - "-corsOrigin"
+      - "__ALL"
+    restart: unless-stopped
+
+volumes:
+  fiware-mongo-data:
