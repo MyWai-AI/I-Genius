@@ -1,0 +1,87 @@
+[project]
+name = "vilma-agent"
+version = "0.0.1"
+description = "VILMA Streamlit Agent"
+readme = "README.md"
+license = { text = "MIT License" }
+requires-python = ">=3.10.14"
+
+# in case we need a above python version 
+# requires-python = ">=3.12,<3.13"
+
+
+
+authors = [
+    { name = "Klajdi Beqiraj", email = "k.beqiraj@myw.ai" },
+]
+
+dependencies = [
+    "streamlit>=1.37.1",
+    "python-dotenv>=1.0.1",
+    "numpy>=1.21,<1.27",
+    "imageio>=2.35.1",
+    "stqdm>=0.0.5",
+    "requests>=2.31.0",
+    "streamlit-post-message @ git+https://github.com/GitMarco27/streamlit_post_message.git",
+    "mywai-python-integration-kit==0.5.15+build.11277",
+    "st-clickable-images>=0.0.3",
+    "streamlit_clickable_images",
+    "streamlit-image-coordinates>=0.1.9",
+    "scikit-learn",
+    "Pillow",
+    "opencv-python-headless",
+    "mediapipe",
+    # Trajectory + IK + Robot
+    "ikpy",
+    "plotly",
+    "ultralytics",
+    "transformers>=4.35.0",
+    "timm",
+    "urdfpy",
+    "trimesh",
+    "pycollada",
+    "shapely",
+    "scipy",
+    "networkx>=3.2",
+    "pyzed",
+    "cyclonedds",
+]
+
+[project.optional-dependencies]
+realsense = [
+    "pyrealsense2==2.56.5.9235"
+]
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+packages = ["src/streamlit_template"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["streamlit_template"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv]
+dev-dependencies = [
+    "pre-commit>=3.8.0"
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pre-commit>=3.8.0",
+    "jupyterlab>=4.4.10"
+]
+
+[tool.uv.sources]
+mywai-python-integration-kit = { index = "mywai" }
+
+[[tool.uv.index]]
+name = "mywai"
+url = "https://pkgs.dev.azure.com/zenatek-mywai/_packaging/zenatek-mywai/pypi/simple/"
+publish-url = "https://pkgs.dev.azure.com/zenatek-mywai/_packaging/zenatek-mywai/pypi/upload/"
+explicit = true

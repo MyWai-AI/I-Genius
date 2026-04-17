@@ -1,0 +1,22 @@
+
+services:
+  vilma-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MYWAI_ARTIFACTS_MAIL: ${MYWAI_ARTIFACTS_MAIL}
+        MYWAI_ARTIFACTS_TOKEN: ${MYWAI_ARTIFACTS_TOKEN}
+    image: vilma:latest
+    container_name: vilma-agent
+    ports:
+      - "9002:8504"
+    environment:
+      DEBUG_MODE: ${DEBUG_MODE}
+      LOCAL_HOST_RUN_ENV: ${LOCAL_HOST_RUN_ENV}
+      DATA_MAX_AGE_HOURS: ${DATA_MAX_AGE_HOURS:-168}
+      DATA_CLEANUP_INTERVAL_MINUTES: ${DATA_CLEANUP_INTERVAL_MINUTES:-60}
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+

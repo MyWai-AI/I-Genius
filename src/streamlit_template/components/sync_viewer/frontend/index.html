@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Sync Viewer</title>
+    <!-- Vue 2 & Vuetify (Peer Dependencies) -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.6.14/dist/vuetify.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.6.14/dist/vuetify.js"></script>
+
+    <!-- MYWAI Viewer Build -->
+    <link href="./mywaiviewer.css" rel="stylesheet">
+    <script src="./mywaiviewer.umd.js"></script>
+
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            background: #0e1117;
+            color: white;
+        }
+
+        #app {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Use CSS Grid for strict separation */
+        #main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            /* Equal split */
+            grid-template-rows: 1fr;
+            width: 100%;
+            height: 100%;
+            gap: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .col-video {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .col-viewer {
+            background: #222;
+            /* Darker bg for 3D */
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #444;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Ensure video fits */
+        }
+
+        /* Vuetify overrides */
+        .v-application {
+            background: transparent !important;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Ensure component takes full height */
+        .v-application--wrap {
+            min-height: 100% !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <v-app>
+            <div id="main-layout" :style="layoutStyle">
+                <div class="col-video" v-if="videoSrc">
+                    <video ref="videoPlayer" controls :src="videoSrc" @timeupdate="onTimeUpdate"
+                        @loadedmetadata="onVideoLoaded" @play="onVideoPlay" @pause="onVideoPause"
+                        @seeked="onVideoSeeked"></video>
+                </div>
+                <div class="col-viewer">
+
+                    <!-- MODE: ROBOT (Default) -->
+                    <!-- Force full height/width on component -->
+                    <component v-if="!isDmpMode && viewerData" is="mywaiviewer" :viewer-data="viewerData"
+                        :enable-algo="false" :backend-end-point="null" ref="viewer"
+                        style="width:100%; height:100%; display:block;">
+                    </component>
+
+                    <!-- MODE: DMP (Plotly) -->
+                    <div v-else-if="isDmpMode && viewerData" id="dmp-chart" style="width:100%; height:100%;"></div>
+
+                    <div v-else
+                        style="display:flex; justify-content:center; align-items:center; height:100%; color:#aaa;">
+                        Waiting for Data...
+                    </div>
+                </div>
+            </div>
+        </v-app>
+    </div>
+
+    <!-- Minimal Streamlit Client -->
+    <script>
+        const Streamlit = {
+            setComponentReady: function () {
+                window.parent.postMessage({ isStreamlitMessage: true, type: "streamlit:componentReady", apiVersion: 1 }, "*");
+            },
+            setFrameHeight: function (height) {
+                window.parent.postMessage({ isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: height }, "*");
+            },
+            events: {
+                addEventListener: function (type, callback) {
+                    window.addEventListener("message", function (event) {
+                        if (event.data.type === type) {
+                            callback(event.data);
+                        }
+                    });
+                }
+            }
+        };
+
+        // Initialize Vue
+        // DEBUG: Check if window.mywaiviewer exists
+        console.log("MyWAIViewer Global:", window.mywaiviewer);
+
+        // Manual Registration if UMD library exposes the component directly or as a plugin
+        if (window.mywaiviewer && window.mywaiviewer.DynamicViewer) {
+            // It's a library exporting multiple components
+            Vue.component('mywaiviewer', window.mywaiviewer.DynamicViewer);
+        } else if (window.mywaiviewer) {
+            // Fallback if it was default exported
+            Vue.component('mywaiviewer', window.mywaiviewer);
+        }
+
+        var app = new Vue({
+            el: '#app',
+            vuetify: new Vuetify({ theme: { dark: true } }),
+            data: {
+                videoSrc: null,
+                viewerData: null,
+                ready: false,
+                lastSeekTime: 0,
+                videoDuration: 0,
+                playToken: null,
+                frameHeight: 560,
+                lastAutoPlaySignature: null,
+                autoplay: true,
+            },
+            computed: {
+                layoutStyle() {
+                    return {
+                        'grid-template-columns': this.videoSrc ? '1fr 1fr' : '1fr'
+                    };
+                },
+                isDmpMode() {
+                    return this.viewerData && this.viewerData.mode === 'dmp';
+                }
+            },
+            watch: {
+                viewerData: {
+                    handler(val) {
+                        if (val && val.mode === 'dmp') {
+                            this.$nextTick(() => {
+                                this.initPlotly();
+                            });
+                        }
+                    },
+                    deep: true
+                }
+            },
+            methods: {
+                onVideoLoaded(e) {
+                    this.videoDuration = e.target.duration;
+                },
+                onVideoPlay() {
+                    if (!this.autoplay) {
+                        this.setRobotPlaying(true);
+                    }
+                },
+                onVideoPause() {
+                    if (!this.autoplay) {
+                        this.setRobotPlaying(false);
+                    }
+                },
+                onVideoSeeked(e) {
+                    if (!this.autoplay) {
+                        this.seekRobot(e.target.currentTime);
+                    }
+                },
+                setRobotPlaying(playing) {
+                    const viewer = window.mywaiViewer;
+                    if (!viewer) return;
+                    let models = Array.isArray(viewer.loadedModelsInScene)
+                        ? viewer.loadedModelsInScene.filter(Boolean)
+                        : [];
+                    if (models.length === 0 && viewer.scene && Array.isArray(viewer.scene.children)) {
+                        models = viewer.scene.children.filter((m) => m && (
+                            typeof m.seekAnimation === 'function'
+                            || typeof m.startAnimation === 'function'
+                        ));
+                    }
+                    models.forEach((model) => {
+                        try {
+                            if (Array.isArray(model.trajectory) && model.trajectory.length > 0) {
+                                model.isPlaying = !!playing;
+                            }
+                        } catch (err) {
+                            console.warn("setRobotPlaying failed:", err);
+                        }
+                    });
+                },
+                seekRobot(t) {
+                    if (window.mywaiViewer && window.mywaiViewer.seek) {
+                        window.mywaiViewer.seek(t);
+                    }
+                },
+                onTimeUpdate(e) {
+                    const t = e.target.currentTime;
+
+                    // ROBOT SYNC
+                    if (!this.isDmpMode) {
+                        // Check global window object for the viewer instance if accessed directly
+                        // Or use ref? The MYWAI viewer usually attaches to window.mywaiViewer
+                        if (window.mywaiViewer && window.mywaiViewer.seek) {
+                            // console.log(`DEBUG: Syncing robot to ${t}s`);
+                            window.mywaiViewer.seek(t);
+                        } else {
+                            console.warn("DEBUG: window.mywaiViewer not found or no seek method!");
+                            console.log("window.mywaiViewer:", window.mywaiViewer);
+                        }
+                    }
+                    // DMP SYNC
+                    else {
+                        this.updatePlotlyMarker(t);
+                    }
+                },
+
+                getRobotTrajectorySignature(data) {
+                    if (!data || !Array.isArray(data.models)) return null;
+                    for (const model of data.models) {
+                        const traj = model && model.trajectory;
+                        if (Array.isArray(traj) && traj.length > 0) {
+                            const first = traj[0] || {};
+                            const last = traj[traj.length - 1] || {};
+                            return `${model.path || model.entityName || 'robot'}::${traj.length}::${first.time || 0}::${last.time || 0}`;
+                        }
+                    }
+                    return null;
+                },
+
+                triggerRobotPlayback() {
+                    const viewer = window.mywaiViewer;
+                    if (!viewer) {
+                        return false;
+                    }
+
+                    let models = Array.isArray(viewer.loadedModelsInScene)
+                        ? viewer.loadedModelsInScene.filter(Boolean)
+                        : [];
+
+                    // In some no-video flows this list is never populated by the viewer internals.
+                    if (models.length === 0 && viewer.scene && Array.isArray(viewer.scene.children)) {
+                        models = viewer.scene.children.filter((model) => (
+                            model
+                            && (typeof model.seekAnimation === 'function'
+                                || typeof model.startAnimation === 'function'
+                                || typeof model.updateAnimation === 'function')
+                        ));
+                        if (models.length > 0) {
+                            viewer.loadedModelsInScene = models;
+                        }
+                    }
+
+                    if (models.length === 0) {
+                        return false;
+                    }
+
+                    let started = false;
+                    models.forEach((model) => {
+                        if (!model) return;
+                        try {
+                            const traj = model.trajectory;
+                            if (Array.isArray(traj) && traj.length > 0) {
+                                if (typeof model.seekAnimation === 'function') {
+                                    model.seekAnimation(0);
+                                }
+                                model.currentAnimationTime = 0;
+                                model.isPlaying = true;
+                                started = true;
+                            } else if (typeof model.startAnimation === 'function' && Array.isArray(model.animations) && model.animations.length > 0) {
+                                model.startAnimation(model.animations[0].name);
+                                started = true;
+                            }
+                        } catch (err) {
+                            console.warn("Playback trigger failed:", err);
+                        }
+                    });
+
+                    return started;
+                },
+
+                requestRobotPlayback() {
+                    let attempts = 0;
+                    const maxAttempts = 150;
+                    const tick = () => {
+                        attempts += 1;
+                        const ok = this.triggerRobotPlayback();
+                        if (!ok && attempts < maxAttempts) {
+                            setTimeout(tick, 80);
+                        }
+                    };
+                    tick();
+                },
+
+                primeRobotPaused() {
+                    // For video-synced mode: get trajectory loaded into the model, seek to 0, but keep paused.
+                    let attempts = 0;
+                    const maxAttempts = 150;
+                    const tick = () => {
+                        attempts += 1;
+                        const viewer = window.mywaiViewer;
+                        let models = viewer && Array.isArray(viewer.loadedModelsInScene)
+                            ? viewer.loadedModelsInScene.filter(Boolean)
+                            : [];
+                        if (viewer && models.length === 0 && viewer.scene && Array.isArray(viewer.scene.children)) {
+                            models = viewer.scene.children.filter((m) => m && (
+                                typeof m.seekAnimation === 'function'
+                                || typeof m.startAnimation === 'function'
+                            ));
+                        }
+                        const ready = models.some((m) => Array.isArray(m && m.trajectory) && m.trajectory.length > 0);
+                        if (!ready) {
+                            if (attempts < maxAttempts) setTimeout(tick, 80);
+                            return;
+                        }
+                        models.forEach((model) => {
+                            try {
+                                if (Array.isArray(model.trajectory) && model.trajectory.length > 0) {
+                                    if (typeof model.seekAnimation === 'function') {
+                                        model.seekAnimation(0);
+                                    }
+                                    model.currentAnimationTime = 0;
+                                    model.isPlaying = false;
+                                }
+                            } catch (err) {
+                                console.warn("primeRobotPaused failed:", err);
+                            }
+                        });
+                    };
+                    tick();
+                },
+
+                initPlotly() {
+                    if (!this.viewerData || !this.viewerData.dmpTrajectory) return;
+
+                    const traj = this.viewerData.dmpTrajectory;
+                    // traj: { x: [], y: [], z: [], t: [], markers?: [...], segments?: [...] }
+
+                    const traces = [];
+
+                    // --- SEGMENTS: phase-colored trajectory lines ---
+                    if (traj.segments && traj.segments.length > 0) {
+                        // Render each segment as a separate colored line
+                        traj.segments.forEach(seg => {
+                            const sx = traj.x.slice(seg.startIdx, seg.endIdx + 1);
+                            const sy = traj.y.slice(seg.startIdx, seg.endIdx + 1);
+                            const sz = traj.z.slice(seg.startIdx, seg.endIdx + 1);
+                            traces.push({
+                                type: 'scatter3d', mode: 'lines',
+                                x: sx, y: sy, z: sz,
+                                line: { width: 5, color: seg.color || '#1f77b4' },
+                                name: seg.label || 'Segment',
+                                hoverinfo: 'none'
+                            });
+                        });
+                    } else {
+                        // Fallback: single-color trajectory line
+                        traces.push({
+                            type: 'scatter3d', mode: 'lines',
+                            x: traj.x, y: traj.y, z: traj.z,
+                            line: { width: 5, color: '#1f77b4' },
+                            name: 'Trajectory',
+                            hoverinfo: 'none'
+                        });
+                    }
+
+                    // Clickable invisible points for seeking
+                    traces.push({
+                        type: 'scatter3d', mode: 'markers',
+                        x: traj.x, y: traj.y, z: traj.z,
+                        marker: { size: 4, opacity: 0 },
+                        name: 'Seek', customdata: traj.t,
+                        hovertemplate: 'Time: %{customdata:.2f}s<extra></extra>'
+                    });
+
+                    // Current time marker (dynamic, updated via updatePlotlyMarker)
+                    traces.push({
+                        type: 'scatter3d', mode: 'markers',
+                        x: [traj.x[0]], y: [traj.y[0]], z: [traj.z[0]],
+                        marker: { size: 10, color: 'yellow', symbol: 'diamond' },
+                        name: 'Current Time'
+                    });
+
+                    // --- MARKERS: customizable labeled points ---
+                    if (traj.markers && traj.markers.length > 0) {
+                        // Each marker: { label: str, index: int, color: str }
+                        const mx = [], my = [], mz = [], mtext = [], mcolors = [];
+                        traj.markers.forEach(m => {
+                            const i = Math.min(m.index, traj.x.length - 1);
+                            mx.push(traj.x[i]);
+                            my.push(traj.y[i]);
+                            mz.push(traj.z[i]);
+                            mtext.push(m.label);
+                            mcolors.push(m.color || '#ffffff');
+                        });
+                        traces.push({
+                            type: 'scatter3d', mode: 'markers+text',
+                            x: mx, y: my, z: mz,
+                            marker: { size: 8, color: mcolors },
+                            text: mtext, textposition: 'top center',
+                            name: 'Phases'
+                        });
+                    } else {
+                        // Fallback: hardcoded Pick/Place at first/last
+                        traces.push({
+                            type: 'scatter3d', mode: 'markers+text',
+                            x: [traj.x[0]], y: [traj.y[0]], z: [traj.z[0]],
+                            marker: { size: 8, color: '#00cc96' },
+                            text: ['Pick'], textposition: 'top center', name: 'Pick'
+                        });
+                        traces.push({
+                            type: 'scatter3d', mode: 'markers+text',
+                            x: [traj.x[traj.x.length - 1]], y: [traj.y[traj.y.length - 1]], z: [traj.z[traj.z.length - 1]],
+                            marker: { size: 8, color: '#ef553b' },
+                            text: ['Place'], textposition: 'top center', name: 'Place'
+                        });
+                    }
+
+                    const layout = {
+                        scene: {
+                            xaxis: { title: 'X', showgrid: true, zeroline: false, showline: false, color: '#aaa' },
+                            yaxis: { title: 'Y', showgrid: true, zeroline: false, showline: false, color: '#aaa' },
+                            zaxis: { title: 'Z', showgrid: true, zeroline: false, showline: false, color: '#aaa' },
+                            aspectmode: 'data',
+                            bgcolor: '#222'
+                        },
+                        paper_bgcolor: '#222',
+                        font: { color: '#eee' },
+                        margin: { l: 0, r: 0, b: 0, t: 30 },
+                        showlegend: true,
+                        legend: { x: 0, y: 1 },
+                        title: { text: 'DMP Trajectory (Click to Seek)', font: { size: 14 } }
+                    };
+
+                    Plotly.newPlot('dmp-chart', traces, layout, { responsive: true });
+
+                    // --- UPDATE: find the "Current Time" marker index for updatePlotlyMarker ---
+                    // It's always at trace index = (segments or 1 line) + 1 (seek) + 0-based = segments.length ? segments.length+1 : 2
+                    const numSegments = (traj.segments && traj.segments.length > 0) ? traj.segments.length : 1;
+                    this._dmpCurrentTimeTraceIdx = numSegments + 1; // after segment traces + seek trace
+
+                    // Click listener
+                    const gd = document.getElementById('dmp-chart');
+                    gd.on('plotly_click', (data) => {
+                        if (data.points && data.points.length > 0) {
+                            const pt = data.points[0];
+                            if (pt.customdata !== undefined) {
+                                const t = pt.customdata;
+                                const vid = this.$refs.videoPlayer;
+                                if (vid) {
+                                    vid.currentTime = t;
+                                }
+                            }
+                        }
+                    });
+                },
+
+                updatePlotlyMarker(time) {
+                    if (!this.viewerData || !this.viewerData.dmpTrajectory) return;
+                    const traj = this.viewerData.dmpTrajectory;
+
+                    // Find index closest to time
+                    let idx = 0;
+                    let minDiff = Infinity;
+                    for (let i = 0; i < traj.t.length; i++) {
+                        const diff = Math.abs(traj.t[i] - time);
+                        if (diff < minDiff) { minDiff = diff; idx = i; }
+                    }
+
+                    // Update "Current Time" marker trace using dynamic index
+                    const traceIdx = this._dmpCurrentTimeTraceIdx || 2;
+                    Plotly.restyle('dmp-chart', {
+                        x: [[traj.x[idx]]],
+                        y: [[traj.y[idx]]],
+                        z: [[traj.z[idx]]]
+                    }, [traceIdx]);
+                }
+            },
+            mounted() {
+                Streamlit.setComponentReady();
+                Streamlit.setFrameHeight(this.frameHeight);
+
+                // Track visibility changes (e.g., when Streamlit switches tabs)
+                this.$nextTick(() => {
+                    const appEl = document.getElementById('app');
+                    if (appEl && window.ResizeObserver) {
+                        const ro = new ResizeObserver((entries) => {
+                            for (let entry of entries) {
+                                if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+                                    // Dispatch resize event to let 3D libraries (Three.js/Babylon) know the container is now visible and has actual dimensions
+                                    window.dispatchEvent(new Event('resize'));
+                                }
+                            }
+                        });
+                        ro.observe(appEl);
+                    }
+                });
+            }
+        });
+
+        // Listen for Streamlit render events
+        Streamlit.events.addEventListener("streamlit:render", function (event) {
+            const args = event.args; // { video_path: ..., viewer_data: ... }
+
+            if (typeof args.autoplay === "boolean") {
+                app.autoplay = args.autoplay;
+            }
+
+            if (typeof args.height === "number" && args.height > 0 && args.height !== app.frameHeight) {
+                app.frameHeight = args.height;
+                Streamlit.setFrameHeight(app.frameHeight);
+            }
+
+            // Handle Video Source
+            if (args.video_path !== app.videoSrc) {
+                app.videoSrc = args.video_path;
+            }
+
+            // Handle Viewer Data
+            if (args.viewer_data) {
+                // Check if data actually changed to avoid re-parsing/re-init
+                // Simple check on string length or deeper if needed
+                const newData = JSON.parse(args.viewer_data);
+
+                // If switching modes or first load
+                if (!app.viewerData || app.viewerData.mode !== newData.mode) {
+                    app.viewerData = newData;
+                } else {
+                    // Same mode, maybe just data update?
+                    app.viewerData = newData;
+                }
+
+                const trajSig = app.getRobotTrajectorySignature(newData);
+                if (trajSig && trajSig !== app.lastAutoPlaySignature) {
+                    app.lastAutoPlaySignature = trajSig;
+                    if (app.autoplay) {
+                        app.$nextTick(() => {
+                            app.requestRobotPlayback();
+                        });
+                    } else {
+                        // Video-synced mode: prime the model (load trajectory) but keep it paused at t=0
+                        app.$nextTick(() => {
+                            app.primeRobotPaused();
+                        });
+                    }
+                }
+            }
+
+            if (args.play_token !== undefined && args.play_token !== app.playToken) {
+                app.playToken = args.play_token;
+                app.$nextTick(() => {
+                    app.requestRobotPlayback();
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

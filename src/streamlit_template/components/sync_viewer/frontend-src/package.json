@@ -1,0 +1,25 @@
+{
+    "name": "sync-viewer-build",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Build wrapper that installs @mywai/3d-viewer from npm and builds it to UMD for the Streamlit sync_viewer component.",
+    "scripts": {
+        "build": "vue-cli-service build --target lib --dest ../frontend --name mywaiviewer --no-clean build-entry.js"
+    },
+    "dependencies": {
+        "@mywai/3d-viewer": "1.1.0-20260211.11984"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.25.2",
+        "@babel/eslint-parser": "^7.25.1",
+        "@babel/preset-env": "^7.25.4",
+        "@vue/cli-plugin-babel": "^5.0.8",
+        "@vue/cli-service": "~5.0.0",
+        "sass": "~1.32.0",
+        "sass-loader": "^10.0.0",
+        "vue": "^2.7.14",
+        "vue-template-compiler": "^2.6.14",
+        "vuetify-loader": "^1.7.0",
+        "vue-cli-plugin-vuetify": "~2.5.8"
+    }
+}

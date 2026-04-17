@@ -1,0 +1,3960 @@
+{
+    "animations": {
+        "MainAction": [
+            {
+                "time": 0.0,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2182,
+                    "Joint_3": 1.6336,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2898,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.033,
+                "q": {
+                    "Joint_1": 3.1381,
+                    "Joint_2": -0.2059,
+                    "Joint_3": 1.6197,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.316,
+                    "Joint_6": -0.0035
+                }
+            },
+            {
+                "time": 0.067,
+                "q": {
+                    "Joint_1": 3.1381,
+                    "Joint_2": -0.199,
+                    "Joint_3": 1.6127,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3317,
+                    "Joint_6": -0.0035
+                }
+            },
+            {
+                "time": 0.1,
+                "q": {
+                    "Joint_1": 3.1398,
+                    "Joint_2": -0.1955,
+                    "Joint_3": 1.6074,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3387,
+                    "Joint_6": -0.0017
+                }
+            },
+            {
+                "time": 0.133,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1937,
+                    "Joint_3": 1.6057,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.3422,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.167,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1937,
+                    "Joint_3": 1.6057,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.3422,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.2,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.192,
+                    "Joint_3": 1.604,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.3439,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.233,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1885,
+                    "Joint_3": 1.6022,
+                    "Joint_4": 0.0017,
+                    "Joint_5": -1.3509,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.267,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1815,
+                    "Joint_3": 1.5952,
+                    "Joint_4": 0.0017,
+                    "Joint_5": -1.3648,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.3,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.171,
+                    "Joint_3": 1.5848,
+                    "Joint_4": 0.0035,
+                    "Joint_5": -1.3858,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.333,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1588,
+                    "Joint_3": 1.5691,
+                    "Joint_4": 0.0035,
+                    "Joint_5": -1.412,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.367,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1466,
+                    "Joint_3": 1.5516,
+                    "Joint_4": 0.0052,
+                    "Joint_5": -1.4434,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.4,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1361,
+                    "Joint_3": 1.5341,
+                    "Joint_4": 0.0052,
+                    "Joint_5": -1.4696,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.433,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1292,
+                    "Joint_3": 1.5219,
+                    "Joint_4": 0.0052,
+                    "Joint_5": -1.4905,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.467,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1222,
+                    "Joint_3": 1.5149,
+                    "Joint_4": 0.0052,
+                    "Joint_5": -1.5027,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.5,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1187,
+                    "Joint_3": 1.5149,
+                    "Joint_4": 0.0052,
+                    "Joint_5": -1.508,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.533,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1169,
+                    "Joint_3": 1.5167,
+                    "Joint_4": 0.0035,
+                    "Joint_5": -1.508,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.567,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1152,
+                    "Joint_3": 1.5202,
+                    "Joint_4": 0.0035,
+                    "Joint_5": -1.5062,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.6,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1134,
+                    "Joint_3": 1.5237,
+                    "Joint_4": 0.0035,
+                    "Joint_5": -1.5045,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.633,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1134,
+                    "Joint_3": 1.5254,
+                    "Joint_4": 0.0035,
+                    "Joint_5": -1.5027,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.667,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1134,
+                    "Joint_3": 1.5289,
+                    "Joint_4": 0.0052,
+                    "Joint_5": -1.4992,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.7,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1169,
+                    "Joint_3": 1.5359,
+                    "Joint_4": 0.0052,
+                    "Joint_5": -1.4888,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.733,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1239,
+                    "Joint_3": 1.5499,
+                    "Joint_4": 0.0052,
+                    "Joint_5": -1.4678,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.767,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1379,
+                    "Joint_3": 1.5691,
+                    "Joint_4": 0.0035,
+                    "Joint_5": -1.4347,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.8,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1553,
+                    "Joint_3": 1.5935,
+                    "Joint_4": 0.0035,
+                    "Joint_5": -1.3945,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.833,
+                "q": {
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1745,
+                    "Joint_3": 1.6162,
+                    "Joint_4": 0.0017,
+                    "Joint_5": -1.3509,
+                    "Joint_6": -0.0
+                }
+            },
+            {
+                "time": 0.867,
+                "q": {
+                    "Joint_1": 3.1172,
+                    "Joint_2": -0.1937,
+                    "Joint_3": 1.6336,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3142,
+                    "Joint_6": -0.0244
+                }
+            },
+            {
+                "time": 0.9,
+                "q": {
+                    "Joint_1": 3.0421,
+                    "Joint_2": -0.2094,
+                    "Joint_3": 1.6424,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2898,
+                    "Joint_6": -0.0995
+                }
+            },
+            {
+                "time": 0.933,
+                "q": {
+                    "Joint_1": 2.9793,
+                    "Joint_2": -0.2182,
+                    "Joint_3": 1.6424,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2811,
+                    "Joint_6": -0.1623
+                }
+            },
+            {
+                "time": 0.967,
+                "q": {
+                    "Joint_1": 2.9322,
+                    "Joint_2": -0.2199,
+                    "Joint_3": 1.6354,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2863,
+                    "Joint_6": -0.2094
+                }
+            },
+            {
+                "time": 1.0,
+                "q": {
+                    "Joint_1": 2.9042,
+                    "Joint_2": -0.2182,
+                    "Joint_3": 1.6249,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2985,
+                    "Joint_6": -0.2374
+                }
+            },
+            {
+                "time": 1.033,
+                "q": {
+                    "Joint_1": 2.8903,
+                    "Joint_2": -0.2112,
+                    "Joint_3": 1.6162,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3142,
+                    "Joint_6": -0.2513
+                }
+            },
+            {
+                "time": 1.067,
+                "q": {
+                    "Joint_1": 2.885,
+                    "Joint_2": -0.2059,
+                    "Joint_3": 1.6092,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3265,
+                    "Joint_6": -0.2566
+                }
+            },
+            {
+                "time": 1.1,
+                "q": {
+                    "Joint_1": 2.8868,
+                    "Joint_2": -0.2025,
+                    "Joint_3": 1.6057,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3334,
+                    "Joint_6": -0.2548
+                }
+            },
+            {
+                "time": 1.133,
+                "q": {
+                    "Joint_1": 2.892,
+                    "Joint_2": -0.2007,
+                    "Joint_3": 1.604,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3369,
+                    "Joint_6": -0.2496
+                }
+            },
+            {
+                "time": 1.167,
+                "q": {
+                    "Joint_1": 2.8955,
+                    "Joint_2": -0.1972,
+                    "Joint_3": 1.6022,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3422,
+                    "Joint_6": -0.2461
+                }
+            },
+            {
+                "time": 1.2,
+                "q": {
+                    "Joint_1": 2.8972,
+                    "Joint_2": -0.1937,
+                    "Joint_3": 1.597,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3509,
+                    "Joint_6": -0.2443
+                }
+            },
+            {
+                "time": 1.233,
+                "q": {
+                    "Joint_1": 2.8955,
+                    "Joint_2": -0.1885,
+                    "Joint_3": 1.5865,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3666,
+                    "Joint_6": -0.2461
+                }
+            },
+            {
+                "time": 1.267,
+                "q": {
+                    "Joint_1": 2.8885,
+                    "Joint_2": -0.1833,
+                    "Joint_3": 1.5725,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3858,
+                    "Joint_6": -0.2531
+                }
+            },
+            {
+                "time": 1.3,
+                "q": {
+                    "Joint_1": 2.8798,
+                    "Joint_2": -0.178,
+                    "Joint_3": 1.5568,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4085,
+                    "Joint_6": -0.2618
+                }
+            },
+            {
+                "time": 1.333,
+                "q": {
+                    "Joint_1": 2.8711,
+                    "Joint_2": -0.171,
+                    "Joint_3": 1.5411,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4294,
+                    "Joint_6": -0.2705
+                }
+            },
+            {
+                "time": 1.367,
+                "q": {
+                    "Joint_1": 2.8623,
+                    "Joint_2": -0.1658,
+                    "Joint_3": 1.5272,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4469,
+                    "Joint_6": -0.2793
+                }
+            },
+            {
+                "time": 1.4,
+                "q": {
+                    "Joint_1": 2.8588,
+                    "Joint_2": -0.1623,
+                    "Joint_3": 1.5184,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4608,
+                    "Joint_6": -0.2827
+                }
+            },
+            {
+                "time": 1.433,
+                "q": {
+                    "Joint_1": 2.8554,
+                    "Joint_2": -0.1606,
+                    "Joint_3": 1.5132,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4661,
+                    "Joint_6": -0.2862
+                }
+            },
+            {
+                "time": 1.467,
+                "q": {
+                    "Joint_1": 2.8554,
+                    "Joint_2": -0.1623,
+                    "Joint_3": 1.5149,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4643,
+                    "Joint_6": -0.2862
+                }
+            },
+            {
+                "time": 1.5,
+                "q": {
+                    "Joint_1": 2.8588,
+                    "Joint_2": -0.1658,
+                    "Joint_3": 1.5237,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4521,
+                    "Joint_6": -0.2827
+                }
+            }
+        ],
+        "PipelineAction": [
+            {
+                "time": 0.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1415,
+                    "Joint_2": -0.2166,
+                    "Joint_3": 1.6313,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2937,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.0757,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2166,
+                    "Joint_3": 1.6314,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2936,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.1514,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6314,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2935,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.2271,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6314,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2935,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.3028,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2168,
+                    "Joint_3": 1.6314,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2934,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.3786,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2168,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2933,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.4543,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2168,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2933,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.53,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2933,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.6057,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2933,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.6814,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6316,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2933,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.7571,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2933,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.8328,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2934,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.9085,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2934,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.9843,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2933,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.06,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2168,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2933,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.1357,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2168,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2933,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.2114,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2169,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2932,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.2871,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2169,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2931,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.3628,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.217,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2931,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.4385,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2171,
+                    "Joint_3": 1.6316,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.293,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.5142,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2172,
+                    "Joint_3": 1.6316,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2928,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.5899,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2173,
+                    "Joint_3": 1.6316,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2927,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.6657,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2174,
+                    "Joint_3": 1.6316,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2926,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.7414,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2175,
+                    "Joint_3": 1.6317,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2924,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.8171,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2177,
+                    "Joint_3": 1.6317,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2922,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.8928,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2178,
+                    "Joint_3": 1.6318,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.292,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.9685,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.218,
+                    "Joint_3": 1.6318,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2918,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.0442,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2182,
+                    "Joint_3": 1.6319,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2915,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.1199,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2184,
+                    "Joint_3": 1.6319,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2912,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.1956,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2187,
+                    "Joint_3": 1.632,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2909,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.2714,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.219,
+                    "Joint_3": 1.6321,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2905,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.3471,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2194,
+                    "Joint_3": 1.6322,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.29,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.4228,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2198,
+                    "Joint_3": 1.6323,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2895,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.4985,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2202,
+                    "Joint_3": 1.6324,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.289,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.5742,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2205,
+                    "Joint_3": 1.6324,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2887,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.6499,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2207,
+                    "Joint_3": 1.6324,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2885,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.7256,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2208,
+                    "Joint_3": 1.6325,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2883,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.8013,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2209,
+                    "Joint_3": 1.6325,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2882,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.8771,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2212,
+                    "Joint_3": 1.6327,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2877,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.9528,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2219,
+                    "Joint_3": 1.633,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2866,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.0285,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2235,
+                    "Joint_3": 1.6336,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2844,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.1042,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2263,
+                    "Joint_3": 1.6347,
+                    "Joint_4": 0.0001,
+                    "Joint_5": -1.2806,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.1799,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2306,
+                    "Joint_3": 1.6362,
+                    "Joint_4": 0.0001,
+                    "Joint_5": -1.2747,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.2556,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2369,
+                    "Joint_3": 1.6382,
+                    "Joint_4": 0.0001,
+                    "Joint_5": -1.2665,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.3313,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2452,
+                    "Joint_3": 1.6406,
+                    "Joint_4": 0.0001,
+                    "Joint_5": -1.2558,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.407,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2553,
+                    "Joint_3": 1.6432,
+                    "Joint_4": 0.0002,
+                    "Joint_5": -1.2432,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.4827,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2667,
+                    "Joint_3": 1.6457,
+                    "Joint_4": 0.0002,
+                    "Joint_5": -1.2292,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.5585,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2788,
+                    "Joint_3": 1.648,
+                    "Joint_4": 0.0003,
+                    "Joint_5": -1.2148,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.6342,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2905,
+                    "Joint_3": 1.6501,
+                    "Joint_4": 0.0003,
+                    "Joint_5": -1.201,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.7099,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.301,
+                    "Joint_3": 1.6519,
+                    "Joint_4": 0.0004,
+                    "Joint_5": -1.1887,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.7856,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3098,
+                    "Joint_3": 1.6532,
+                    "Joint_4": 0.0004,
+                    "Joint_5": -1.1786,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.8613,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3164,
+                    "Joint_3": 1.6542,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.171,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.937,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3208,
+                    "Joint_3": 1.6548,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.166,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.0127,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3233,
+                    "Joint_3": 1.6551,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1632,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.0884,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3242,
+                    "Joint_3": 1.6552,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1621,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.1642,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3242,
+                    "Joint_3": 1.6553,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1621,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.2399,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3237,
+                    "Joint_3": 1.6552,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1627,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.3156,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3233,
+                    "Joint_3": 1.6551,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1632,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.3913,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3233,
+                    "Joint_3": 1.6549,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1634,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.467,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3236,
+                    "Joint_3": 1.6547,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1632,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.5427,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3244,
+                    "Joint_3": 1.6546,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1625,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.6184,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3254,
+                    "Joint_3": 1.6546,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1616,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.6941,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3265,
+                    "Joint_3": 1.6545,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1606,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.7698,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3274,
+                    "Joint_3": 1.6545,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1597,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.8456,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3281,
+                    "Joint_3": 1.6544,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1592,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.9213,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3284,
+                    "Joint_3": 1.6543,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.159,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.997,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3283,
+                    "Joint_3": 1.6541,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1592,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.0727,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3279,
+                    "Joint_3": 1.654,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1598,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.1484,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3272,
+                    "Joint_3": 1.6537,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1607,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.2241,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3262,
+                    "Joint_3": 1.6535,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1619,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.2998,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3251,
+                    "Joint_3": 1.6533,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1632,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.3755,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3238,
+                    "Joint_3": 1.6531,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1647,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.4513,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3225,
+                    "Joint_3": 1.6529,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1662,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.527,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3212,
+                    "Joint_3": 1.6527,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1678,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.6027,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3199,
+                    "Joint_3": 1.6525,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1692,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.6784,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3186,
+                    "Joint_3": 1.6523,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1707,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.7541,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3175,
+                    "Joint_3": 1.6521,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.172,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.8298,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3164,
+                    "Joint_3": 1.652,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1732,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.9055,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3155,
+                    "Joint_3": 1.6519,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.1742,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.9812,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3147,
+                    "Joint_3": 1.6518,
+                    "Joint_4": 0.0004,
+                    "Joint_5": -1.1751,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.057,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3138,
+                    "Joint_3": 1.6516,
+                    "Joint_4": 0.0004,
+                    "Joint_5": -1.1762,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.1327,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3127,
+                    "Joint_3": 1.6513,
+                    "Joint_4": 0.0004,
+                    "Joint_5": -1.1776,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.2084,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3111,
+                    "Joint_3": 1.6509,
+                    "Joint_4": 0.0004,
+                    "Joint_5": -1.1796,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.2841,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.309,
+                    "Joint_3": 1.6505,
+                    "Joint_4": 0.0004,
+                    "Joint_5": -1.182,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.3598,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3063,
+                    "Joint_3": 1.6502,
+                    "Joint_4": 0.0003,
+                    "Joint_5": -1.1851,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.4355,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3031,
+                    "Joint_3": 1.6498,
+                    "Joint_4": 0.0003,
+                    "Joint_5": -1.1887,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.5112,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2994,
+                    "Joint_3": 1.6494,
+                    "Joint_4": 0.0002,
+                    "Joint_5": -1.1928,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.5869,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2956,
+                    "Joint_3": 1.649,
+                    "Joint_4": 0.0002,
+                    "Joint_5": -1.1971,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.6626,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2916,
+                    "Joint_3": 1.6486,
+                    "Joint_4": 0.0001,
+                    "Joint_5": -1.2014,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.7384,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2874,
+                    "Joint_3": 1.6483,
+                    "Joint_4": 0.0001,
+                    "Joint_5": -1.2059,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.8141,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.283,
+                    "Joint_3": 1.6481,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2105,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.8898,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1402,
+                    "Joint_2": -0.2785,
+                    "Joint_3": 1.648,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2151,
+                    "Joint_6": -0.0014,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.9655,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1388,
+                    "Joint_2": -0.2741,
+                    "Joint_3": 1.648,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2195,
+                    "Joint_6": -0.0028,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.0412,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1378,
+                    "Joint_2": -0.2701,
+                    "Joint_3": 1.6482,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2233,
+                    "Joint_6": -0.0038,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.1169,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1375,
+                    "Joint_2": -0.2668,
+                    "Joint_3": 1.6487,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2261,
+                    "Joint_6": -0.0041,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.1926,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1382,
+                    "Joint_2": -0.2647,
+                    "Joint_3": 1.6498,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2271,
+                    "Joint_6": -0.0034,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.2683,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1404,
+                    "Joint_2": -0.2644,
+                    "Joint_3": 1.6514,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2258,
+                    "Joint_6": -0.0012,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.3441,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2662,
+                    "Joint_3": 1.6537,
+                    "Joint_4": 0.0001,
+                    "Joint_5": -1.2217,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.4198,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2704,
+                    "Joint_3": 1.6567,
+                    "Joint_4": 0.0002,
+                    "Joint_5": -1.2146,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.4955,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.277,
+                    "Joint_3": 1.6603,
+                    "Joint_4": 0.0005,
+                    "Joint_5": -1.2044,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.5712,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2858,
+                    "Joint_3": 1.6644,
+                    "Joint_4": 0.0007,
+                    "Joint_5": -1.1915,
+                    "Joint_6": -0.0003,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.6469,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2964,
+                    "Joint_3": 1.6687,
+                    "Joint_4": 0.001,
+                    "Joint_5": -1.1765,
+                    "Joint_6": -0.0004,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.7226,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3082,
+                    "Joint_3": 1.6732,
+                    "Joint_4": 0.0013,
+                    "Joint_5": -1.1602,
+                    "Joint_6": -0.0006,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.7983,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3208,
+                    "Joint_3": 1.6775,
+                    "Joint_4": 0.0017,
+                    "Joint_5": -1.1433,
+                    "Joint_6": -0.0007,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.874,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3335,
+                    "Joint_3": 1.6816,
+                    "Joint_4": 0.002,
+                    "Joint_5": -1.1265,
+                    "Joint_6": -0.0009,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.9497,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3458,
+                    "Joint_3": 1.6853,
+                    "Joint_4": 0.0023,
+                    "Joint_5": -1.1104,
+                    "Joint_6": -0.001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.0255,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3576,
+                    "Joint_3": 1.6887,
+                    "Joint_4": 0.0025,
+                    "Joint_5": -1.0953,
+                    "Joint_6": -0.0012,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.1012,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3685,
+                    "Joint_3": 1.6917,
+                    "Joint_4": 0.0028,
+                    "Joint_5": -1.0814,
+                    "Joint_6": -0.0013,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.1769,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3786,
+                    "Joint_3": 1.6942,
+                    "Joint_4": 0.0029,
+                    "Joint_5": -1.0688,
+                    "Joint_6": -0.0014,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.2526,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.388,
+                    "Joint_3": 1.6963,
+                    "Joint_4": 0.003,
+                    "Joint_5": -1.0573,
+                    "Joint_6": -0.0015,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.3283,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.3967,
+                    "Joint_3": 1.6979,
+                    "Joint_4": 0.0031,
+                    "Joint_5": -1.047,
+                    "Joint_6": -0.0015,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.404,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.4049,
+                    "Joint_3": 1.6991,
+                    "Joint_4": 0.003,
+                    "Joint_5": -1.0376,
+                    "Joint_6": -0.0015,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.4797,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.4126,
+                    "Joint_3": 1.6999,
+                    "Joint_4": 0.0029,
+                    "Joint_5": -1.0291,
+                    "Joint_6": -0.0015,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.5554,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.42,
+                    "Joint_3": 1.7002,
+                    "Joint_4": 0.0027,
+                    "Joint_5": -1.0214,
+                    "Joint_6": -0.0014,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.6312,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.4271,
+                    "Joint_3": 1.7002,
+                    "Joint_4": 0.0024,
+                    "Joint_5": -1.0143,
+                    "Joint_6": -0.0013,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.7069,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.4339,
+                    "Joint_3": 1.6999,
+                    "Joint_4": 0.002,
+                    "Joint_5": -1.0078,
+                    "Joint_6": -0.0011,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.7826,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.4405,
+                    "Joint_3": 1.6992,
+                    "Joint_4": 0.0016,
+                    "Joint_5": -1.0019,
+                    "Joint_6": -0.0009,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.8583,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.4469,
+                    "Joint_3": 1.6983,
+                    "Joint_4": 0.001,
+                    "Joint_5": -0.9964,
+                    "Joint_6": -0.0006,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.934,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.4531,
+                    "Joint_3": 1.6972,
+                    "Joint_4": 0.0003,
+                    "Joint_5": -0.9913,
+                    "Joint_6": -0.0002,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.0097,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1296,
+                    "Joint_2": -0.459,
+                    "Joint_3": 1.6959,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9867,
+                    "Joint_6": -0.012,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.0854,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1058,
+                    "Joint_2": -0.4648,
+                    "Joint_3": 1.6943,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9825,
+                    "Joint_6": -0.0358,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.1611,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.0802,
+                    "Joint_2": -0.4705,
+                    "Joint_3": 1.6922,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9788,
+                    "Joint_6": -0.0614,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.2369,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.053,
+                    "Joint_2": -0.4762,
+                    "Joint_3": 1.6897,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9757,
+                    "Joint_6": -0.0886,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.3126,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.0243,
+                    "Joint_2": -0.4818,
+                    "Joint_3": 1.6866,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9732,
+                    "Joint_6": -0.1173,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.3883,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.9939,
+                    "Joint_2": -0.4873,
+                    "Joint_3": 1.6829,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9714,
+                    "Joint_6": -0.1477,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.464,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.9618,
+                    "Joint_2": -0.4927,
+                    "Joint_3": 1.6784,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9704,
+                    "Joint_6": -0.1798,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.5397,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.9274,
+                    "Joint_2": -0.4981,
+                    "Joint_3": 1.673,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9705,
+                    "Joint_6": -0.2142,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.6154,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.8907,
+                    "Joint_2": -0.5035,
+                    "Joint_3": 1.6662,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9718,
+                    "Joint_6": -0.2509,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.6911,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.8517,
+                    "Joint_2": -0.5091,
+                    "Joint_3": 1.6579,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9746,
+                    "Joint_6": -0.2899,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.7668,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.8104,
+                    "Joint_2": -0.5149,
+                    "Joint_3": 1.6478,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9789,
+                    "Joint_6": -0.3312,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.8425,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.7675,
+                    "Joint_2": -0.5213,
+                    "Joint_3": 1.6355,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9849,
+                    "Joint_6": -0.3741,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.9183,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.7235,
+                    "Joint_2": -0.5282,
+                    "Joint_3": 1.6209,
+                    "Joint_4": -0.0,
+                    "Joint_5": -0.9926,
+                    "Joint_6": -0.4181,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.994,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6793,
+                    "Joint_2": -0.5358,
+                    "Joint_3": 1.6039,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.0019,
+                    "Joint_6": -0.4623,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.0697,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6354,
+                    "Joint_2": -0.5443,
+                    "Joint_3": 1.5845,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.0128,
+                    "Joint_6": -0.5062,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.1454,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.5927,
+                    "Joint_2": -0.5537,
+                    "Joint_3": 1.5629,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.025,
+                    "Joint_6": -0.5489,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.2211,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.5516,
+                    "Joint_2": -0.5639,
+                    "Joint_3": 1.5393,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.0384,
+                    "Joint_6": -0.59,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.2968,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.5126,
+                    "Joint_2": -0.5749,
+                    "Joint_3": 1.5139,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.0528,
+                    "Joint_6": -0.629,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.3725,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.4757,
+                    "Joint_2": -0.5867,
+                    "Joint_3": 1.4869,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.068,
+                    "Joint_6": -0.6659,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.4482,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.4411,
+                    "Joint_2": -0.5992,
+                    "Joint_3": 1.4586,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.0838,
+                    "Joint_6": -0.7005,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.524,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.4088,
+                    "Joint_2": -0.6123,
+                    "Joint_3": 1.4294,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.1,
+                    "Joint_6": -0.7328,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.5997,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.3787,
+                    "Joint_2": -0.6259,
+                    "Joint_3": 1.3993,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.1164,
+                    "Joint_6": -0.7629,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.6754,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.3508,
+                    "Joint_2": -0.6399,
+                    "Joint_3": 1.3687,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.133,
+                    "Joint_6": -0.7908,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.7511,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.325,
+                    "Joint_2": -0.6542,
+                    "Joint_3": 1.3377,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.1497,
+                    "Joint_6": -0.8166,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.8268,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.3011,
+                    "Joint_2": -0.6687,
+                    "Joint_3": 1.3066,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.1662,
+                    "Joint_6": -0.8405,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.9025,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.2793,
+                    "Joint_2": -0.6832,
+                    "Joint_3": 1.2758,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.1826,
+                    "Joint_6": -0.8623,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.9782,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.2593,
+                    "Joint_2": -0.6976,
+                    "Joint_3": 1.2453,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.1986,
+                    "Joint_6": -0.8823,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.0539,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.2411,
+                    "Joint_2": -0.7117,
+                    "Joint_3": 1.2156,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2143,
+                    "Joint_6": -0.9005,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.1296,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.2246,
+                    "Joint_2": -0.7254,
+                    "Joint_3": 1.1867,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2295,
+                    "Joint_6": -0.917,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.2054,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.2097,
+                    "Joint_2": -0.7386,
+                    "Joint_3": 1.1586,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2444,
+                    "Joint_6": -0.9319,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.2811,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.196,
+                    "Joint_2": -0.7512,
+                    "Joint_3": 1.1315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2589,
+                    "Joint_6": -0.9456,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.3568,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.1836,
+                    "Joint_2": -0.7631,
+                    "Joint_3": 1.1052,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2732,
+                    "Joint_6": -0.958,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.4325,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.1721,
+                    "Joint_2": -0.7745,
+                    "Joint_3": 1.0796,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2875,
+                    "Joint_6": -0.9695,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.5082,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.1613,
+                    "Joint_2": -0.7852,
+                    "Joint_3": 1.0545,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3018,
+                    "Joint_6": -0.9803,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.5839,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.1513,
+                    "Joint_2": -0.7954,
+                    "Joint_3": 1.0298,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3164,
+                    "Joint_6": -0.9903,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.6596,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.1417,
+                    "Joint_2": -0.805,
+                    "Joint_3": 1.0053,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3313,
+                    "Joint_6": -0.9999,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.7353,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.1327,
+                    "Joint_2": -0.8141,
+                    "Joint_3": 0.9809,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3466,
+                    "Joint_6": -1.0089,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.8111,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.124,
+                    "Joint_2": -0.8228,
+                    "Joint_3": 0.9565,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3624,
+                    "Joint_6": -1.0176,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.8868,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.1156,
+                    "Joint_2": -0.831,
+                    "Joint_3": 0.9319,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3787,
+                    "Joint_6": -1.026,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.9625,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.1075,
+                    "Joint_2": -0.839,
+                    "Joint_3": 0.9072,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3955,
+                    "Joint_6": -1.0341,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.0382,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0998,
+                    "Joint_2": -0.8466,
+                    "Joint_3": 0.8822,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4127,
+                    "Joint_6": -1.0418,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.1139,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0923,
+                    "Joint_2": -0.8541,
+                    "Joint_3": 0.8571,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4304,
+                    "Joint_6": -1.0493,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.1896,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0851,
+                    "Joint_2": -0.8614,
+                    "Joint_3": 0.8319,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4483,
+                    "Joint_6": -1.0565,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.2653,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0782,
+                    "Joint_2": -0.8685,
+                    "Joint_3": 0.8066,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4664,
+                    "Joint_6": -1.0634,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.341,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0717,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.7859,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4829,
+                    "Joint_6": -1.0699,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.4168,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0656,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.7717,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.4969,
+                    "Joint_6": -1.076,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.4925,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0598,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.7579,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.5104,
+                    "Joint_6": -1.0818,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.5682,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0544,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.7447,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.5233,
+                    "Joint_6": -1.0872,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.6439,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0494,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.7322,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.5356,
+                    "Joint_6": -1.0922,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.7196,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0448,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.7204,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.5472,
+                    "Joint_6": -1.0968,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.7953,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0405,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.7093,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.5581,
+                    "Joint_6": -1.1011,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.871,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0366,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6989,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.5682,
+                    "Joint_6": -1.105,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.9467,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.033,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6894,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.5776,
+                    "Joint_6": -1.1086,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.0224,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0298,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6805,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.5863,
+                    "Joint_6": -1.1118,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.0982,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0268,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6723,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.5942,
+                    "Joint_6": -1.1148,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.1739,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.024,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6648,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6016,
+                    "Joint_6": -1.1176,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.2496,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0215,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.658,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6082,
+                    "Joint_6": -1.1201,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.3253,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0192,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6517,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6144,
+                    "Joint_6": -1.1224,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.401,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0171,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.646,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6199,
+                    "Joint_6": -1.1245,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.4767,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0152,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6408,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.625,
+                    "Joint_6": -1.1264,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.5524,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0135,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.636,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6296,
+                    "Joint_6": -1.1282,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.6281,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0119,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6317,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6338,
+                    "Joint_6": -1.1297,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.7039,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0104,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6278,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6376,
+                    "Joint_6": -1.1312,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.7796,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0091,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6242,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6411,
+                    "Joint_6": -1.1325,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.8553,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0079,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.621,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6442,
+                    "Joint_6": -1.1337,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.931,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0068,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6182,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.647,
+                    "Joint_6": -1.1348,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.0067,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0058,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6156,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6495,
+                    "Joint_6": -1.1358,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.0824,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0048,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6133,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6517,
+                    "Joint_6": -1.1368,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.1581,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.004,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6112,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6537,
+                    "Joint_6": -1.1376,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.2338,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0033,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6094,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6554,
+                    "Joint_6": -1.1383,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.3095,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0026,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6078,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6569,
+                    "Joint_6": -1.139,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.3853,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0019,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6065,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6582,
+                    "Joint_6": -1.1397,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.461,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0014,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6053,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6593,
+                    "Joint_6": -1.1402,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.5367,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0009,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6043,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6602,
+                    "Joint_6": -1.1407,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.6124,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0004,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6035,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.661,
+                    "Joint_6": -1.1412,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.6881,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.0,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6028,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6616,
+                    "Joint_6": -1.1416,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.7638,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 1.9996,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6023,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6622,
+                    "Joint_6": -1.142,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.8395,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 1.9992,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6018,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6626,
+                    "Joint_6": -1.1424,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.9152,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 1.9989,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6014,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6629,
+                    "Joint_6": -1.1427,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.991,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 1.9986,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6011,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6632,
+                    "Joint_6": -1.143,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 15.0667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 1.9983,
+                    "Joint_2": -0.8727,
+                    "Joint_3": 0.6009,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.6634,
+                    "Joint_6": -1.1433,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            }
+        ],
+        "SEC": [
+            {
+                "time": 0.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1415,
+                    "Joint_2": -0.2167,
+                    "Joint_3": 1.6315,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2934,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1354,
+                    "Joint_2": -0.2159,
+                    "Joint_3": 1.6296,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2961,
+                    "Joint_6": -0.0062,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 0.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1343,
+                    "Joint_2": -0.2156,
+                    "Joint_3": 1.6284,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2977,
+                    "Joint_6": -0.0073,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1382,
+                    "Joint_2": -0.2155,
+                    "Joint_3": 1.6276,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2985,
+                    "Joint_6": -0.0034,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2157,
+                    "Joint_3": 1.6271,
+                    "Joint_4": 0.0,
+                    "Joint_5": -1.2989,
+                    "Joint_6": -0.0,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 1.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2159,
+                    "Joint_3": 1.6268,
+                    "Joint_4": 0.0004,
+                    "Joint_5": -1.299,
+                    "Joint_6": -0.0001,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2152,
+                    "Joint_3": 1.6273,
+                    "Joint_4": 0.0013,
+                    "Joint_5": -1.2991,
+                    "Joint_6": -0.0004,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2137,
+                    "Joint_3": 1.6285,
+                    "Joint_4": 0.0028,
+                    "Joint_5": -1.2994,
+                    "Joint_6": -0.0008,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 2.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2114,
+                    "Joint_3": 1.6298,
+                    "Joint_4": 0.0048,
+                    "Joint_5": -1.3004,
+                    "Joint_6": -0.0013,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2088,
+                    "Joint_3": 1.6307,
+                    "Joint_4": 0.007,
+                    "Joint_5": -1.3021,
+                    "Joint_6": -0.0019,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2059,
+                    "Joint_3": 1.6312,
+                    "Joint_4": 0.0089,
+                    "Joint_5": -1.3045,
+                    "Joint_6": -0.0023,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 3.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2037,
+                    "Joint_3": 1.6305,
+                    "Joint_4": 0.0101,
+                    "Joint_5": -1.3074,
+                    "Joint_6": -0.0027,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.2016,
+                    "Joint_3": 1.6301,
+                    "Joint_4": 0.0106,
+                    "Joint_5": -1.31,
+                    "Joint_6": -0.0027,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1987,
+                    "Joint_3": 1.6313,
+                    "Joint_4": 0.0104,
+                    "Joint_5": -1.3116,
+                    "Joint_6": -0.0027,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 4.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.195,
+                    "Joint_3": 1.6344,
+                    "Joint_4": 0.0099,
+                    "Joint_5": -1.3122,
+                    "Joint_6": -0.0025,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1907,
+                    "Joint_3": 1.6391,
+                    "Joint_4": 0.0092,
+                    "Joint_5": -1.3117,
+                    "Joint_6": -0.0024,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1862,
+                    "Joint_3": 1.6448,
+                    "Joint_4": 0.0087,
+                    "Joint_5": -1.3106,
+                    "Joint_6": -0.0023,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 5.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1827,
+                    "Joint_3": 1.6492,
+                    "Joint_4": 0.0085,
+                    "Joint_5": -1.3096,
+                    "Joint_6": -0.0022,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1803,
+                    "Joint_3": 1.6524,
+                    "Joint_4": 0.0086,
+                    "Joint_5": -1.309,
+                    "Joint_6": -0.0022,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1783,
+                    "Joint_3": 1.6549,
+                    "Joint_4": 0.0089,
+                    "Joint_5": -1.3084,
+                    "Joint_6": -0.0023,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 6.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1769,
+                    "Joint_3": 1.657,
+                    "Joint_4": 0.0095,
+                    "Joint_5": -1.3077,
+                    "Joint_6": -0.0025,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1767,
+                    "Joint_3": 1.6585,
+                    "Joint_4": 0.0098,
+                    "Joint_5": -1.3064,
+                    "Joint_6": -0.0026,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1778,
+                    "Joint_3": 1.6597,
+                    "Joint_4": 0.0096,
+                    "Joint_5": -1.3042,
+                    "Joint_6": -0.0025,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 7.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1804,
+                    "Joint_3": 1.6602,
+                    "Joint_4": 0.0084,
+                    "Joint_5": -1.301,
+                    "Joint_6": -0.0023,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1844,
+                    "Joint_3": 1.6599,
+                    "Joint_4": 0.0061,
+                    "Joint_5": -1.2973,
+                    "Joint_6": -0.0017,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.1416,
+                    "Joint_2": -0.1888,
+                    "Joint_3": 1.6594,
+                    "Joint_4": 0.0027,
+                    "Joint_5": -1.2935,
+                    "Joint_6": -0.0007,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 8.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 3.091,
+                    "Joint_2": -0.193,
+                    "Joint_3": 1.6583,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2903,
+                    "Joint_6": -0.0506,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.9419,
+                    "Joint_2": -0.2046,
+                    "Joint_3": 1.6467,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2903,
+                    "Joint_6": -0.1997,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.8194,
+                    "Joint_2": -0.222,
+                    "Joint_3": 1.6258,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2939,
+                    "Joint_6": -0.3223,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 9.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.7317,
+                    "Joint_2": -0.2389,
+                    "Joint_3": 1.6035,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.2992,
+                    "Joint_6": -0.4099,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6804,
+                    "Joint_2": -0.2505,
+                    "Joint_3": 1.5869,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3042,
+                    "Joint_6": -0.4612,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6561,
+                    "Joint_2": -0.2561,
+                    "Joint_3": 1.5779,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3076,
+                    "Joint_6": -0.4855,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 10.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.649,
+                    "Joint_2": -0.2571,
+                    "Joint_3": 1.5752,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3093,
+                    "Joint_6": -0.4926,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6513,
+                    "Joint_2": -0.2558,
+                    "Joint_3": 1.5761,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3097,
+                    "Joint_6": -0.4904,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6589,
+                    "Joint_2": -0.2535,
+                    "Joint_3": 1.5787,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3094,
+                    "Joint_6": -0.4827,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 11.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.666,
+                    "Joint_2": -0.2523,
+                    "Joint_3": 1.5797,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3096,
+                    "Joint_6": -0.4756,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6698,
+                    "Joint_2": -0.2529,
+                    "Joint_3": 1.5779,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3108,
+                    "Joint_6": -0.4718,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6675,
+                    "Joint_2": -0.2558,
+                    "Joint_3": 1.5725,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3134,
+                    "Joint_6": -0.4741,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 12.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6585,
+                    "Joint_2": -0.2609,
+                    "Joint_3": 1.5634,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3172,
+                    "Joint_6": -0.4831,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6444,
+                    "Joint_2": -0.2678,
+                    "Joint_3": 1.5519,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3219,
+                    "Joint_6": -0.4972,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6297,
+                    "Joint_2": -0.2739,
+                    "Joint_3": 1.5414,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3263,
+                    "Joint_6": -0.5119,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 13.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6185,
+                    "Joint_2": -0.2783,
+                    "Joint_3": 1.5335,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3298,
+                    "Joint_6": -0.5231,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6113,
+                    "Joint_2": -0.2806,
+                    "Joint_3": 1.5289,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3321,
+                    "Joint_6": -0.5303,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.3333,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6075,
+                    "Joint_2": -0.2819,
+                    "Joint_3": 1.5265,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3332,
+                    "Joint_6": -0.5341,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 14.6667,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6071,
+                    "Joint_2": -0.2818,
+                    "Joint_3": 1.5269,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.333,
+                    "Joint_6": -0.5345,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            },
+            {
+                "time": 15.0,
+                "q": {
+                    "Base link_fixed_base_phantom": 0.0,
+                    "Joint_1": 2.6102,
+                    "Joint_2": -0.2803,
+                    "Joint_3": 1.5301,
+                    "Joint_4": -0.0,
+                    "Joint_5": -1.3311,
+                    "Joint_6": -0.5314,
+                    "Flange_fixed": 0.0,
+                    "ee_link_fixed": 0.0
+                }
+            }
+        ]
+    }
+}

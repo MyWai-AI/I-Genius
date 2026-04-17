@@ -1,0 +1,21 @@
+[Unit]
+Description=VILMA Vulcanexus Edge Executor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/vilma-agent
+Environment=ROS_DOMAIN_ID=42
+Environment=RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+Environment=ROS_LOCALHOST_ONLY=0
+Environment=ROS_DISCOVERY_SERVER=192.168.0.10:14520
+Environment=OUTPUT_DIR=/var/lib/vilma-edge/executor
+ExecStart=/opt/vilma-agent/scripts/vulcanexus/run_edge_executor.sh
+Restart=always
+RestartSec=3
+User=robot
+Group=robot
+
+[Install]
+WantedBy=multi-user.target

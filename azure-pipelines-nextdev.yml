@@ -1,0 +1,70 @@
+trigger:
+  branches:
+    include:
+      - main
+
+resources:
+  repositories:
+  - repository: self
+
+variables:
+  imageRepository: 'vilma'
+  containerRegistry: 'mywaik8snextdev.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/docker-compose.yml'
+  tag: '$(Build.BuildId)'
+  DEBUG_MODE: 'false'
+  LOCAL_HOST_RUN_ENV: 'false'
+
+pool:
+  name: Default
+  demands:
+    - Agent.OS -equals Linux
+    - Agent.OSArchitecture -equals X64
+stages:
+- stage: __default
+  displayName: Build and push stage
+  jobs:
+  - job: Job
+    displayName: Build and Push
+    steps:
+
+    # Step 1: Build
+    - task: DockerCompose@0
+      displayName: Build Docker image
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Mywai (CSP)(df36236a-6848-4ebb-a1de-1aa36a05a056)'
+        azureContainerRegistry: |
+          {"loginServer":"mywaik8snextdev.azurecr.io",
+           "id" : "/subscriptions/df36236a-6848-4ebb-a1de-1aa36a05a056/resourceGroups/MywAiResources-dev/providers/Microsoft.ContainerRegistry/registries/mywaik8snextdev"}
+        dockerComposeFile: '$(dockerfilePath)'
+        projectName: 'vilma'
+        repository: '$(imageRepository)'
+        action: 'Build services'
+        additionalImageTags: '$(tag)'
+        includeLatestTag: false
+        arguments: |
+          --build-arg MYWAI_ARTIFACTS_MAIL=$(MYWAI_ARTIFACTS_MAIL)
+          --build-arg MYWAI_ARTIFACTS_TOKEN=$(MYWAI_ARTIFACTS_TOKEN)
+          --build-arg CACHE_BUSTER=$(Build.BuildId)
+      env:
+        MYWAI_ARTIFACTS_MAIL: $(MYWAI_ARTIFACTS_MAIL)
+        MYWAI_ARTIFACTS_TOKEN: $(MYWAI_ARTIFACTS_TOKEN)
+        DEBUG_MODE: $(DEBUG_MODE)
+        LOCAL_HOST_RUN_ENV: $(LOCAL_HOST_RUN_ENV)
+
+    # Step 2: Push
+    - task: DockerCompose@0
+      displayName: Push Docker image to ACR
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Mywai (CSP)(df36236a-6848-4ebb-a1de-1aa36a05a056)'
+        azureContainerRegistry: |
+          {"loginServer":"mywaik8snextdev.azurecr.io",
+           "id" : "/subscriptions/df36236a-6848-4ebb-a1de-1aa36a05a056/resourceGroups/MywAiResources-dev/providers/Microsoft.ContainerRegistry/registries/mywaik8snextdev"}
+        dockerComposeFile: '$(dockerfilePath)'
+        projectName: 'vilma'
+        repository: '$(imageRepository)'
+        action: 'Push services'
+        additionalImageTags: '$(tag)'
+        includeLatestTag: true
