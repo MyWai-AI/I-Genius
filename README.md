@@ -1,60 +1,28 @@
 # I-Genius
 
-I-Genius is an open-source visual imitation learning toolkit for manipulation workflows. It provides a local-first Streamlit interface for processing demonstrations, generating reusable Cartesian trajectories, visualizing robot playback, and transporting robot-ready paths across machines using Vulcanexus.
+I-Genius is a local-first visual imitation learning toolkit for robot manipulation demonstrations. The current reusable open-source workflow focuses on ZED `.svo` / `.svo2` recordings exported into an RGB-D ZIP, then processed locally into trajectories, DMP outputs, and robot playback.
 
-## Highlights
+## Current Scope
 
-- Local-first workflow for video, BAG, SVO, and prepared ZIP inputs
-- Trajectory extraction, adaptation, and skill reuse pipeline
-- Robot playback and inverse-kinematics visualization inside the app
-- Vulcanexus-based trajectory publishing from the UI
-- Reusable edge receiver pattern for mixed ROS 1 / ROS 2 deployments
-- FIWARE sandbox compose file for northbound experiments
+This repository is organized around:
 
-## Architecture
+- local Streamlit UI for uploading demonstration data
+- ZED/SVO RGB-D ZIP uploads for accurate pick-and-place workflows
+- hand, object, trajectory, DMP, and robot playback pipeline steps
+- reusable documentation for preparing data outside the app
+- local runtime folders that are ignored by git
 
-```mermaid
-flowchart LR
-    A[Demonstration Input] --> B[Perception and Trajectory Extraction]
-    B --> C[Skill Reuse / Cartesian Trajectory]
-    C --> D[Robot Playback in App]
-    C --> E[Vulcanexus / DDS Transport]
-    E --> F[Generic Edge Receiver]
-    F --> G[Robot-Specific Backend]
-    G --> H[Robot Driver / Execution]
-```
-
-For an Ubuntu 20.04 robot workstation with ROS 1 Noetic drivers and a ROS 2 Humble communication container, the recommended split is:
-
-```mermaid
-flowchart LR
-    A[I-Genius on server] --> B[/learned_trajectory PoseArray/]
-    B --> C[ROS 2 Humble edge receiver container]
-    C --> D[CSV plus metadata artifact on host]
-    D --> E[Validation / remap tools]
-    E --> F[ROS 1 Noetic robot driver]
-```
-
-## Repository Scope
-
-This public repository includes:
-
-- the local-first application flow
-- the proven Vulcanexus integration
-- reusable edge receiver and status helpers
-- FIWARE sandbox compose file
-- documentation for the edge contract and deployment pattern
-
-This public repository does not include:
+This repository should not contain:
 
 - private platform credentials
-- private package feeds
-- private deployment pipelines
-- internal cloud integrations
+- cloud integration screenshots
+- private package feed files
+- generated videos, extracted frames, depth maps, or DMP runtime outputs
+- one-off notebook outputs or temporary experiment data
 
 ## Quick Start
 
-### 1. Create a Python environment
+Create the Python environment:
 
 ```bash
 python3.12 -m venv .venv
@@ -63,11 +31,11 @@ pip install --upgrade pip uv
 uv sync
 ```
 
-### 2. Run the local-first app
+Run the local app:
 
 ```bash
 source .venv/bin/activate
-uv run streamlit run src/streamlit_template/new_ui/pages/Common/landing_page.py   --server.port 8504   --server.address 0.0.0.0
+uv run streamlit run src/streamlit_template/new_ui/pages/Common/landing_page.py --server.port 8504 --server.address 0.0.0.0
 ```
 
 Open:
@@ -76,77 +44,84 @@ Open:
 http://localhost:8504
 ```
 
-### 3. Docker run
+Docker is also available:
 
 ```bash
 docker compose up --build
 ```
 
-The app will be available at:
+Open:
 
 ```text
 http://localhost:9002
 ```
 
-## Typical Local Workflow
+## Recommended Workflow
 
-1. Open the app and choose `Local Workspace`
-2. Upload a video, BAG, SVO, or prepared ZIP input
-3. Run the pipeline
-4. Inspect the generated trajectory and robot playback
-5. Use `Push to Robot` from the robot step when you want to publish through Vulcanexus
+For precise pick-and-place data, use the ZED/SVO ZIP workflow:
 
-## Vulcanexus Integration
+1. Record a demonstration with a ZED camera as `.svo` or `.svo2`.
+2. Use the Colab cells in [tutorials/svo_zip_workflow.md](tutorials/svo_zip_workflow.md) to export RGB frames, metric depth, camera intrinsics, and a preview video.
+3. Upload the generated `<session_id>_svo_data.zip` in the local app.
+4. Confirm that the ZIP validator shows camera intrinsics, RGB frames, and depth meters.
+5. Run the SVO pipeline.
+6. Review the hand, object, trajectory, DMP, and robot playback steps.
 
-The UI can publish the final trajectory using:
+Expected upload structure:
 
-- topic: `/learned_trajectory`
-- type: `geometry_msgs/msg/PoseArray`
-
-Important scripts:
-
-- `scripts/vulcanexus/docker_publish_traj.sh`
-- `scripts/vulcanexus/traj_pose_array_pub.py`
-- `scripts/vulcanexus/traj_pose_array_sub.py`
-- `scripts/vulcanexus/traj_status_sub.py`
-- `scripts/vulcanexus/edge_receive_posearray.py`
-- `scripts/vulcanexus/run_edge_receiver.sh`
-- `docs/edge_receiver_contract.md`
-
-## Reusable Edge Pattern
-
-The reusable edge boundary is intentionally simple:
-
-1. receive the trajectory on ROS 2
-2. persist a normalized artifact (`csv` + `metadata.json`)
-3. hand off to a robot-specific backend
-
-This allows the producer side to stay robot-agnostic while the edge side remains adaptable to different robot stacks.
-
-## FIWARE Sandbox
-
-A basic Orion-LD + Mongo sandbox is provided in:
-
-- `docker-compose.fiware.yml`
-
-Start it with:
-
-```bash
-docker compose -f docker-compose.fiware.yml up -d
+```text
+<session_id>_svo_data.zip
+├── camera/
+│   ├── <session_id>.npy
+│   └── <session_id>.npz
+├── frames/
+│   └── <session_id>/
+│       ├── frame_000000.png
+│       └── ...
+├── depth_meters/
+│   └── <session_id>/
+│       ├── frame_000000.npy
+│       └── ...
+├── depth_color/
+│   └── <session_id>/
+│       ├── frame_000000.png
+│       └── ...
+└── videos/
+    └── <session_id>/
+        └── <session_id>.mp4
 ```
+
+The detailed export and validation tutorial is here:
+
+- [tutorials/svo_zip_workflow.md](tutorials/svo_zip_workflow.md)
+- [tutorials/custom_robot_zip.md](tutorials/custom_robot_zip.md)
 
 ## Project Structure
 
-- `src/streamlit_template/` — application UI and pipeline logic
-- `scripts/vulcanexus/` — Vulcanexus transport, edge receiver, and helper scripts
-- `docs/edge_receiver_contract.md` — reusable edge contract
-- `docker-compose.fiware.yml` — FIWARE sandbox services
+- `src/streamlit_template/` - Streamlit UI and pipeline logic
+- `src/streamlit_template/core/SVO/` - SVO processing steps
+- `src/streamlit_template/new_ui/services/SVO/` - SVO upload and helper services
+- `data/SVO/` - local SVO runtime folders with `.gitkeep` placeholders
+- `data/Common/` - shared models, robot files, and required app assets
+- `tutorials/` - user-facing setup and data-preparation guides
+- `docker-compose.yml` - local container entry point
+- `pyproject.toml` - Python project dependencies
 
-## Notes for Open-Source Use
+## Runtime Data Policy
 
-Before using this repository in production, review:
+Runtime outputs belong under `data/SVO/`, `data/Generic/`, or `data/BAG/`, but they should not be committed. The repository tracks only folder placeholders and source assets needed to run the app.
 
-- robot-specific safety validation
-- workspace and frame assumptions
-- deployment-specific security and network configuration
-- licensing of any third-party assets bundled with your deployment
+To clean generated runtime files while keeping placeholders, run:
+
+```bash
+find data/SVO data/Generic data/BAG -type f ! -name .gitkeep -delete
+find data/SVO data/Generic data/BAG -type d -empty -delete
+```
+
+Use this before preparing a public commit if you have been testing uploads locally.
+
+## Notes
+
+- ZED depth exported by the tutorial is stored in meters.
+- RGB and depth frame names must match exactly, for example `frame_000000.png` and `frame_000000.npy`.
+- MP4 input can be useful for quick demos, but it does not contain metric depth and is not the recommended path for precise robot-space pick-and-place.

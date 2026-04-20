@@ -1,8 +1,8 @@
 """
 SVO Helpers — Reconstruct RGB and RGBD videos from SVO flat frame files.
 
-Handles both standard naming (frame_000000.jpg) and MYWAI timestamp-prefixed
-naming (639076237154104597_frame_000000_OpenArm001.jpg).
+Handles both standard naming (frame_000000.jpg) and timestamp-prefixed naming
+(639076237154104597_frame_000000_OpenArm001.jpg).
 """
 import re
 import logging
@@ -34,7 +34,7 @@ def _convert_to_h264_if_needed(output_path: str):
         if shutil.which("ffmpeg"):
             temp_output = output_path.replace('.mp4', '_temp.mp4')
             subprocess.run([
-                'ffmpeg', '-y', '-i', output_path, 
+                'ffmpeg', '-y', '-i', output_path,
                 '-vcodec', 'libx264', '-crf', '23', temp_output
             ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             shutil.move(temp_output, output_path)

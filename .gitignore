@@ -183,19 +183,18 @@ data/SVO/**
 !data/Common/**/*.task
 
 .vscode/
+.codex
+.codex/
 nohup.out
 
 # 3D Viewer
 3DViewer/
+data/_runtime/
 
 src/streamlit_template/components/sync_viewer/frontend-src/node_modules/
-src/streamlit_template/components/sync_viewer/frontend/mywaiviewer.umd.js
-src/streamlit_template/components/sync_viewer/frontend/mywaiviewer.umd.js.map
-src/streamlit_template/components/sync_viewer/frontend/mywaiviewer.umd.min.js
-src/streamlit_template/components/sync_viewer/frontend/mywaiviewer.umd.min.js.map
-src/streamlit_template/components/sync_viewer/frontend/mywaiviewer.common.js
-src/streamlit_template/components/sync_viewer/frontend/mywaiviewer.common.js.map
-src/streamlit_template/components/sync_viewer/frontend/mywaiviewer.css
+src/streamlit_template/components/sync_viewer/frontend/*.js
+src/streamlit_template/components/sync_viewer/frontend/*.js.map
+src/streamlit_template/components/sync_viewer/frontend/*.css
 src/streamlit_template/components/sync_viewer/frontend/fonts/
 src/streamlit_template/components/sync_viewer/frontend/demo.html
 

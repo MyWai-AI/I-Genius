@@ -1,5 +1,5 @@
 """
-Landing page for the public local-first VILMA app.
+Landing page for the public local-first I-Genius app.
 """
 
 import logging
@@ -37,8 +37,8 @@ def render_landing_page() -> None:
     st.markdown(
         """
         <div class="page-header">
-            <div class="page-title">VILMA</div>
-            <div class="page-subtitle">Visual Imitation Learning for Manipulation Automation</div>
+            <div class="page-title">I-Genius</div>
+            <div class="page-subtitle">Local visual imitation learning for robot manipulation</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -68,7 +68,7 @@ def render_landing_page() -> None:
 
 def main() -> None:
     st.set_page_config(
-        page_title="Igenius - VILMA",
+        page_title="I-Genius",
         page_icon="🤖",
         layout="wide",
         initial_sidebar_state="collapsed",

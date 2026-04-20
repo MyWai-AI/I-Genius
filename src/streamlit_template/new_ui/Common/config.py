@@ -1,7 +1,5 @@
 """
-UI Configuration module for VILMA application.
-
-Centralizes all UI-related configurations, paths, and constants.
+UI configuration module for the I-Genius application.
 """
 
 from pathlib import Path
@@ -14,7 +12,7 @@ class UIConfig:
     """Immutable UI configuration container."""
     
     # Page configuration
-    PAGE_TITLE: str = "Igenius - VILMA"
+    PAGE_TITLE: str = "I-Genius"
     PAGE_LAYOUT: str = "wide"
     PAGE_ICON: str = "🔧"
     

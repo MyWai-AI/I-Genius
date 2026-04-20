@@ -59,7 +59,6 @@ docker/
 !supervisord.conf
 !pyproject.toml
 !uv.lock
-azure-pipelines*.yml
 Dockerfile*
 !Dockerfile
 configure_poetry.sh
