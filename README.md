@@ -1,6 +1,7 @@
 # I-Genius
 
 I-Genius is a local-first visual imitation learning toolkit for robot manipulation demonstrations. The current reusable open-source workflow focuses on ZED `.svo` / `.svo2` recordings exported into an RGB-D ZIP, then processed locally into trajectories, DMP outputs, and robot playback.
+An extended Skill-Reuse branch augments this pipeline by supporting direct .mp4 video uploads, enabling broader input flexibility beyond ZED-specific formats while preserving the downstream trajectory and skill extraction workflow.
 
 ## Current Scope
 
