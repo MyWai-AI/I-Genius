@@ -29,6 +29,127 @@ def _extract_frame_index(filepath):
     return None
 
 
+def _build_indexed_paths(paths):
+    indexed_paths = []
+    for i, p in enumerate(paths):
+        fidx = _extract_frame_index(p)
+        indexed_paths.append((i if fidx is None else fidx, p))
+    return indexed_paths
+
+
+def _normalize_range(min_idx, max_idx, selected):
+    try:
+        start, end = int(selected[0]), int(selected[1])
+    except Exception:
+        start, end = min_idx, max_idx
+    start = max(min_idx, min(max_idx, start))
+    end = max(min_idx, min(max_idx, end))
+    if end < start:
+        start, end = end, start
+    return (start, end)
+
+
+def sync_timeline_touch_state_bounds(min_idx, max_idx, key_prefix="default"):
+    """Update touch-state from session values before rendering, returns whether user changed range."""
+    if max_idx <= min_idx:
+        return True
+
+    range_key = f"{key_prefix}_timeline_range"
+    prev_key = f"{key_prefix}_timeline_prev"
+    touched_key = f"{key_prefix}_timeline_touched"
+
+    selected = st.session_state.get(range_key, (min_idx, max_idx))
+    current = _normalize_range(min_idx, max_idx, selected)
+
+    if prev_key not in st.session_state:
+        st.session_state[prev_key] = current
+    if touched_key not in st.session_state:
+        st.session_state[touched_key] = False
+
+    if tuple(current) != tuple(st.session_state.get(prev_key, current)):
+        st.session_state[touched_key] = True
+    st.session_state[prev_key] = tuple(current)
+
+    return bool(st.session_state.get(touched_key, False))
+
+
+def sync_timeline_touch_state(paths, key_prefix="default"):
+    """Path-based wrapper for sync_timeline_touch_state_bounds."""
+    if not paths:
+        return False
+    indexed_paths = _build_indexed_paths(paths)
+    min_idx = min(idx for idx, _ in indexed_paths)
+    max_idx = max(idx for idx, _ in indexed_paths)
+    return sync_timeline_touch_state_bounds(min_idx, max_idx, key_prefix=key_prefix)
+
+
+def timeline_trim_paths(paths, key_prefix="default"):
+    """Filter paths by the currently selected timeline range in session state."""
+    if not paths:
+        return []
+
+    indexed_paths = _build_indexed_paths(paths)
+
+    min_idx = min(idx for idx, _ in indexed_paths)
+    max_idx = max(idx for idx, _ in indexed_paths)
+    if min_idx == max_idx:
+        return [indexed_paths[0][1]]
+
+    range_key = f"{key_prefix}_timeline_range"
+    selected = st.session_state.get(range_key, (min_idx, max_idx))
+
+    try:
+        selected_start, selected_end = int(selected[0]), int(selected[1])
+    except Exception:
+        selected_start, selected_end = min_idx, max_idx
+
+    selected_start = max(min_idx, min(max_idx, selected_start))
+    selected_end = max(min_idx, min(max_idx, selected_end))
+    if selected_end < selected_start:
+        selected_start, selected_end = selected_end, selected_start
+
+    ranged = [p for idx, p in indexed_paths if selected_start <= idx <= selected_end]
+    if not ranged:
+        st.info("No frames in the selected timeline range.")
+        return []
+
+    return ranged
+
+
+def render_timeline_range_control(paths, key_prefix="default"):
+    """Render timeline slider for path-based frame indices."""
+    if not paths:
+        return False
+
+    indexed_paths = _build_indexed_paths(paths)
+    min_idx = min(idx for idx, _ in indexed_paths)
+    max_idx = max(idx for idx, _ in indexed_paths)
+    return render_timeline_range_control_bounds(min_idx, max_idx, key_prefix=key_prefix)
+
+
+def render_timeline_range_control_bounds(min_idx, max_idx, key_prefix="default"):
+    """Render timeline slider for explicit frame-index bounds."""
+    if max_idx <= min_idx:
+        return True
+
+    range_key = f"{key_prefix}_timeline_range"
+
+    if range_key not in st.session_state:
+        st.session_state[range_key] = (min_idx, max_idx)
+
+    selected = st.session_state.get(range_key, (min_idx, max_idx))
+    selected_start, selected_end = _normalize_range(min_idx, max_idx, selected)
+
+    st.slider(
+        "Timeline frame range",
+        min_value=min_idx,
+        max_value=max_idx,
+        value=(selected_start, selected_end),
+        key=range_key,
+    )
+    return True
+
+
 def render_frame_grid_viewer(paths, fps, metadata=None, video_seek_key="video_seek_time", key_prefix="default"):
     """
     Render a clickable grid of frames.

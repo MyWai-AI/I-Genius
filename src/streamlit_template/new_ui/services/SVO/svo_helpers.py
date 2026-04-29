@@ -93,9 +93,9 @@ def reconstruct_rgb_video(
         return None
     h, w = first_frame.shape[:2]
 
-    # Try H.264 codecs (browser-compatible), fall back to mp4v
+    # Try mp4v or MJPEG (skip H264/avc1 which require unavailable OpenH264 library)
     writer = None
-    for fourcc_str in ["avc1", "H264", "mp4v"]:
+    for fourcc_str in ["mp4v", "MJPG", "XVID"]:
         fourcc = cv2.VideoWriter_fourcc(*fourcc_str)
         writer = cv2.VideoWriter(output_path, fourcc, fps, (w, h))
         if writer.isOpened():
@@ -113,8 +113,6 @@ def reconstruct_rgb_video(
         if frame is not None:
             writer.write(frame)
     writer.release()
-
-    _convert_to_h264_if_needed(output_path)
 
     logger.info(f"RGB video written: {output_path} ({len(frame_files)} frames @ {fps} fps)")
     return output_path
@@ -163,9 +161,9 @@ def reconstruct_rgbd_video(
         return None
     h, w = first_depth.shape
 
-    # Try H.264 codecs, fall back to mp4v
+    # Try mp4v or MJPEG (skip H264/avc1 which require unavailable OpenH264 library)
     writer = None
-    for fourcc_str in ["avc1", "H264", "mp4v"]:
+    for fourcc_str in ["mp4v", "MJPG", "XVID"]:
         fourcc = cv2.VideoWriter_fourcc(*fourcc_str)
         writer = cv2.VideoWriter(output_path, fourcc, fps, (w, h))
         if writer.isOpened():

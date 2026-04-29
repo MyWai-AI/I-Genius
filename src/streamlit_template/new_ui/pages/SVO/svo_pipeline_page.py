@@ -16,6 +16,7 @@ except ImportError:
         clickable_images = None
 
 from src.streamlit_template.new_ui.components.Common.stepper_bar import StepperBar, PIPELINE_STEPS
+from src.streamlit_template.new_ui.components.Common import frame_viewer as _frame_viewer
 from src.streamlit_template.new_ui.services.SVO.svo_pipeline_service import (
     handle_svo_hands,
     handle_svo_objects,
@@ -101,7 +102,7 @@ def render_svo_pipeline_page():
 
     col_back, _ = st.columns([1, 5])
     with col_back:
-        if st.button("← Back"):
+        if st.button("← Back", key="svo_back_button"):
             st.session_state["selected_platform"] = st.session_state.get("pipeline_source", "local")
             st.rerun()
 
@@ -129,7 +130,7 @@ def render_svo_pipeline_page():
 
     if not base.exists():
        st.warning(f"SVO data directory not found at {base}. Please ensure data is available.")
-       if st.button("Refresh"):
+       if st.button("Refresh", key="svo_refresh_button"):
            st.rerun()
        return
 
@@ -379,6 +380,9 @@ def render_svo_pipeline_page():
                     "linkColors": robot_config.get("link_colors", {}),
                     "animations": robot_config.get("animations", {}),
                 }],
+                "cart_path": cart_path.tolist() if cart_path is not None else [],
+                "grasp_idx": int(grasp_idx) if grasp_idx is not None else None,
+                "release_idx": int(release_idx) if release_idx is not None else None,
                 "images": [],
                 "timeseries": [],
             }
@@ -505,6 +509,7 @@ def render_svo_pipeline_page():
     # --- DMP 3D (full width) ---
     if rtype == "dmp3d":
         from src.streamlit_template.components.sync_viewer import sync_viewer
+        from src.streamlit_template.core.Common.robot_playback import transform_traj_for_display
         import base64
 
         timestamps = res.get("timestamps")
@@ -515,10 +520,13 @@ def render_svo_pipeline_page():
         if not dmp_xyz_path.exists():
             dmp_xyz_path = dmp_dir / "object_xyz_dmp.npy"
 
+        _, robot_config_dmp = _resolve_active_robot()
+
         traj_data = None
         if dmp_xyz_path.exists() and timestamps:
             try:
                 yg = np.load(str(dmp_xyz_path))
+                yg = transform_traj_for_display(yg, robot_config_dmp)
                 if len(timestamps) == len(yg):
                     # Build segment + marker data for the sync_viewer
                     reach_len = res.get("reach_len", 0)
@@ -612,12 +620,12 @@ def render_svo_pipeline_page():
                     img_paths = [str(p) for p in res_nav["paths"]]
                     col_prev, _, col_next = st.columns([1, 6, 1])
                     with col_prev:
-                        if clicked_index > 0 and st.button("⬅ Prev", width="stretch"):
+                        if clicked_index > 0 and st.button("⬅ Prev", width="stretch", key="svo_prev_button"):
                             st.session_state.clicked_index -= 1
                             st.session_state.selected_frame = img_paths[st.session_state.clicked_index]
                             st.rerun()
                     with col_next:
-                        if clicked_index < len(img_paths) - 1 and st.button("Next ➡", width="stretch"):
+                        if clicked_index < len(img_paths) - 1 and st.button("Next ➡", width="stretch", key="svo_next_button"):
                             st.session_state.clicked_index += 1
                             st.session_state.selected_frame = img_paths[st.session_state.clicked_index]
                             st.rerun()
@@ -633,7 +641,7 @@ def render_svo_pipeline_page():
         res = step_results.get(step_key)
 
         if not res:
-            pass
+            return
 
         rtype = res.get("type")
 
@@ -646,8 +654,15 @@ def render_svo_pipeline_page():
                 )
                 return
             img_paths = [str(p) for p in res["paths"]]
-            encoded = encode_images(tuple(img_paths))
-            grid_key = f"svo_viewer_grid_{selected_step}_{len(img_paths)}"
+            slider_key_prefix = f"svo_pipeline_{rtype}"
+
+            display_paths = _frame_viewer.timeline_trim_paths(img_paths, key_prefix=slider_key_prefix)
+            if not display_paths:
+                _frame_viewer.render_timeline_range_control(img_paths, key_prefix=slider_key_prefix)
+                return
+
+            encoded = encode_images(tuple(display_paths))
+            grid_key = f"svo_viewer_grid_{selected_step}_{len(display_paths)}"
 
             clicked = clickable_images(
                 encoded,
@@ -668,9 +683,11 @@ def render_svo_pipeline_page():
             )
 
             if clicked > -1 and clicked != st.session_state.get("clicked_index"):
-                st.session_state.selected_frame = img_paths[clicked]
+                st.session_state.selected_frame = display_paths[clicked]
                 st.session_state.clicked_index = clicked
                 st.rerun()
+
+            _frame_viewer.render_timeline_range_control(img_paths, key_prefix=slider_key_prefix)
 
         # TRAJECTORY 2D SUBPLOTS
         elif rtype == "trajectory2d":

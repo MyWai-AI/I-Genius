@@ -215,9 +215,10 @@ def reconstruct_video_from_frames(frames_dir: Path, output_path: str, fps: float
         return
     h, w = first_frame.shape[:2]
 
-    # Try H.264 codecs (browser-compatible), fall back to mp4v
+    # Try mp4v or MJPEG (H264/avc1 may require unavailable OpenH264 library)
+    # Start with mp4v which is most compatible
     writer = None
-    for fourcc_str in ["avc1", "H264", "mp4v"]:
+    for fourcc_str in ["mp4v", "MJPG", "XVID"]:
         fourcc = cv2.VideoWriter_fourcc(*fourcc_str)
         writer = cv2.VideoWriter(output_path, fourcc, fps, (w, h))
         if writer.isOpened():

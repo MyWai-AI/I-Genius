@@ -13,12 +13,292 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.6.14/dist/vuetify.js"></script>
 
-    <!-- Robot viewer build -->
-    <link href="./robotviewer.css" rel="stylesheet">
-    <script src="./robotviewer.umd.js"></script>
+    <!-- MYWAI Viewer Build -->
+    <link href="./mywaiviewer.css" rel="stylesheet">
+    <script src="./mywaiviewer.umd.js"></script>
 
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+
+    <!-- Three.js + URDFLoader robot viewer (fallback when mywaiviewer bundle is absent) -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+        import { ColladaLoader } from 'three/addons/loaders/ColladaLoader.js';
+
+        // Decode a data URI to ArrayBuffer (for binary formats like STL)
+        function dataUriToArrayBuffer(dataUri) {
+            const b64 = dataUri.split(',')[1] || '';
+            const bin = atob(b64);
+            const buf = new ArrayBuffer(bin.length);
+            const view = new Uint8Array(buf);
+            for (let i = 0; i < bin.length; i++) view[i] = bin.charCodeAt(i);
+            return buf;
+        }
+
+        // Inline minimal URDFLoader — parses URDF XML with inlined mesh data URIs
+        class URDFLoader {
+            parse(urdfXml) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(urdfXml, 'text/xml');
+                const robot = new THREE.Group();
+                robot.joints = {};
+
+                // Build global material color map from top-level <material> definitions
+                const globalMaterials = {};
+                doc.querySelectorAll('robot > material').forEach(m => {
+                    const mname = m.getAttribute('name');
+                    const colorEl = m.querySelector('color');
+                    if (mname && colorEl) {
+                        const rgba = (colorEl.getAttribute('rgba') || '0.5 0.5 0.5 1').split(' ').map(Number);
+                        globalMaterials[mname] = new THREE.Color(rgba[0], rgba[1], rgba[2]);
+                    }
+                });
+
+                const linkMeshes = {};
+                const stlLoader = new STLLoader();
+                const daeLoader = new ColladaLoader();
+
+                // Load all links
+                doc.querySelectorAll('link').forEach(linkEl => {
+                    const name = linkEl.getAttribute('name');
+                    const group = new THREE.Group();
+                    group.name = name;
+                    linkMeshes[name] = group;
+
+                    linkEl.querySelectorAll('visual').forEach(visual => {
+                        const meshEl = visual.querySelector('geometry mesh');
+                        if (!meshEl) return;
+                        const filename = meshEl.getAttribute('filename') || '';
+                        if (!filename) return;
+
+                        // Origin
+                        const originEl = visual.querySelector('origin');
+                        const xyz = originEl ? (originEl.getAttribute('xyz') || '0 0 0').split(' ').map(Number) : [0,0,0];
+                        const rpy = originEl ? (originEl.getAttribute('rpy') || '0 0 0').split(' ').map(Number) : [0,0,0];
+                        const scaleAttr = (meshEl.getAttribute('scale') || '1 1 1').split(' ').map(Number);
+
+                        // Resolve color: inline > named reference > global material > default grey
+                        let color = new THREE.Color(0x999999);
+                        const matEl = visual.querySelector('material');
+                        if (matEl) {
+                            const inlineColor = matEl.querySelector('color');
+                            if (inlineColor) {
+                                const rgba = (inlineColor.getAttribute('rgba') || '0.5 0.5 0.5 1').split(' ').map(Number);
+                                color = new THREE.Color(rgba[0], rgba[1], rgba[2]);
+                            } else {
+                                const matName = matEl.getAttribute('name');
+                                if (matName && globalMaterials[matName]) color = globalMaterials[matName];
+                            }
+                        }
+
+                        const onMeshLoaded = (geom) => {
+                            const mat = new THREE.MeshPhongMaterial({ color, side: THREE.DoubleSide });
+                            const mesh = new THREE.Mesh(geom, mat);
+                            mesh.position.set(xyz[0], xyz[1], xyz[2]);
+                            mesh.rotation.set(rpy[0], rpy[1], rpy[2]);
+                            mesh.scale.set(scaleAttr[0], scaleAttr[1], scaleAttr[2]);
+                            group.add(mesh);
+                        };
+
+                        const isDataUri = filename.startsWith('data:');
+                        const isStl = filename.includes('.stl') || filename.includes('.STL') || filename.startsWith('data:model/stl');
+                        const isDae = filename.includes('.dae') || filename.includes('.DAE') || filename.startsWith('data:model/vnd.collada');
+
+                        if (isStl) {
+                            if (isDataUri) {
+                                // Parse directly from ArrayBuffer — no fetch needed
+                                try { onMeshLoaded(stlLoader.parse(dataUriToArrayBuffer(filename))); }
+                                catch(e) { console.warn('STL parse error', e); }
+                            } else {
+                                stlLoader.load(filename, onMeshLoaded);
+                            }
+                        } else if (isDae) {
+                            if (isDataUri) {
+                                const xml = atob(filename.split(',')[1] || '');
+                                try {
+                                    const result = daeLoader.parse(xml, '');
+                                    result.scene.traverse(c => { if (c.isMesh) onMeshLoaded(c.geometry.clone()); });
+                                } catch(e) { console.warn('DAE parse error', e); }
+                            } else {
+                                daeLoader.load(filename, result => {
+                                    result.scene.traverse(c => { if (c.isMesh) onMeshLoaded(c.geometry.clone()); });
+                                });
+                            }
+                        }
+                    });
+                    robot.add(group);
+                });
+
+                // Build joint tree
+                doc.querySelectorAll('joint').forEach(jointEl => {
+                    const jname = jointEl.getAttribute('name');
+                    const jtype = jointEl.getAttribute('type');
+                    const parentName = jointEl.querySelector('parent')?.getAttribute('link');
+                    const childName = jointEl.querySelector('child')?.getAttribute('link');
+
+                    const originEl = jointEl.querySelector('origin');
+                    const xyz = originEl ? (originEl.getAttribute('xyz') || '0 0 0').split(' ').map(Number) : [0,0,0];
+                    const rpy = originEl ? (originEl.getAttribute('rpy') || '0 0 0').split(' ').map(Number) : [0,0,0];
+
+                    const axisEl = jointEl.querySelector('axis');
+                    const axisXYZ = axisEl ? (axisEl.getAttribute('xyz') || '0 0 1').split(' ').map(Number) : [0,0,1];
+                    const axis = new THREE.Vector3(...axisXYZ).normalize();
+
+                    const childGroup = linkMeshes[childName];
+                    if (!childGroup) return;
+
+                    // Re-parent child under parent
+                    const parentGroup = linkMeshes[parentName] || robot;
+                    childGroup.position.set(xyz[0], xyz[1], xyz[2]);
+                    childGroup.rotation.set(rpy[0], rpy[1], rpy[2]);
+                    parentGroup.add(childGroup);
+
+                    if (jtype === 'fixed') return;
+
+                    // Snapshot rest pose so setJointValue applies on top of it
+                    const restQuat = childGroup.quaternion.clone();
+                    const restPos = childGroup.position.clone();
+
+                    robot.joints[jname] = {
+                        _group: childGroup,
+                        _axis: axis,
+                        _type: jtype,
+                        _restQuat: restQuat,
+                        _restPos: restPos,
+                        setJointValue(val) {
+                            if (this._type === 'revolute' || this._type === 'continuous') {
+                                const delta = new THREE.Quaternion().setFromAxisAngle(this._axis, val);
+                                this._group.quaternion.multiplyQuaternions(this._restQuat, delta);
+                            } else if (this._type === 'prismatic') {
+                                this._group.position.copy(this._restPos).addScaledVector(this._axis, val);
+                            }
+                        }
+                    };
+                });
+
+                return robot;
+            }
+        }
+
+        // Expose a global controller so the classic Vue script can call in
+        window.RobotViewer = {
+            _renderer: null,
+            _animRunning: false,
+            _robot: null,
+            _traj: [],
+
+            init(containerId, urdfDataUri, trajectory, rotationDeg, positionM) {
+                const el = document.getElementById(containerId);
+                if (!el) return;
+
+                // Tear down previous instance
+                this.destroy();
+                el.innerHTML = '';
+
+                const w = el.clientWidth || 600;
+                const h = el.clientHeight || 500;
+
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x222222);
+
+                const camera = new THREE.PerspectiveCamera(45, w / h, 0.01, 100);
+                camera.position.set(1.5, 1.5, 1.5);
+
+                const renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(w, h);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                el.appendChild(renderer.domElement);
+                this._renderer = renderer;
+
+                const controls = new OrbitControls(camera, renderer.domElement);
+                controls.target.set(0, 0.4, 0);
+                controls.update();
+
+                scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+                const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+                dir.position.set(2, 4, 2);
+                scene.add(dir);
+                scene.add(new THREE.GridHelper(2, 20, 0x444444, 0x333333));
+
+                // Decode base64 URDF data URI → raw XML
+                const b64 = urdfDataUri.split(',')[1] || '';
+                const urdfXml = atob(b64);
+
+                const loader = new URDFLoader();
+                // Meshes are already inlined as data URIs inside the XML — no custom load needed
+                const robot = loader.parse(urdfXml);
+                robot.rotation.set(
+                    THREE.MathUtils.degToRad(rotationDeg[0]),
+                    THREE.MathUtils.degToRad(rotationDeg[1]),
+                    THREE.MathUtils.degToRad(rotationDeg[2])
+                );
+                robot.position.set(positionM[0], positionM[1], positionM[2]);
+                scene.add(robot);
+                this._robot = robot;
+                this._traj = trajectory || [];
+
+                // Apply first frame immediately
+                if (this._traj.length > 0) this.seekToFrame(0);
+
+                this._animRunning = true;
+                const animate = () => {
+                    if (!this._animRunning) return;
+                    requestAnimationFrame(animate);
+                    controls.update();
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                if (window.ResizeObserver) {
+                    this._ro = new ResizeObserver(() => {
+                        const nw = el.clientWidth, nh = el.clientHeight;
+                        if (nw > 0 && nh > 0) {
+                            camera.aspect = nw / nh;
+                            camera.updateProjectionMatrix();
+                            renderer.setSize(nw, nh);
+                        }
+                    });
+                    this._ro.observe(el);
+                }
+            },
+
+            seekToTime(time) {
+                if (!this._robot || this._traj.length === 0) return;
+                let idx = 0, minDiff = Infinity;
+                for (let i = 0; i < this._traj.length; i++) {
+                    const d = Math.abs(this._traj[i].time - time);
+                    if (d < minDiff) { minDiff = d; idx = i; }
+                }
+                this.seekToFrame(idx);
+            },
+
+            seekToFrame(idx) {
+                const frame = this._traj[idx];
+                if (!frame || !frame.q) return;
+                Object.entries(frame.q).forEach(([name, val]) => {
+                    if (this._robot.joints[name]) this._robot.joints[name].setJointValue(val);
+                });
+            },
+
+            destroy() {
+                this._animRunning = false;
+                if (this._ro) { this._ro.disconnect(); this._ro = null; }
+                if (this._renderer) { this._renderer.dispose(); this._renderer = null; }
+                this._robot = null;
+                this._traj = [];
+            }
+        };
+    </script>
 
     <style>
         body {
@@ -98,22 +378,24 @@
                 </div>
                 <div class="col-viewer">
 
-                    <!-- MODE: ROBOT (Default) -->
-                    <!-- Force full height/width on component -->
-                    <component v-if="!isDmpMode && viewerData && hasRobotViewerBundle" is="robot-viewer" :viewer-data="viewerData"
-                        :enable-algo="false" :backend-end-point="null" ref="viewer"
+                    <!-- MODE: ROBOT with bundle -->
+                    <component v-if="isRobotBundleAvailable && !isDmpMode && viewerData" is="mywaiviewer"
+                        :viewer-data="viewerData" :enable-algo="false" :backend-end-point="null" ref="viewer"
                         style="width:100%; height:100%; display:block;">
                     </component>
 
-                    <div v-else-if="!isDmpMode && viewerData && !hasRobotViewerBundle"
-                        style="display:flex; justify-content:center; align-items:center; height:100%; color:#aaa; text-align:center; padding:24px;">
-                        Robot viewer bundle is not available in this checkout.
+                    <!-- Always in DOM so Plotly can target them; shown/hidden via display -->
+                    <!-- MODE: ROBOT fallback (bundle unavailable) -->
+                    <div id="robot-fallback-chart"
+                        :style="{ display: (!isRobotBundleAvailable && !isDmpMode && viewerData) ? 'block' : 'none', width: '100%', height: '100%' }">
                     </div>
 
                     <!-- MODE: DMP (Plotly) -->
-                    <div v-else-if="isDmpMode && viewerData" id="dmp-chart" style="width:100%; height:100%;"></div>
+                    <div id="dmp-chart"
+                        :style="{ display: (isDmpMode && viewerData) ? 'block' : 'none', width: '100%', height: '100%' }">
+                    </div>
 
-                    <div v-else
+                    <div v-if="!viewerData"
                         style="display:flex; justify-content:center; align-items:center; height:100%; color:#aaa;">
                         Waiting for Data...
                     </div>
@@ -143,19 +425,16 @@
         };
 
         // Initialize Vue
-        const robotViewerBundleKey = "my" + "waiviewer";
-        const robotViewerInstanceKey = "my" + "waiViewer";
-
-        // DEBUG: Check if the robot viewer bundle is available
-        console.log("Robot viewer global:", window[robotViewerBundleKey]);
+        // DEBUG: Check if window.mywaiviewer exists
+        console.log("MyWAIViewer Global:", window.mywaiviewer);
 
         // Manual Registration if UMD library exposes the component directly or as a plugin
-        if (window[robotViewerBundleKey] && window[robotViewerBundleKey].DynamicViewer) {
+        if (window.mywaiviewer && window.mywaiviewer.DynamicViewer) {
             // It's a library exporting multiple components
-            Vue.component('robot-viewer', window[robotViewerBundleKey].DynamicViewer);
-        } else if (window[robotViewerBundleKey]) {
+            Vue.component('mywaiviewer', window.mywaiviewer.DynamicViewer);
+        } else if (window.mywaiviewer) {
             // Fallback if it was default exported
-            Vue.component('robot-viewer', window[robotViewerBundleKey]);
+            Vue.component('mywaiviewer', window.mywaiviewer);
         }
 
         var app = new Vue({
@@ -164,10 +443,10 @@
             data: {
                 videoSrc: null,
                 viewerData: null,
-                hasRobotViewerBundle: !!window[robotViewerBundleKey],
                 ready: false,
                 lastSeekTime: 0,
                 videoDuration: 0,
+                isRobotBundleAvailable: !!(window.mywaiviewer),
             },
             computed: {
                 layoutStyle() {
@@ -186,6 +465,10 @@
                             this.$nextTick(() => {
                                 this.initPlotly();
                             });
+                        } else if (val && !this.isRobotBundleAvailable) {
+                            this.$nextTick(() => {
+                                this.initRobotFallback();
+                            });
                         }
                     },
                     deep: true
@@ -200,20 +483,40 @@
 
                     // ROBOT SYNC
                     if (!this.isDmpMode) {
-                        // Check global window object for the viewer instance if accessed directly
-                        const robotViewer = window[robotViewerInstanceKey];
-                        if (robotViewer && robotViewer.seek) {
-                            // console.log(`DEBUG: Syncing robot to ${t}s`);
-                            robotViewer.seek(t);
+                        if (this.isRobotBundleAvailable) {
+                            if (window.mywaiViewer && window.mywaiViewer.seek) {
+                                window.mywaiViewer.seek(t);
+                            }
                         } else {
-                            console.warn("DEBUG: robot viewer instance not found or no seek method!");
-                            console.log("robot viewer instance:", robotViewer);
+                            this.updateRobotFallbackMarker(t);
                         }
                     }
                     // DMP SYNC
                     else {
                         this.updatePlotlyMarker(t);
                     }
+                },
+
+                initRobotFallback() {
+                    if (!this.viewerData || this.isRobotBundleAvailable || this.isDmpMode) return;
+                    if (!window.RobotViewer) {
+                        // Module script is deferred — retry once it's ready
+                        setTimeout(() => this.initRobotFallback(), 100);
+                        return;
+                    }
+                    const model = (this.viewerData.models || [])[0] || {};
+                    if (!model.path) return;
+                    window.RobotViewer.init(
+                        'robot-fallback-chart',
+                        model.path,
+                        model.trajectory || [],
+                        model.rotation || [-90, 0, 0],
+                        model.position || [0, 0, 0]
+                    );
+                },
+
+                updateRobotFallbackMarker(time) {
+                    if (window.RobotViewer) window.RobotViewer.seekToTime(time);
                 },
 
                 initPlotly() {
@@ -364,16 +667,23 @@
             },
             mounted() {
                 Streamlit.setComponentReady();
-                Streamlit.setFrameHeight(800); // Fixed height to ensure visibility
+                Streamlit.setFrameHeight(800);
 
-                // Track visibility changes (e.g., when Streamlit switches tabs)
                 this.$nextTick(() => {
+                    // Re-init charts if viewerData arrived before mount
+                    if (this.viewerData) {
+                        if (this.isDmpMode) {
+                            this.initPlotly();
+                        } else if (!this.isRobotBundleAvailable) {
+                            this.initRobotFallback();
+                        }
+                    }
+
                     const appEl = document.getElementById('app');
                     if (appEl && window.ResizeObserver) {
                         const ro = new ResizeObserver((entries) => {
                             for (let entry of entries) {
                                 if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-                                    // Dispatch resize event to let 3D libraries (Three.js/Babylon) know the container is now visible and has actual dimensions
                                     window.dispatchEvent(new Event('resize'));
                                 }
                             }

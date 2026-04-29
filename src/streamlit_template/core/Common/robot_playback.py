@@ -502,22 +502,23 @@ def dmp_xyz_to_cartesian(
 
     # 3. Scaling
     if arm_reach > 0:
-        # Auto-scale: compute max absolute displacement per axis
+        # Auto-scale: per-axis so a dominant axis (e.g. large camera-X) does
+        # not crush smaller axes (e.g. Z lift). Each axis independently fills
+        # workspace * scale_xyz fraction.
         max_disp = np.max(np.abs(centered), axis=0)  # (3,)
         max_disp = np.where(max_disp < 1e-6, 1e-6, max_disp)  # avoid /0
 
         workspace = arm_reach * 0.6  # use 60 % of reach as safe zone
-        # Uniform scale factor to preserve shape proportions
-        auto_s = workspace / np.max(max_disp)
-        auto_s = min(auto_s, 5.0)  # cap: don't inflate truly tiny motions
+        # Per-axis scale factors, capped to avoid inflating near-zero axes
+        auto_s = np.minimum(workspace / max_disp, 5.0)
 
         # Apply: auto-scale * user multiplier
-        xs = centered[:, 0] * auto_s * scale_xyz[0]
-        ys = centered[:, 1] * auto_s * scale_xyz[1]
-        zs = centered[:, 2] * auto_s * scale_xyz[2]
+        xs = centered[:, 0] * auto_s[0] * scale_xyz[0]
+        ys = centered[:, 1] * auto_s[1] * scale_xyz[1]
+        zs = centered[:, 2] * auto_s[2] * scale_xyz[2]
 
-        print(f"[DEBUG] Auto-scale: max_disp={max_disp}, "
-              f"workspace={workspace:.3f}, auto_s={auto_s:.4f}, "
+        print(f"[DEBUG] Auto-scale (per-axis): max_disp={max_disp.round(4)}, "
+              f"workspace={workspace:.3f}, auto_s={auto_s.round(4)}, "
               f"user_scale={scale_xyz}")
     else:
         # Legacy: scale_xyz applied directly
@@ -575,6 +576,60 @@ def dmp_xyz_to_cartesian(
         "cartesian_path": path
     }
 
+
+def transform_traj_for_display(
+    traj: np.ndarray,
+    robot_config: dict,
+) -> np.ndarray:
+    """Apply the same per-axis scaling used by the robot step to a raw camera-space
+    XYZ trajectory so that DMP visualisations share the same coordinate space.
+
+    Parameters
+    ----------
+    traj : (N, 3) array in camera/depth space
+    robot_config : dict loaded from config.json (same one used by the robot step)
+
+    Returns
+    -------
+    (N, 3) array in robot Cartesian space (metres)
+    """
+    traj = _ensure_array(traj, shape_last=3)
+    if len(traj) == 0:
+        return traj
+
+    scale_xyz = tuple(robot_config.get("dmp_scale", [1.0, 1.0, 1.0]))
+    offset_xyz = tuple(robot_config.get("dmp_offset", [0.4, 0.0, 0.2]))
+    flip_y = False
+    flip_z = bool(robot_config.get("flip_z", False))
+    rotate_z = float(robot_config.get("dmp_rotation_z", 0.0))
+    arm_reach = float(robot_config.get("arm_reach", 0.0))
+
+    centered = traj - traj[0]
+
+    if flip_y:
+        centered[:, 1] = -centered[:, 1]
+    if flip_z:
+        centered[:, 2] = -centered[:, 2]
+
+    if arm_reach > 0:
+        max_disp = np.max(np.abs(centered), axis=0)
+        max_disp = np.where(max_disp < 1e-6, 1e-6, max_disp)
+        workspace = arm_reach * 0.6
+        auto_s = np.minimum(workspace / max_disp, 5.0)
+        xs = centered[:, 0] * auto_s[0] * scale_xyz[0]
+        ys = centered[:, 1] * auto_s[1] * scale_xyz[1]
+        zs = centered[:, 2] * auto_s[2] * scale_xyz[2]
+    else:
+        xs = centered[:, 0] * scale_xyz[0]
+        ys = centered[:, 1] * scale_xyz[1]
+        zs = centered[:, 2] * scale_xyz[2]
+
+    if rotate_z != 0.0:
+        rad = np.deg2rad(rotate_z)
+        c, s = np.cos(rad), np.sin(rad)
+        xs, ys = xs * c - ys * s, xs * s + ys * c
+
+    return np.stack([offset_xyz[0] + xs, offset_xyz[1] + ys, offset_xyz[2] + zs], axis=1)
 
 
 def get_robot_home_position(urdf_path: str) -> np.ndarray:

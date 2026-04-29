@@ -22,7 +22,7 @@ def sync_viewer(viewer_data: dict, video_path: str = None, key=None):
     
     Args:
         video_path (str): URL or base64 data URI of the video.
-        viewer_data (dict): Dictionary conforming to the viewer data schema.
+        viewer_data (dict): Dictionary conforming to MYWAI Viewer Data schema.
     """
     # Ensure viewer_data is valid JSON serializable
     viewer_data_json = json.dumps(viewer_data)
