@@ -9,6 +9,8 @@ import hashlib
 from streamlit_clickable_images import clickable_images
 
 from src.streamlit_template.new_ui.components.Common.stepper_bar import StepperBar, PIPELINE_STEPS
+from src.streamlit_template.new_ui.components.Common import frame_viewer as _frame_viewer
+from src.streamlit_template.new_ui.pages.SVO.svo_pipeline_page import render_svo_pipeline_page
 from src.streamlit_template.new_ui.services.Generic.pipeline_service import (
     handle_hands,
     handle_objects,
@@ -101,22 +103,33 @@ def _resolve_active_robot():
     return urdf_path, robot_config
 
 
+def _configure_svo_session_from_generic_upload() -> str | None:
+    """Map the Generic local-video upload into the SVO session layout."""
+    session_id = st.session_state.get("generic_session_id")
+    if not session_id:
+        video_path = st.session_state.get("local_video_path")
+        if not video_path:
+            return None
+        session_id = hashlib.md5(video_path.encode()).hexdigest()[:8]
+
+    st.session_state["svo_base_path"] = "data/Generic"
+    st.session_state["svo_session_id"] = session_id
+    return session_id
+
+
 def render_pipeline_page():
     """Render the pipeline processing page."""
     # Force clear any stale elements from previous pages
     placeholder = st.empty()
     placeholder.empty()
     
-    # Header removed
-    # st.markdown...
-    
-    col_back, _ = st.columns([1, 5])
-    with col_back:
-        if st.button("← Back"):
-            st.session_state["selected_platform"] = st.session_state.get("pipeline_source", "local")
-            st.rerun()
-    
     video_path = st.session_state.get("local_video_path")
+
+    # Full SVO transplant: reuse the SVO page/service on top of Generic local uploads.
+    if video_path and os.path.exists(video_path):
+        if _configure_svo_session_from_generic_upload():
+            render_svo_pipeline_page()
+            return
     
     # Hide any persistent buttons from previous pages (Streamlit ghost components bug)
     st.markdown("""
@@ -251,10 +264,23 @@ def render_pipeline_page():
                                 st.session_state.pipeline_running = False
                                 return
 
+                    # --- NEW: Monocular Depth Estimation ---
+                    depth_meters_dir = paths["frames"].parent.parent / "depth_meters" / paths["frames"].name
+                    if not depth_meters_dir.exists() or not any(depth_meters_dir.glob("*.npy")):
+                        with st.spinner("Estimating monocular depth (may take a moment)..."):
+                            from src.streamlit_template.core.Common.estimate_monocular_depth import estimate_depth_for_frames
+                            try:
+                                depth_meters_dir.mkdir(parents=True, exist_ok=True)
+                                estimate_depth_for_frames(
+                                    input_dir=paths["frames"],
+                                    output_dir=depth_meters_dir,
+                                )
+                            except Exception as e:
+                                st.warning(f"Monocular depth estimation failed: {e}")
 
                     handle_hands(paths["frames"], paths["hands"])
                 elif next_step == 1:
-                        handle_objects(paths["frames"], paths["objects"])
+                    handle_objects(paths["frames"], paths["objects"])
                 elif next_step == 2:
                     with st.spinner("Extracting trajectories..."):
                         handle_trajectory(paths["frames"], paths["hands"], paths["objects"], paths["trajectories"])
@@ -510,6 +536,9 @@ def render_pipeline_page():
                         "animations": robot_config.get("animations", {})
                     }
                 ],
+                "cart_path": cart_path.tolist() if cart_path is not None else [],
+                "grasp_idx": int(grasp_idx) if grasp_idx is not None else None,
+                "release_idx": int(release_idx) if release_idx is not None else None,
                 "images": [],
                 "timeseries": []
             }
@@ -634,17 +663,24 @@ def render_pipeline_page():
     # SPECIAL FULL-WIDTH LAYOUT FOR DMP 3D
     if rtype == "dmp3d":
         from src.streamlit_template.components.sync_viewer import sync_viewer
+        from src.streamlit_template.core.Common.robot_playback import transform_traj_for_display
         import base64
         import numpy as np
 
         timestamps = res.get("timestamps")
         dmp_dir = paths["dmp"]
-        dmp_xyz_path = dmp_dir / "object_xyz_dmp.npy"
-        
+        # Prefer skill_reuse_traj (matches robot playback), fallback to object_xyz_dmp
+        dmp_xyz_path = dmp_dir / "skill_reuse_traj.npy"
+        if not dmp_xyz_path.exists():
+            dmp_xyz_path = dmp_dir / "object_xyz_dmp.npy"
+
+        _, robot_config_dmp = _resolve_active_robot()
+
         traj_data = None
         if dmp_xyz_path.exists() and timestamps:
             try:
                 yg = np.load(str(dmp_xyz_path))
+                yg = transform_traj_for_display(yg, robot_config_dmp)
                 if len(timestamps) == len(yg):
                     traj_data = {
                         "x": yg[:, 0].tolist(),
@@ -745,32 +781,40 @@ def render_pipeline_page():
             
             if rtype == "objects" and "total_detections" in res:
                 pass # Caption removed
-            
-            encoded = encode_images(tuple(img_paths))
-            grid_key = f"viewer_grid_{selected_step}_{len(img_paths)}"
-            
-            clicked = clickable_images(
-                encoded,
-                titles=[f"Frame {i+1}" for i in range(len(encoded))],
-                key=grid_key,
-                div_style={
-                    "display": "grid",
-                    "grid-template-columns": "repeat(auto-fill, minmax(23%, 1fr))",
-                    "gap": "10px",
-                    "height": "600px",
-                    "overflow-y": "auto",
-                },
-                img_style={
-                    "width": "100%",
-                    "border-radius": "8px",
-                    "cursor": "pointer",
-                },
-            )
-            
-            if clicked > -1 and clicked != st.session_state.get("clicked_index"):
-                st.session_state.selected_frame = img_paths[clicked]
-                st.session_state.clicked_index = clicked
-                st.rerun()
+            slider_key_prefix = f"generic_pipeline_{rtype}"
+            touched = _frame_viewer.sync_timeline_touch_state(img_paths, key_prefix=slider_key_prefix)
+            _frame_viewer.render_timeline_range_control(img_paths, key_prefix=slider_key_prefix)
+
+            if touched:
+                display_paths = _frame_viewer.timeline_trim_paths(img_paths, key_prefix=slider_key_prefix)
+                if display_paths:
+                    encoded = encode_images(tuple(display_paths))
+                    grid_key = f"viewer_grid_{selected_step}_{len(display_paths)}"
+
+                    clicked = clickable_images(
+                        encoded,
+                        titles=[f"Frame {i+1}" for i in range(len(encoded))],
+                        key=grid_key,
+                        div_style={
+                            "display": "grid",
+                            "grid-template-columns": "repeat(auto-fill, minmax(23%, 1fr))",
+                            "gap": "10px",
+                            "height": "600px",
+                            "overflow-y": "auto",
+                        },
+                        img_style={
+                            "width": "100%",
+                            "border-radius": "8px",
+                            "cursor": "pointer",
+                        },
+                    )
+
+                    if clicked > -1 and clicked != st.session_state.get("clicked_index"):
+                        st.session_state.selected_frame = display_paths[clicked]
+                        st.session_state.clicked_index = clicked
+                        st.rerun()
+            else:
+                st.info("Select a frame range above to load the frames.")
         
         # TRAJECTORY 2D SUBPLOTS with timestamp slider
         elif rtype == "trajectory2d":

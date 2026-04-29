@@ -37,9 +37,9 @@ def generate_dmp_xyz(
             Z.append(_get(row, "Z", "Z_m"))
 
     T = np.array(T)
-    X = np.array(X)
-    Y = np.array(Y)
-    Z = np.array(Z)
+    X = np.nan_to_num(np.array(X), nan=0.0)
+    Y = np.nan_to_num(np.array(Y), nan=0.0)
+    Z = np.nan_to_num(np.array(Z), nan=0.0)
 
     if len(X) < smooth_window:
         raise ValueError("Trajectory too short for smoothing")

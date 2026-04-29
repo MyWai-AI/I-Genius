@@ -10,13 +10,7 @@ BASE_PATH = Path(os.environ.get('VILMA_BASE_PATH', 'data\Debug'))
 
 HAND_MODEL_PATH = Path('data/Common/ai_model/hand/hand_landmarker.task')
 _DEFAULT_OBJ_MODEL = 'data/Common/ai_model/object/best-obb.pt'
-_FALLBACK_OBJ_MODEL = '/home/vvijaykumar/vilma-agent/src/streamlit_template/models/blueball.pt'
-OBJECT_MODEL_PATH = Path(
-    os.environ.get(
-        'VILMA_OBJECT_MODEL',
-        _DEFAULT_OBJ_MODEL if Path(_DEFAULT_OBJ_MODEL).exists() else _FALLBACK_OBJ_MODEL,
-    )
-)
+OBJECT_MODEL_PATH = Path(os.environ.get('VILMA_OBJECT_MODEL', _DEFAULT_OBJ_MODEL))
 
 RGB_PATH = BASE_PATH / 'rgb'
 DEPTH_PATH = BASE_PATH / 'depth'

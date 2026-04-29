@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 from pathlib import Path
 from src.streamlit_template.new_ui.components.Common.frame_viewer import render_frame_grid_viewer
+from src.streamlit_template.new_ui.components.Common import frame_viewer as _frame_viewer
 from src.streamlit_template.new_ui.services.Generic.frame_service import extract_and_cache_frames
 from src.streamlit_template.core.Generic.extract_frames import extract_frames_from_video
 from src.streamlit_template.new_ui.components.Common.video_player import render_video_player
@@ -77,6 +78,10 @@ def render_local_page():
                         st.session_state["selected_platform"] = "svo_pipeline"
                         st.session_state["svo_base_path"] = "data/SVO"
                     else:
+                        generic_sid = st.session_state.get("generic_session_id")
+                        if generic_sid:
+                            st.session_state["svo_base_path"] = "data/Generic"
+                            st.session_state["svo_session_id"] = generic_sid
                         st.session_state["selected_platform"] = "pipeline"
                     st.session_state["pipeline_running"] = True
                     st.session_state["local_video_path"] = st.session_state.get("persistent_video_path")
@@ -597,7 +602,7 @@ def render_local_page():
                             st.session_state["local_video_path"] = str(_vout.resolve())
 
             else:
-                # --- Normal video file ---
+                # --- Normal video file: Extract frames, depth, and intrinsics ---
                 upload_dir = "data/Generic/uploads"
                 os.makedirs(upload_dir, exist_ok=True)
                 file_path = os.path.join(upload_dir, uploaded_video.name)
@@ -611,9 +616,75 @@ def render_local_page():
                     with open(file_path, "wb") as f:
                         f.write(uploaded_video.getbuffer())
 
-                if st.session_state.get("persistent_video_path") != file_path:
-                    st.session_state["persistent_video_path"] = file_path
-                    st.rerun()
+                # Generate session ID based on filename (deterministic)
+                import hashlib
+                _video_name = uploaded_video.name.rsplit('.', 1)[0]
+                _video_name_clean = "".join(c for c in _video_name if c.isalnum() or c in ('_', '-'))
+                _video_hash = hashlib.md5(uploaded_video.name.encode()).hexdigest()[:8]
+                _video_derived_sid = f"{_video_name_clean}_{_video_hash}"
+                
+                if "generic_session_id" not in st.session_state or st.session_state.get("last_uploaded_video") != uploaded_video.name:
+                    st.session_state["generic_session_id"] = _video_derived_sid
+                    st.session_state["last_uploaded_video"] = uploaded_video.name
+                
+                session_id = st.session_state["generic_session_id"]
+                generic_root = Path("data/Generic")
+                
+                # Extract frames, depth, and intrinsics (treat as complete data package)
+                should_extract = True
+                rgb_dir = generic_root / "frames" / session_id
+                intrinsics_path = generic_root / "camera" / f"{session_id}.npy"
+                
+                if rgb_dir.exists() and intrinsics_path.exists():
+                    # Check if frames already extracted
+                    frames = list(rgb_dir.glob("frame_*.png")) + list(rgb_dir.glob("frame_*.jpg"))
+                    if len(frames) > 0:
+                        should_extract = False
+                
+                if should_extract:
+                    with st.spinner(f"Extracting frames, depth, and intrinsics to {session_id}..."):
+                        try:
+                            from src.streamlit_template.new_ui.services.Generic.video_extraction_service import extract_video_frames_depth_intrinsics
+                            
+                            result = extract_video_frames_depth_intrinsics(
+                                video_path=file_path,
+                                output_root=generic_root,
+                                session_id=session_id,
+                                every_n=1,
+                                skip_depth=False,
+                            )
+                            
+                            st.success(f"✓ Extracted {result['frames_extracted']} frames with depth and intrinsics")
+                        except Exception as e:
+                            st.warning(f"Extraction failed (depth may be skipped): {e}")
+                            # Fallback: extract frames only
+                            from src.streamlit_template.new_ui.services.Generic.frame_service import extract_and_cache_frames
+                            extract_and_cache_frames(file_path)
+                
+                # Reconstruct video from extracted frames
+                video_base = generic_root / "videos" / session_id
+                video_out = video_base / f"{session_id}.mp4"
+                
+                frame_files = sorted(
+                    list(rgb_dir.glob("frame_*.png")) + list(rgb_dir.glob("frame_*.jpg"))
+                    + list(rgb_dir.glob("frame_*.jpeg"))
+                )
+                
+                if frame_files and (not video_out.exists() or video_out.stat().st_size == 0):
+                    with st.spinner(f"Reconstructing video from {len(frame_files)} frames (using mp4v codec)..."):
+                        video_base.mkdir(parents=True, exist_ok=True)
+                        try:
+                            reconstruct_video_from_frames(rgb_dir, str(video_out), fps=15.0)
+                        except Exception as e:
+                            st.warning(f"Video reconstruction had issues, but frames are still available: {e}")
+                
+                # Keep Local-page playback on the original uploaded file for browser compatibility.
+                # Reconstructed files can use codecs that some browsers reject.
+                target_path = file_path
+
+                if st.session_state.get("persistent_video_path") != target_path:
+                    st.session_state["persistent_video_path"] = target_path
+                    st.session_state["local_video_path"] = target_path
         # Note: We intentionally DO NOT clear persistent_video_path here if uploaded_video is None,
         # otherwise it will be cleared as soon as the user starts processing or switches tabs.
 
@@ -705,6 +776,20 @@ def render_local_page():
                                          "fps": 30.0, # BAG typical
                                          "metadata": None
                                      }
+                    
+                    else:
+                         # Check for Generic video frames (newly extracted)
+                         generic_id = st.session_state.get("generic_session_id")
+                         if generic_id:
+                             rgb_path = Path("data/Generic/frames") / generic_id
+                             if rgb_path.exists():
+                                 frames = sorted(list(rgb_path.glob("frame_*.png")) + list(rgb_path.glob("frame_*.jpg")))
+                                 if frames:
+                                     frames_idx = {
+                                         "frame_paths": [str(p) for p in frames],
+                                         "fps": 15.0, # Generic video typical
+                                         "metadata": None
+                                     }
 
                     # Fallback: Extract from video if not found above
                     if not frames_idx and video_path and os.path.exists(video_path):
@@ -714,7 +799,23 @@ def render_local_page():
                         paths = frames_idx["frame_paths"]
                         fps = frames_idx.get("fps", 30.0)
                         metadata = frames_idx.get("metadata")
-                        render_frame_grid_viewer(paths, fps, metadata=metadata, key_prefix="local")
+                        _sid = (
+                            st.session_state.get("svo_session_id")
+                            or st.session_state.get("bag_session_id")
+                            or st.session_state.get("generic_session_id")
+                            or "default"
+                        )
+                        slider_key_prefix = f"local_frames_{_sid}"
+                        touched = _frame_viewer.sync_timeline_touch_state(paths, key_prefix=slider_key_prefix)
+                        _frame_viewer.render_timeline_range_control(paths, key_prefix=slider_key_prefix)
+
+                        # User request: show slider first, then render frames after selecting a range.
+                        if touched:
+                            display_paths = _frame_viewer.timeline_trim_paths(paths, key_prefix=slider_key_prefix)
+                            if display_paths:
+                                render_frame_grid_viewer(display_paths, fps, metadata=metadata, key_prefix=slider_key_prefix)
+                        else:
+                            st.info("Select a frame range on the slider to load frames.")
                     else:
                         if is_svo or is_bag:
                              pass

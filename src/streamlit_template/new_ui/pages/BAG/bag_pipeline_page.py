@@ -365,6 +365,9 @@ def render_bag_pipeline_page():
                     "linkColors": robot_config.get("link_colors", {}),
                     "animations": robot_config.get("animations", {}),
                 }],
+                "cart_path": cart_path.tolist() if cart_path is not None else [],
+                "grasp_idx": int(grasp_idx) if grasp_idx is not None else None,
+                "release_idx": int(release_idx) if release_idx is not None else None,
                 "images": [],
                 "timeseries": [],
             }
@@ -485,6 +488,7 @@ def render_bag_pipeline_page():
     # --- DMP 3D (full width) ---
     if rtype == "dmp3d":
         from src.streamlit_template.components.sync_viewer import sync_viewer
+        from src.streamlit_template.core.Common.robot_playback import transform_traj_for_display
         import base64
 
         timestamps = res.get("timestamps")
@@ -496,10 +500,13 @@ def render_bag_pipeline_page():
         if not dmp_xyz_path.exists():
             dmp_xyz_path = dmp_dir / "object_xyz_dmp.npy"
 
+        _, robot_config_dmp = _resolve_active_robot()
+
         traj_data = None
         if dmp_xyz_path.exists() and timestamps:
             try:
                 yg = np.load(str(dmp_xyz_path))
+                yg = transform_traj_for_display(yg, robot_config_dmp)
                 if len(timestamps) == len(yg):
                     # Build segment + marker data for the sync_viewer
                     reach_len = res.get("reach_len", 0)
@@ -613,7 +620,7 @@ def render_bag_pipeline_page():
         res = step_results.get(step_key)
 
         if not res:
-            pass
+            return
 
         rtype = res.get("type")
 

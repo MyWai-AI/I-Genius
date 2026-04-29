@@ -2,9 +2,9 @@ import subprocess
 import os
 
 # -------- CONFIG --------
-RGB_DIR = r"C:\Users\VivekVijaykumar\Downloads\zed_python\output\rgb"
-FPS = 15
-OUT_VIDEO = r"C:\Users\VivekVijaykumar\Downloads\zed_python\output\rgb_final.mp4"
+RGB_DIR = os.environ.get("RGB_DIR", "output/rgb")
+FPS = int(os.environ.get("FPS", "15"))
+OUT_VIDEO = os.environ.get("OUT_VIDEO", "output/rgb_final.mp4")
 # ------------------------
 
 cmd = [

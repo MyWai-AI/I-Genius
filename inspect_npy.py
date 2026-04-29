@@ -1,7 +1,8 @@
 import numpy as np
 import os
 
-path = r"c:\Users\MohammadhoseinAbdoll\vilma-agent\data\SVO\frame_000000.npy"
+import sys
+path = sys.argv[1] if len(sys.argv) > 1 else "frame_000000.npy"
 if not os.path.exists(path):
     print(f"File not found: {path}")
 else:

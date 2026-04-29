@@ -30,8 +30,8 @@ if str(CORE_SVO_PATH) not in sys.path:
 # Import constants and helpers from the new validated scripts
 from _paper_config import (
     KALMAN_Q, KALMAN_R, KALMAN_AUTO_TUNE,
-    GRASP_DISTANCE_THRESHOLD_M, GRASP_STABLE_WINDOW,
-    RELEASE_MIN_MOVE_FRAMES, RELEASE_STABLE_WINDOW, RELEASE_STABLE_WINDOW_MAX_FRAC,
+    GRASP_STABLE_WINDOW,
+    RELEASE_MIN_MOVE_FRAMES, RELEASE_STABLE_WINDOW,
     GMM_COMPONENTS,
     DMP_N_BFS, DMP_ALPHA_Z, DMP_BETA_Z, DMP_ALPHA_S, DMP_REG_LAMBDA,
     DMP_LAMBDA_CANDIDATES, DMP_TUNE_SMOOTHNESS_WEIGHT,
@@ -641,8 +641,12 @@ def handle_svo_trajectory(base_path: Path, session_id: str = None):
     hand_smooth = np.load(str(hand_path))
     obj_smooth = np.load(str(obj_path))
 
-    # --- Script 04: Grasp estimation (uses pre-computed fingertip trajectories) ---
+    # --- Script 04: Grasp estimation (paper Algorithm 1) ---
+    # Paper: graspIndex = argmin distance(hand, initialPosition)
+    # where initialPosition = mean(objTraj[:start])  (first ~10% of frames)
     with st.spinner("Estimating grasp point..."):
+        from scipy.ndimage import uniform_filter1d as _uf1d
+
         tips_path = hands_dir / "hand_tips_3d_smooth.npy"
         if not tips_path.exists():
             st.error("hand_tips_3d_smooth.npy not found — re-run Step 1 (Hands).")
@@ -653,37 +657,66 @@ def handle_svo_trajectory(base_path: Path, session_id: str = None):
         hand_tips = hand_tips[:t_len]
         obj_smooth_clipped = obj_smooth[:t_len]
 
+        # Estimate object's initial (resting) position — paper: mean(objTraj[:start])
+        # Skip leading zero-padded/non-finite frames before averaging.
+        _nonzero_mask = np.any(obj_smooth_clipped != 0, axis=1) & np.isfinite(obj_smooth_clipped).all(axis=1)
+        _first_real = int(np.argmax(_nonzero_mask)) if np.any(_nonzero_mask) else 0
+        n_init = max(5, int(t_len * 0.10))
+        init_seg = obj_smooth_clipped[_first_real : _first_real + n_init]
+        finite_init = np.isfinite(init_seg).all(axis=1)
+        initial_position = init_seg[finite_init].mean(axis=0) if np.any(finite_init) else obj_smooth_clipped[_first_real]
+
+        # Distance from each hand frame to the fixed initial object position (paper Algorithm 1)
         distances = np.full(t_len, np.inf, dtype=np.float32)
         for i in range(t_len):
             tips_frame = hand_tips[i]  # (5, 3)
             valid = np.isfinite(tips_frame).all(axis=1)
             if np.any(valid):
-                dists = np.linalg.norm(tips_frame[valid] - obj_smooth_clipped[i], axis=1)
-                distances[i] = float(np.min(dists))
+                distances[i] = float(np.min(np.linalg.norm(tips_frame[valid] - initial_position, axis=1)))
+            elif np.isfinite(hand_smooth[i]).all():
+                distances[i] = float(np.linalg.norm(hand_smooth[i] - initial_position))
 
-        # Handle NaN/inf distances — fallback to hand center (matching core script 04)
         finite = np.isfinite(distances)
         if not np.any(finite):
-            hand_center = hand_smooth[:t_len]
-            center_finite = np.isfinite(hand_center).all(axis=1)
-            if np.any(center_finite):
-                distances = np.linalg.norm(hand_center - obj_smooth_clipped, axis=1).astype(np.float32)
-                finite = np.isfinite(distances)
+            raise RuntimeError("No valid hand-to-object distances found.")
+        distances[~finite] = float(np.nanmax(distances[finite]))
 
-        if np.any(finite):
-            max_finite = float(np.nanmax(distances[finite]))
-            distances[~np.isfinite(distances)] = max_finite
+        # Smooth then find the first local minimum below adaptive threshold
+        distances_smooth = _uf1d(distances.astype(np.float64), size=5).astype(np.float32)
+        _dist_thresh = max(0.03, float(np.percentile(distances_smooth[finite], 5)))
 
-        np.save(str(seg_dir / "min_fingertip_distance.npy"), distances)
+        grasp_idx = int(np.argmin(distances_smooth))  # global argmin fallback
+        for i in range(1, t_len - 1):
+            if distances_smooth[i] <= _dist_thresh:
+                if distances_smooth[i] <= distances_smooth[i - 1] and distances_smooth[i] <= distances_smooth[i + 1]:
+                    grasp_idx = i
+                    break
+                if i >= 2 and distances_smooth[i] <= distances_smooth[i - 2] * 1.1:
+                    grasp_idx = i
+                    break
 
-        THRESH, WINDOW = GRASP_DISTANCE_THRESHOLD_M, GRASP_STABLE_WINDOW
-        grasp_idx = None
-        for i in range(len(distances) - WINDOW + 1):
-            if np.all(distances[i:i+WINDOW] <= THRESH):
+        # If argmin at frame 0, initial-position estimate may be off — fall back to current-object distance
+        if grasp_idx == 0:
+            dist_current = np.full(t_len, np.inf, dtype=np.float32)
+            for i in range(t_len):
+                tips_frame = hand_tips[i]
+                valid = np.isfinite(tips_frame).all(axis=1)
+                if np.any(valid):
+                    dist_current[i] = float(np.min(np.linalg.norm(tips_frame[valid] - obj_smooth_clipped[i], axis=1)))
+            fc = np.isfinite(dist_current)
+            if np.any(fc):
+                dist_current[~fc] = float(np.nanmax(dist_current[fc]))
+                grasp_idx = int(np.argmin(_uf1d(dist_current.astype(np.float64), size=5)))
+
+        # Stability: prefer start of a stable low-distance window
+        for i in range(max(0, grasp_idx - GRASP_STABLE_WINDOW), grasp_idx + 1):
+            end = i + GRASP_STABLE_WINDOW
+            if end <= len(distances_smooth) and np.all(distances_smooth[i:end] <= distances_smooth[grasp_idx] * 1.5):
                 grasp_idx = i
                 break
-        if grasp_idx is None:
-            grasp_idx = int(np.argmin(distances))
+
+        grasp_idx = int(np.clip(grasp_idx, 0, t_len - 1))
+        np.save(str(seg_dir / "min_hand_initial_distance.npy"), distances)
         np.save(str(seg_dir / "grasp_idx.npy"), np.array(grasp_idx, dtype=np.int32))
 
     # --- Script 05: Reconstruct trajectory ---
@@ -697,11 +730,14 @@ def handle_svo_trajectory(base_path: Path, session_id: str = None):
             reconstructed[i] = hand_traj[i] + offset
         np.save(str(objects_dir / "object_3d_reconstructed.npy"), reconstructed)
 
-    # --- Script 08: GMM segmentation ---
+    # --- Script 08: GMM segmentation (paper Algorithm 1) ---
+    # Paper: last cluster = cluster whose mean is closest to finalPosition
+    # where finalPosition = mean(objTraj[end:])  (last ~10% of frames)
+    # releaseIndex = first frame in last cluster (with stability + low-velocity guard)
     with st.spinner("Running GMM segmentation (release detection)..."):
         from sklearn.mixture import GaussianMixture
 
-        gmm = GaussianMixture(n_components=GMM_COMPONENTS, covariance_type="full", random_state=0)
+        gmm = GaussianMixture(n_components=GMM_COMPONENTS, covariance_type="full", random_state=0, n_init=5)
         labels = gmm.fit_predict(reconstructed)
 
         np.save(str(seg_dir / "gmm_labels.npy"), labels)
@@ -713,65 +749,46 @@ def handle_svo_trajectory(base_path: Path, session_id: str = None):
         vel = np.concatenate([[vel[0] if len(vel) else 0.0], vel])
         np.save(str(seg_dir / "object_velocity.npy"), vel.astype(np.float32))
 
-        # Release detection — use fingertip-object distance divergence as primary signal
-        tail_window = labels[max(0, len(labels) - 20) :]
-        last_cluster = int(np.bincount(tail_window).argmax())
-        
+        # Identify last (post-placing) cluster by proximity to final position (paper-aligned)
+        n_rec = len(reconstructed)
+        n_final = max(5, int(n_rec * 0.10))
+        final_seg = reconstructed[max(0, n_rec - n_final):]
+        _nonzero_final = np.any(final_seg != 0, axis=1) & np.isfinite(final_seg).all(axis=1)
+        finite_final = _nonzero_final if np.any(_nonzero_final) else np.isfinite(final_seg).all(axis=1)
+        final_position = final_seg[finite_final].mean(axis=0) if np.any(finite_final) else reconstructed[-1]
+        last_cluster = int(np.argmin(np.linalg.norm(gmm.means_ - final_position, axis=1)))
+
+        # Sanity: cross-reference with tail-window vote
+        tail_window = labels[max(0, n_rec - 20):]
+        tail_vote_cluster = int(np.bincount(tail_window).argmax())
+        if last_cluster != tail_vote_cluster:
+            pass  # Use final-position cluster (paper-aligned); tail vote is only informational
+
         low_vel_threshold = float(np.percentile(vel, 40))
-        
         min_release_idx = min(len(reconstructed) - 1, grasp_idx + RELEASE_MIN_MOVE_FRAMES)
+        stable_window = max(2, RELEASE_STABLE_WINDOW)
 
-        # --- Method 1: Distance-based release (hand pulling away after placement) ---
-        # Strategy: find the end of the move phase (last high-velocity frame),
-        # then find where fingertip-object distance reaches a local minimum
-        # and starts rising (= hand letting go of object).
+        # Primary: stable window in last cluster + low velocity (paper Algorithm 1)
         release_idx = None
-        if distances is not None and len(distances) > min_release_idx:
-            from scipy.ndimage import uniform_filter1d
+        for i in range(min_release_idx, len(reconstructed) - stable_window + 1):
+            if (np.all(labels[i : i + stable_window] == last_cluster) and
+                    np.all(vel[i : i + stable_window] <= low_vel_threshold)):
+                release_idx = i
+                break
 
-            # Find end of move phase: last frame with velocity above 60th percentile
-            vel_thresh = float(np.percentile(vel, 60))
-            high_vel_frames = np.where(vel[grasp_idx:] > vel_thresh)[0] + grasp_idx
-            move_end = int(high_vel_frames[-1]) if len(high_vel_frames) > 0 else min_release_idx
-
-            # Search for release only AFTER the move phase ends
-            search_start = max(min_release_idx, move_end)
-            if search_start < len(distances) - 10:
-                dist_region = distances[search_start:].astype(float)
-                dist_smooth = uniform_filter1d(dist_region, size=7)
-
-                # Find the minimum distance in the post-move region
-                min_pos = int(np.argmin(dist_smooth))
-                min_dist = dist_smooth[min_pos]
-                rise_threshold = min_dist * 1.05  # 5% rise from minimum
-
-                for i in range(min_pos + 1, len(dist_smooth)):
-                    if dist_smooth[i] > rise_threshold:
-                        check_end = min(i + 5, len(dist_smooth))
-                        if np.all(dist_smooth[i:check_end] > rise_threshold):
-                            release_idx = search_start + i
-                            break
-
-        # --- Method 2: Fallback to GMM + velocity window ---
+        # Relax: drop velocity requirement, cluster membership only
         if release_idx is None:
-            adaptive_window = int(round(len(reconstructed) * RELEASE_STABLE_WINDOW_MAX_FRAC))
-            stable_window = max(2, min(max(RELEASE_STABLE_WINDOW, adaptive_window), 20))
-            
             for i in range(min_release_idx, len(reconstructed) - stable_window + 1):
-                in_last_cluster = np.all(labels[i : i + stable_window] == last_cluster)
-                low_velocity = np.all(vel[i : i + stable_window] <= low_vel_threshold)
-                if in_last_cluster and low_velocity:
+                if np.all(labels[i : i + stable_window] == last_cluster):
                     release_idx = i
                     break
-                    
-            if release_idx is None:
-                candidate = np.where(labels == last_cluster)[0]
-                candidate = candidate[candidate >= min_release_idx]
-                if candidate.size:
-                    release_idx = int(candidate[0])
-                else:
-                    release_idx = len(reconstructed) - 1
-                
+
+        # Final fallback: first frame in last cluster after min guard
+        if release_idx is None:
+            candidate = np.where(labels == last_cluster)[0]
+            candidate = candidate[candidate >= min_release_idx]
+            release_idx = int(candidate[0]) if candidate.size else len(reconstructed) - 1
+
         np.save(str(seg_dir / "release_idx.npy"), np.array(release_idx, dtype=np.int32))
 
     # --- Script 09: Extract skill phases (use HAND trajectory, not reconstructed) ---
@@ -1110,6 +1127,10 @@ def handle_svo_dmp(base_path: Path, session_id: str = None):
         full_dmp_traj = np.vstack([p for p in [reach, move] if len(p) > 0]) if (len(reach)+len(move))>0 else np.empty((0,3))
 
     np.save(str(dmp_dir / "object_xyz_dmp.npy"), full_dmp_traj)
+
+    # If skill reuse failed, promote object_xyz_dmp so the robot step can find it
+    if (reuse_traj is None or len(reuse_traj) == 0) and len(full_dmp_traj) > 0:
+        np.save(str(dmp_dir / "skill_reuse_traj.npy"), full_dmp_traj)
 
     # --- Use skill_reuse_traj for viewer (matches robot playback) ---
     if reuse_traj is not None and len(reuse_traj) > 0:

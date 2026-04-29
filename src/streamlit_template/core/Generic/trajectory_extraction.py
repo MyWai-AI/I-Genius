@@ -610,21 +610,31 @@ def extract_hand_object_trajectory(
                 depth_img = cv2.imread(str(dp), cv2.IMREAD_UNCHANGED)
 
         if depth_img is None:
-            # SVO usually at data/SVO. frames_dir is data/Generic/frames/{hash}
-            # so data is frames_dir.parent.parent
-            svo_npy = frames_dir.parent.parent / "SVO" / f"frame_{fi:06d}.npy"
-            if svo_npy.exists():
+            # Check for generic depth_meters
+            generic_npy = frames_dir.parent.parent / "depth_meters" / frames_dir.name / f"frame_{fi:06d}.npy"
+            if generic_npy.exists():
                 try:
-                    # Load depth map (meters)
-                    depth_loaded = np.load(str(svo_npy))
+                    depth_loaded = np.load(str(generic_npy))
                     depth_img = depth_loaded
-                    depth_scale_override = 1.0 # SVO is already in meters
+                    depth_scale_override = 1.0 # Model outputs in meters
                 except Exception as e:
-                    print(f"[ERROR] Failed to load SVO depth {svo_npy}: {e}")
+                    print(f"[ERROR] Failed to load Generic depth {generic_npy}: {e}")
             else:
-                # Debug only first few failures to avoid spam
-                if fi < 5:
-                    print(f"[DEBUG] SVO depth file not found: {svo_npy}")
+                # SVO usually at data/SVO. frames_dir is data/Generic/frames/{hash}
+                # so data is frames_dir.parent.parent
+                svo_npy = frames_dir.parent.parent / "SVO" / f"frame_{fi:06d}.npy"
+                if svo_npy.exists():
+                    try:
+                        # Load depth map (meters)
+                        depth_loaded = np.load(str(svo_npy))
+                        depth_img = depth_loaded
+                        depth_scale_override = 1.0 # SVO is already in meters
+                    except Exception as e:
+                        print(f"[ERROR] Failed to load SVO depth {svo_npy}: {e}")
+                else:
+                    # Debug only first few failures to avoid spam
+                    if fi < 5:
+                        print(f"[DEBUG] SVO depth file not found: {svo_npy}")
 
         # HAND POINT
 

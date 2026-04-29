@@ -7,12 +7,12 @@ import os
 from pathlib import Path
 
 # Dataset paths
-BASE_PATH = Path(os.environ.get('VILMA_BASE_PATH', '/home/vvijaykumar/vilma-agent/data/BAG Data'))
+BASE_PATH = Path(os.environ.get('VILMA_BASE_PATH', 'data/BAG'))
 BAG_FILE = Path(os.environ.get('VILMA_BAG_FILE', str(BASE_PATH / 'demo.bag')))
 
 # Models
-HAND_MODEL_PATH = Path('/home/vvijaykumar/vilma-agent/src/streamlit_template/models/hand_landmarker.task')
-OBJECT_MODEL_PATH = Path('/home/vvijaykumar/vilma-agent/src/streamlit_template/models/blueball.pt')
+HAND_MODEL_PATH = Path(os.environ.get('VILMA_HAND_MODEL', 'data/Common/ai_model/hand/hand_landmarker.task'))
+OBJECT_MODEL_PATH = Path(os.environ.get('VILMA_OBJECT_MODEL', 'data/Common/ai_model/object/best-obb.pt'))
 
 # I/O folders
 RGB_PATH = BASE_PATH / 'rgb'
