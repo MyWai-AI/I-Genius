@@ -126,3 +126,4 @@ Use this before preparing a public commit if you have been testing uploads local
 - ZED depth exported by the tutorial is stored in meters.
 - RGB and depth frame names must match exactly, for example `frame_000000.png` and `frame_000000.npy`.
 - MP4 input can be useful for quick demos, but it does not contain metric depth and is not the recommended path for precise robot-space pick-and-place.
+- The Vulcanexus Docker helper scripts in `scripts/vulcanexus/` are configured to mount from the `I-Genius` workspace path instead of legacy paths.
