@@ -4,7 +4,7 @@ set -euo pipefail
 
 CONTAINER="${DDSROUTER_CONTAINER:-vulcanexus_humble}"
 HOST_CONFIG_PATH="${HOST_CONFIG_PATH:-/tmp/ddsrouter_cloud.yaml}"
-CONTAINER_CONFIG_PATH="${CONTAINER_CONFIG_PATH:-/workspace/vilma-agent/.tmp/ddsrouter.yaml}"
+CONTAINER_CONFIG_PATH="${CONTAINER_CONFIG_PATH:-/workspace/I-Genius/.tmp/ddsrouter.yaml}"
 SETUP_FILE="${ROS_SETUP_FILE:-/opt/vulcanexus/humble/setup.bash}"
 
 if [ ! -f "$HOST_CONFIG_PATH" ]; then

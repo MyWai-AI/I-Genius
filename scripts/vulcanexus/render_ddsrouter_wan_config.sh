@@ -11,11 +11,11 @@ fi
 
 case "$MODE" in
   cloud)
-    TEMPLATE_PATH="/home/vvijaykumar/vilma-agent/scripts/vulcanexus/ddsrouter_cloud.template.yaml"
+    TEMPLATE_PATH="/home/vvijaykumar/I-Genius/scripts/vulcanexus/ddsrouter_cloud.template.yaml"
     OUTPUT_PATH="${OUTPUT_PATH:-/tmp/ddsrouter_cloud.yaml}"
     ;;
   edge)
-    TEMPLATE_PATH="/home/vvijaykumar/vilma-agent/scripts/vulcanexus/ddsrouter_edge.template.yaml"
+    TEMPLATE_PATH="/home/vvijaykumar/I-Genius/scripts/vulcanexus/ddsrouter_edge.template.yaml"
     OUTPUT_PATH="${OUTPUT_PATH:-/tmp/ddsrouter_edge.yaml}"
     ;;
   *)

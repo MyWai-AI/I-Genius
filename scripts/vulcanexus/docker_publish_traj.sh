@@ -3,8 +3,8 @@
 set -euo pipefail
 
 CONTAINER="${VULCANEXUS_CONTAINER:-vulcanexus_humble}"
-HOST_WORKSPACE="${HOST_WORKSPACE:-/home/vvijaykumar/vilma-agent}"
-CONTAINER_WORKSPACE="${CONTAINER_WORKSPACE:-/workspace/vilma-agent}"
+HOST_WORKSPACE="${HOST_WORKSPACE:-/home/vvijaykumar/I-Genius}"
+CONTAINER_WORKSPACE="${CONTAINER_WORKSPACE:-/workspace/I-Genius}"
 CSV_RELATIVE_PATH="${CSV_RELATIVE_PATH:-data/BAG Data/dmp/skill_reuse_traj.csv}"
 TOPIC="${TOPIC:-/learned_trajectory}"
 FRAME_ID="${FRAME_ID:-camera_frame}"
@@ -17,7 +17,7 @@ QOS_DURABILITY="${QOS_DURABILITY:-volatile}"
 HOST_CSV_PATH="$HOST_WORKSPACE/$CSV_RELATIVE_PATH"
 CONTAINER_CSV_PATH="$CONTAINER_WORKSPACE/$CSV_RELATIVE_PATH"
 CONTAINER_SCRIPT_PATH="$CONTAINER_WORKSPACE/scripts/vulcanexus/traj_pose_array_pub.py"
-FALLBACK_CONTAINER_DIR="/tmp/vilma-agent-vulcanexus-pub"
+FALLBACK_CONTAINER_DIR="/tmp/I-Genius-vulcanexus-pub"
 
 if [ ! -f "$HOST_CSV_PATH" ]; then
   echo "Host CSV file not found: $HOST_CSV_PATH" >&2

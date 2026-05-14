@@ -4,7 +4,7 @@ set -euo pipefail
 
 CONTAINER="${VULCANEXUS_CONTAINER:-vulcanexus_humble}"
 HOST_XML_PATH="${HOST_XML_PATH:-/tmp/fastdds_server_configuration.xml}"
-CONTAINER_XML_PATH="${CONTAINER_XML_PATH:-/workspace/vilma-agent/.tmp/fastdds_server_configuration.xml}"
+CONTAINER_XML_PATH="${CONTAINER_XML_PATH:-/workspace/I-Genius/.tmp/fastdds_server_configuration.xml}"
 ROS_SETUP_FILE="${ROS_SETUP_FILE:-/opt/vulcanexus/humble/setup.bash}"
 
 if [ ! -f "$HOST_XML_PATH" ]; then

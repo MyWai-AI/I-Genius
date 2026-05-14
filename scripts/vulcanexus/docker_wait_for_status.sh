@@ -3,15 +3,15 @@
 set -euo pipefail
 
 CONTAINER="${VULCANEXUS_SUB_CONTAINER:-vulcanexus_humble}"
-HOST_WORKSPACE="${HOST_WORKSPACE:-/home/vvijaykumar/vilma-agent}"
-CONTAINER_WORKSPACE="${CONTAINER_WORKSPACE:-/workspace/vilma-agent}"
+HOST_WORKSPACE="${HOST_WORKSPACE:-/home/vvijaykumar/I-Genius}"
+CONTAINER_WORKSPACE="${CONTAINER_WORKSPACE:-/workspace/I-Genius}"
 TOPIC="${TOPIC:-/trajectory_status}"
 SETUP_FILE="${ROS_SETUP_FILE:-/opt/vulcanexus/humble/setup.bash}"
 NODE_NAME="${NODE_NAME:-traj_status_sub}"
 TIMEOUT_SEC="${TIMEOUT_SEC:-8}"
 
 CONTAINER_SCRIPT_PATH="$CONTAINER_WORKSPACE/scripts/vulcanexus/traj_status_sub.py"
-FALLBACK_CONTAINER_DIR="/tmp/vilma-agent-vulcanexus-status"
+FALLBACK_CONTAINER_DIR="/tmp/I-Genius-vulcanexus-status"
 
 if [ ! -f "$HOST_WORKSPACE/scripts/vulcanexus/traj_status_sub.py" ]; then
   echo "Host status subscriber script not found: $HOST_WORKSPACE/scripts/vulcanexus/traj_status_sub.py" >&2

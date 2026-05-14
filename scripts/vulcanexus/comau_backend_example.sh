@@ -19,6 +19,6 @@ production pattern is:
 2. A host-side Comau adapter validates/remaps that artifact if needed.
 3. The existing Noetic Comau driver / replay path executes the validated result.
 
-Do not put Comau-specific execution logic into vilma-agent.
+Do not put Comau-specific execution logic into I-Genius.
 Keep it in the robot-side backend.
 EOF
