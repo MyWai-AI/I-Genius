@@ -21,11 +21,11 @@ DEFAULT_ROS_DOMAIN_ID = 42
 DEFAULT_VULCANEXUS_TOPIC = "/learned_trajectory"
 DEFAULT_VULCANEXUS_STATUS_TOPIC = "/trajectory_status"
 DEFAULT_VULCANEXUS_FRAME_ID = "camera_frame"
-DEFAULT_VULCANEXUS_DISCOVERY_SERVER = "192.168.0.10:14520"
-DEFAULT_VULCANEXUS_REPEAT = 40
-DEFAULT_VULCANEXUS_RATE_HZ = 2.0
+DEFAULT_VULCANEXUS_DISCOVERY_SERVER = ""
+DEFAULT_VULCANEXUS_REPEAT = 10000
+DEFAULT_VULCANEXUS_RATE_HZ = 1.0
 DEFAULT_VULCANEXUS_WAIT_FOR_SUBSCRIBER_SEC = 15.0
-DEFAULT_VULCANEXUS_STATUS_WAIT_SEC = 8.0
+DEFAULT_VULCANEXUS_STATUS_WAIT_SEC = 0.0
 
 
 def _repo_root() -> Path:
@@ -74,6 +74,7 @@ def get_default_vulcanexus_publish_settings() -> Dict[str, object]:
         "topic": DEFAULT_VULCANEXUS_TOPIC,
         "discovery_server": get_default_vulcanexus_discovery_server(),
         "repeat_count": int(os.getenv("VILMA_VULCANEXUS_REPEAT", str(DEFAULT_VULCANEXUS_REPEAT))),
+        "rate_hz": float(os.getenv("VILMA_VULCANEXUS_RATE_HZ", str(DEFAULT_VULCANEXUS_RATE_HZ))),
         "status_topic": DEFAULT_VULCANEXUS_STATUS_TOPIC,
         "status_wait_sec": float(
             os.getenv("VILMA_VULCANEXUS_STATUS_WAIT_SEC", str(DEFAULT_VULCANEXUS_STATUS_WAIT_SEC))
@@ -81,7 +82,7 @@ def get_default_vulcanexus_publish_settings() -> Dict[str, object]:
     }
 
 
-def _write_cartesian_csv(csv_path: Path, cart_path) -> np.ndarray:
+def _write_cartesian_csv(csv_path: Path, cart_path, metadata_rows=None) -> np.ndarray:
     arr = np.asarray(cart_path, dtype=float)
     if arr.ndim != 2 or arr.shape[1] != 3:
         raise ValueError(f"cart_path must have shape (N, 3); got {arr.shape!r}")
@@ -95,11 +96,44 @@ def _write_cartesian_csv(csv_path: Path, cart_path) -> np.ndarray:
     if arr.shape[0] == 0:
         raise ValueError("cart_path has no finite waypoints after filtering.")
 
+    normalized_metadata = None
+    if metadata_rows is not None:
+        normalized_metadata = list(metadata_rows)
+        if len(normalized_metadata) != arr.shape[0]:
+            original_arr = np.asarray(cart_path, dtype=float)
+            if original_arr.ndim == 2:
+                finite_indices = [
+                    i for i, row in enumerate(original_arr.tolist())
+                    if all(np.isfinite(v) for v in row)
+                ]
+                if len(finite_indices) == arr.shape[0] and len(normalized_metadata) == len(original_arr):
+                    normalized_metadata = [normalized_metadata[i] for i in finite_indices]
+            if len(normalized_metadata) != arr.shape[0]:
+                logger.warning(
+                    "metadata_rows length %d does not match waypoint count %d — "
+                    "pushing without metadata.",
+                    len(normalized_metadata), arr.shape[0],
+                )
+                normalized_metadata = None
+
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.writer(handle)
-        writer.writerow(["x", "y", "z"])
-        writer.writerows(arr.tolist())
+        if normalized_metadata is None:
+            writer = csv.writer(handle)
+            writer.writerow(["x", "y", "z"])
+            writer.writerows(arr.tolist())
+        else:
+            fieldnames = ["x", "y", "z", "x_mm", "y_mm", "z_mm", "event", "source_index", "label"]
+            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer.writeheader()
+            for point, metadata in zip(arr.tolist(), normalized_metadata):
+                row = {
+                    "x": point[0], "y": point[1], "z": point[2],
+                    "x_mm": metadata.get("x_mm", ""), "y_mm": metadata.get("y_mm", ""),
+                    "z_mm": metadata.get("z_mm", ""), "event": metadata.get("event", ""),
+                    "source_index": metadata.get("source_index", ""), "label": metadata.get("label", ""),
+                }
+                writer.writerow(row)
     return arr
 
 
@@ -348,6 +382,8 @@ def publish_cartesian_trajectory_vulcanexus(
     wait_for_subscriber_sec: float = DEFAULT_VULCANEXUS_WAIT_FOR_SUBSCRIBER_SEC,
     frame_id: str = DEFAULT_VULCANEXUS_FRAME_ID,
     container_name: Optional[str] = None,
+    metadata_rows=None,
+    metadata_source: Optional[str] = None,
 ) -> Tuple[bool, str]:
     """
     Publish a Cartesian trajectory through the existing Vulcanexus LAN helper.
@@ -364,7 +400,7 @@ def publish_cartesian_trajectory_vulcanexus(
     csv_path = runtime_dir / "last_cartesian_push.csv"
 
     try:
-        arr = _write_cartesian_csv(csv_path, cart_path)
+        arr = _write_cartesian_csv(csv_path, cart_path, metadata_rows=metadata_rows)
     except Exception as exc:
         return False, f"Could not prepare Cartesian trajectory for Vulcanexus publish: {exc}"
 
@@ -422,6 +458,9 @@ def publish_cartesian_trajectory_vulcanexus(
         f"Published {arr.shape[0]} Cartesian waypoints via Vulcanexus LAN on "
         f"'{topic_name}' (domain {domain_id}). {summary}"
     )
+    if metadata_rows is not None:
+        source_note = f" from {metadata_source}" if metadata_source else ""
+        msg += f" Metadata sidecar enabled{source_note}."
     if status_waiter is not None:
         ok, status_msg, status_payload = _finish_vulcanexus_status_waiter(status_waiter)
         if ok:

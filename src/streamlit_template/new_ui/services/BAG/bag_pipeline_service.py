@@ -314,10 +314,19 @@ def handle_bag_hands(base_path: Path, session_id: str = None):
 # STEP 2: OBJECTS (Scripts 03 + 04)
 # ========================================================================
 
-def handle_bag_objects(base_path: Path, session_id: str = None):
+def handle_bag_objects(
+    base_path: Path,
+    session_id: str = None,
+    model_path: str = None,
+    confidence_threshold: float = 0.25,
+    max_area_pct: float = 100.0,
+    min_area_pct: float = 0.0,
+    tracking_bbox_xyxy=None,
+    tracking_label: str = None,
+):
     """Step 2: Detect Objects (YOLO)."""
     _init_step_results()
-    
+
     status_ph = st.empty()
     status_ph.info("⏳ Detect Objects: Initializing...")
 
@@ -357,7 +366,14 @@ def handle_bag_objects(base_path: Path, session_id: str = None):
             width=int(intr_raw.get("width", -1)), height=int(intr_raw.get("height", -1)),
         )
 
-        model = YOLO("data/Common/ai_model/object/blueball.pt")
+        # Resolve model: use provided path, fall back to cached or official YOLO
+        _resolved_model = (model_path or "").strip() or "data/Common/ai_model/object/blueball.pt"
+        if not Path(_resolved_model).exists() and "/" not in _resolved_model and "\\" not in _resolved_model:
+            pass  # official YOLO model name, ultralytics will download
+        elif not Path(_resolved_model).exists():
+            _resolved_model = "yolov8n.pt"  # safe fallback
+        model = YOLO(_resolved_model)
+        _conf_thresh = max(0.01, min(0.95, float(confidence_threshold)))
         trajectory_3d = []
 
         annotated_dir = objects_dir / "annotated"
@@ -369,7 +385,7 @@ def handle_bag_objects(base_path: Path, session_id: str = None):
             depth_path = depth_dir / fname.name.replace(".png", ".npy")
             bgr = cv2.imread(str(fname))
             depth = np.load(str(depth_path))
-            results = model(bgr, verbose=False)[0]
+            results = model(bgr, verbose=False, conf=_conf_thresh)[0]
 
             detected = False
             if results.obb is not None and len(results.obb) > 0:

@@ -2,6 +2,7 @@
 SVO Pipeline Page - Dedicated page for running the SVO processing pipeline.
 Same stepper UI as BAG pipeline, using SVO-specific service handlers.
 """
+import hashlib
 import streamlit as st
 import os
 from pathlib import Path
@@ -25,6 +26,57 @@ from src.streamlit_template.new_ui.services.SVO.svo_pipeline_service import (
     handle_svo_robot,
 )
 from src.streamlit_template.ui.helpers import encode_images
+
+
+def _video_tracking_hashes(*paths) -> list:
+    hashes = []
+    seen = set()
+    for raw_path in paths:
+        if not raw_path:
+            continue
+        variants = [str(raw_path)]
+        try:
+            variants.append(str(Path(raw_path).resolve()))
+        except Exception:
+            pass
+        for variant in variants:
+            if not variant:
+                continue
+            digest = hashlib.md5(variant.encode()).hexdigest()[:8]
+            if digest not in seen:
+                seen.add(digest)
+                hashes.append(digest)
+    return hashes
+
+
+def _selected_tracking_for_session(sess):
+    """Return (bbox_xyxy, label, detection_index) matched to the current session, or (None, None, None)."""
+    current_hashes = set(_video_tracking_hashes(
+        st.session_state.get("local_video_path"),
+        st.session_state.get("persistent_video_path"),
+        st.session_state.get("selected_tracking_source_path"),
+    ))
+    if sess:
+        current_hashes.add(sess)
+
+    source_hashes = set(st.session_state.get("selected_tracking_source_hashes") or [])
+    source_hash = st.session_state.get("selected_tracking_source_hash")
+    if source_hash:
+        source_hashes.add(source_hash)
+
+    shared_bbox = st.session_state.get("selected_tracking_bbox_xyxy")
+    source_matches = bool(current_hashes.intersection(source_hashes))
+    if source_matches and isinstance(shared_bbox, (list, tuple)) and len(shared_bbox) == 4:
+        return list(shared_bbox), st.session_state.get("selected_tracking_label"), st.session_state.get("selected_tracking_detection_index")
+
+    for hash_key in [sess, *current_hashes]:
+        if not hash_key:
+            continue
+        candidate_bbox = st.session_state.get(f"tracking_bbox_{hash_key}")
+        if isinstance(candidate_bbox, (list, tuple)) and len(candidate_bbox) == 4:
+            return list(candidate_bbox), st.session_state.get("selected_tracking_label"), st.session_state.get("selected_tracking_detection_index")
+
+    return None, None, None
 
 
 def _get_svo_data_paths():
@@ -216,16 +268,59 @@ def render_svo_pipeline_page():
                 sess = paths.get("session_id")
 
                 if next_step == 0:
-                    st.session_state.pipeline_logs = [] # Clear logs on new run
+                    st.session_state.pipeline_logs = []  # Clear logs on new run
                     res = handle_svo_hands(base, session_id=sess)
                 elif next_step == 1:
-                    res = handle_svo_objects(base, session_id=sess)
+                    _selected_bbox, _selected_label, _selected_det_index = _selected_tracking_for_session(sess)
+                    if _selected_bbox is None and isinstance(
+                        st.session_state.get("selected_tracking_bbox_xyxy"), (list, tuple)
+                    ):
+                        st.error(
+                            "A target object is selected, but it could not be matched to this "
+                            "pipeline session. Go back to Local, reselect the target object, "
+                            "then run the pipeline again."
+                        )
+                        statuses[next_step] = "error"
+                        st.session_state.pipeline_statuses = statuses
+                        st.session_state.pipeline_running = False
+                        st.rerun()
+                        return
+                    _selected_model = st.session_state.get("selected_object_model_path")
+                    _conf = float(st.session_state.get("selected_object_conf_threshold", 0.25))
+                    _max_area = float(st.session_state.get("selected_object_max_area_pct", 100.0))
+                    _min_area = float(st.session_state.get("selected_object_min_area_pct", 0.0))
+                    _size_ratio = float(st.session_state.get("selected_object_bbox_size_ratio", 4.0))
+                    res = handle_svo_objects(
+                        base,
+                        session_id=sess,
+                        model_path=_selected_model,
+                        tracking_bbox_xyxy=_selected_bbox,
+                        tracking_label=_selected_label,
+                        tracking_detection_index=_selected_det_index,
+                        confidence_threshold=_conf,
+                        max_area_pct=_max_area,
+                        min_area_pct=_min_area,
+                        bbox_size_ratio=_size_ratio,
+                    )
                 elif next_step == 2:
                     res = handle_svo_trajectory(base, session_id=sess)
                 elif next_step == 3:
                     res = handle_svo_dmp(base, session_id=sess)
                 elif next_step == 4:
                     u_path, r_config = _resolve_active_robot()
+                    # Merge custom transform params from "Generate New Trajectory" button
+                    _custom = st.session_state.pop("svo_gen_traj_custom_params", None)
+                    if _custom:
+                        r_config = dict(r_config or {})
+                        _off = _custom.get("offset", [0.0, 0.0, 0.0])
+                        _sc = _custom.get("scale", [1.0, 1.0, 1.0])
+                        _rz = _custom.get("rotation_z_deg", 0.0)
+                        _base_off = r_config.get("dmp_offset", [0.4, 0.0, 0.2])
+                        _base_sc = r_config.get("dmp_scale", [0.5, 0.5, 0.5])
+                        _base_rz = r_config.get("dmp_rotation_z", 90.0)
+                        r_config["dmp_offset"] = [_base_off[j] + _off[j] for j in range(3)]
+                        r_config["dmp_scale"] = [_base_sc[j] * _sc[j] for j in range(3)]
+                        r_config["dmp_rotation_z"] = _base_rz + _rz
                     res = handle_svo_robot(base, session_id=sess, urdf_path=u_path, robot_config=r_config)
 
                 if res is None:
@@ -414,6 +509,31 @@ def render_svo_pipeline_page():
                     save_animation,
                 )
                 with st.popover("Action", use_container_width=False):
+                    # --- Generate New Trajectory (base frame only, no live stream) ---
+                    st.markdown("#### Generate New Trajectory")
+                    _gen_offset_x = st.slider("Offset X (m)", -0.5, 0.5, 0.0, 0.01, key="svo_gen_offset_x")
+                    _gen_offset_y = st.slider("Offset Y (m)", -0.5, 0.5, 0.0, 0.01, key="svo_gen_offset_y")
+                    _gen_offset_z = st.slider("Offset Z (m)", -0.5, 0.5, 0.0, 0.01, key="svo_gen_offset_z")
+                    _gen_scale_x = st.slider("Scale X", 0.1, 3.0, 1.0, 0.05, key="svo_gen_scale_x")
+                    _gen_scale_y = st.slider("Scale Y", 0.1, 3.0, 1.0, 0.05, key="svo_gen_scale_y")
+                    _gen_scale_z = st.slider("Scale Z", 0.1, 3.0, 1.0, 0.05, key="svo_gen_scale_z")
+                    _gen_rot_z = st.slider("Rotation Z (deg)", -180.0, 180.0, 0.0, 1.0, key="svo_gen_rot_z")
+                    if st.button("🔄 Generate New Trajectory", key="svo_gen_new_traj"):
+                        _sess = paths.get("session_id")
+                        _, _r_config = _resolve_active_robot()
+                        _custom_params = {
+                            "offset": [_gen_offset_x, _gen_offset_y, _gen_offset_z],
+                            "scale": [_gen_scale_x, _gen_scale_y, _gen_scale_z],
+                            "rotation_z_deg": _gen_rot_z,
+                        }
+                        st.session_state["svo_gen_traj_custom_params"] = _custom_params
+                        st.session_state["pipeline_running"] = True
+                        statuses = st.session_state.get("pipeline_statuses", ["pending"] * 5)
+                        statuses[4] = "running"
+                        st.session_state["pipeline_statuses"] = statuses
+                        st.rerun()
+
+                    st.markdown("---")
                     st.markdown("#### Save Animation")
                     anim_name = st.text_input("Animation name", value="PipelineAction", key="svo_anim_name")
                     if st.button("Save Animation", key="svo_save_anim"):
@@ -531,6 +651,7 @@ def render_svo_pipeline_page():
                     # Build segment + marker data for the sync_viewer
                     reach_len = res.get("reach_len", 0)
                     move_len = res.get("move_len", 0)
+                    post_release_len = res.get("post_release_len", 0)
                     total = len(yg)
 
                     grasp_idx = res.get("grasp_idx", reach_len)
@@ -543,9 +664,9 @@ def render_svo_pipeline_page():
                     # Move (Green): grasp_idx+1 .. release_idx-1
                     if move_len > 0:
                         segments.append({"startIdx": grasp_idx + 1, "endIdx": release_idx - 1, "color": "#34A853", "label": "Move"})
-                    # Post-Release (Orange): release_idx .. end
-                    if release_idx < total:
-                        segments.append({"startIdx": release_idx, "endIdx": total - 1, "color": "#FF9800", "label": "Post-Release"})
+                    # Post-Release hand motion (Orange): after release marker .. end
+                    if post_release_len > 0 and release_idx + 1 < total:
+                        segments.append({"startIdx": release_idx + 1, "endIdx": total - 1, "color": "#FF9800", "label": "Post-Release"})
 
                     markers = [
                         {"label": "Start", "index": 0, "color": "#00cc96"},
@@ -554,10 +675,14 @@ def render_svo_pipeline_page():
                         {"label": "End", "index": total - 1, "color": "#9C27B0"},
                     ]
 
+                    # Invert Z for display so the robot arm lifts visually upward
+                    z_vals = np.asarray(yg[:, 2], dtype=np.float64)
+                    z_display = (float(np.nanmin(z_vals)) + float(np.nanmax(z_vals)) - z_vals).tolist()
+
                     traj_data = {
                         "x": yg[:, 0].tolist(),
                         "y": yg[:, 1].tolist(),
-                        "z": yg[:, 2].tolist(),
+                        "z": z_display,
                         "t": timestamps,
                         "segments": segments,
                         "markers": markers,

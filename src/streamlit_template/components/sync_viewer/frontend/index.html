@@ -13,14 +13,10 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.6.14/dist/vuetify.js"></script>
 
-    <!-- MYWAI Viewer Build -->
-    <link href="./mywaiviewer.css" rel="stylesheet">
-    <script src="./mywaiviewer.umd.js"></script>
-
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
 
-    <!-- Three.js + URDFLoader robot viewer (fallback when mywaiviewer bundle is absent) -->
+    <!-- Three.js + URDFLoader robot viewer -->
     <script type="importmap">
     {
       "imports": {
@@ -378,14 +374,8 @@
                 </div>
                 <div class="col-viewer">
 
-                    <!-- MODE: ROBOT with bundle -->
-                    <component v-if="isRobotBundleAvailable && !isDmpMode && viewerData" is="mywaiviewer"
-                        :viewer-data="viewerData" :enable-algo="false" :backend-end-point="null" ref="viewer"
-                        style="width:100%; height:100%; display:block;">
-                    </component>
-
                     <!-- Always in DOM so Plotly can target them; shown/hidden via display -->
-                    <!-- MODE: ROBOT fallback (bundle unavailable) -->
+                    <!-- MODE: ROBOT (Three.js fallback) -->
                     <div id="robot-fallback-chart"
                         :style="{ display: (!isRobotBundleAvailable && !isDmpMode && viewerData) ? 'block' : 'none', width: '100%', height: '100%' }">
                     </div>
@@ -425,18 +415,6 @@
         };
 
         // Initialize Vue
-        // DEBUG: Check if window.mywaiviewer exists
-        console.log("MyWAIViewer Global:", window.mywaiviewer);
-
-        // Manual Registration if UMD library exposes the component directly or as a plugin
-        if (window.mywaiviewer && window.mywaiviewer.DynamicViewer) {
-            // It's a library exporting multiple components
-            Vue.component('mywaiviewer', window.mywaiviewer.DynamicViewer);
-        } else if (window.mywaiviewer) {
-            // Fallback if it was default exported
-            Vue.component('mywaiviewer', window.mywaiviewer);
-        }
-
         var app = new Vue({
             el: '#app',
             vuetify: new Vuetify({ theme: { dark: true } }),
@@ -446,7 +424,7 @@
                 ready: false,
                 lastSeekTime: 0,
                 videoDuration: 0,
-                isRobotBundleAvailable: !!(window.mywaiviewer),
+                isRobotBundleAvailable: false,
             },
             computed: {
                 layoutStyle() {
@@ -483,13 +461,7 @@
 
                     // ROBOT SYNC
                     if (!this.isDmpMode) {
-                        if (this.isRobotBundleAvailable) {
-                            if (window.mywaiViewer && window.mywaiViewer.seek) {
-                                window.mywaiViewer.seek(t);
-                            }
-                        } else {
-                            this.updateRobotFallbackMarker(t);
-                        }
+                        this.updateRobotFallbackMarker(t);
                     }
                     // DMP SYNC
                     else {

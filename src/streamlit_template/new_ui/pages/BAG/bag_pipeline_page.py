@@ -210,7 +210,16 @@ def render_bag_pipeline_page():
                 if next_step == 0:
                     handle_bag_hands(base, session_id=sess)
                 elif next_step == 1:
-                    handle_bag_objects(base, session_id=sess)
+                    handle_bag_objects(
+                        base,
+                        session_id=sess,
+                        model_path=st.session_state.get("selected_object_model_path"),
+                        confidence_threshold=float(st.session_state.get("selected_object_conf_threshold", 0.25)),
+                        max_area_pct=float(st.session_state.get("selected_object_max_area_pct", 100.0)),
+                        min_area_pct=float(st.session_state.get("selected_object_min_area_pct", 0.0)),
+                        tracking_bbox_xyxy=st.session_state.get("selected_tracking_bbox_xyxy"),
+                        tracking_label=st.session_state.get("selected_tracking_label"),
+                    )
                 elif next_step == 2:
                     handle_bag_trajectory(base, session_id=sess)
                 elif next_step == 3:
