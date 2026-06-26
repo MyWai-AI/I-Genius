@@ -186,8 +186,9 @@ def extract_bag_frames(
 
 def reconstruct_video_from_frames(frames_dir: Path, output_path: str, fps: float = 30.0):
     """
-    Reconstruct an MP4 video from extracted RGB frames.
-    Tries H.264 codec first (browser-compatible), falls back to mp4v.
+    Reconstruct a browser-compatible H.264 MP4 from extracted RGB frames.
+    Uses ffmpeg (preferred, produces H.264 which browsers can play).
+    Falls back to OpenCV mp4v if ffmpeg is unavailable.
 
     Args:
         frames_dir: Directory containing frame_XXXXX.png/jpg files.
@@ -195,9 +196,10 @@ def reconstruct_video_from_frames(frames_dir: Path, output_path: str, fps: float
         fps: Frames per second for the output video.
     """
     import cv2
+    import subprocess
+    import shutil
 
     frames_dir = Path(frames_dir)
-    # Support both PNG and JPG frames; sort by name for correct ordering
     frame_files = sorted(
         list(frames_dir.glob("frame_*.png")) + list(frames_dir.glob("frame_*.jpg"))
         + list(frames_dir.glob("frame_*.jpeg")),
@@ -206,17 +208,87 @@ def reconstruct_video_from_frames(frames_dir: Path, output_path: str, fps: float
     if not frame_files:
         return
 
-    # Ensure parent directory exists
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    output_suffix = Path(output_path).suffix.lower()
 
-    # Read first frame to get dimensions
+    if output_suffix == ".webm":
+        first_frame = cv2.imread(str(frame_files[0]))
+        if first_frame is None:
+            return
+        h, w = first_frame.shape[:2]
+        writer = None
+        for fourcc_str in ["VP80", "VP90"]:
+            writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*fourcc_str), fps, (w, h))
+            if writer.isOpened():
+                break
+            writer.release()
+            writer = None
+        if writer is None:
+            return
+        writer.write(first_frame)
+        for f in frame_files[1:]:
+            frame = cv2.imread(str(f))
+            if frame is not None:
+                writer.write(frame)
+        writer.release()
+        return
+
+    # --- Attempt 1: imageio-ffmpeg (bundled ffmpeg, cross-platform H.264) ---
+    try:
+        import imageio
+        import numpy as _np_io
+        writer = imageio.get_writer(
+            output_path,
+            fps=fps,
+            codec="libx264",
+            pixelformat="yuv420p",
+            output_params=["-movflags", "+faststart"],
+            macro_block_size=16,
+        )
+        for f in frame_files:
+            frame_rgb = imageio.imread(str(f))
+            if frame_rgb is not None:
+                writer.append_data(frame_rgb)
+        writer.close()
+        if Path(output_path).exists() and Path(output_path).stat().st_size > 0:
+            return
+    except Exception:
+        pass
+
+    # --- Attempt 2: system ffmpeg via concat list ---
+    if shutil.which("ffmpeg"):
+        try:
+            import tempfile
+            with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as flist:
+                for f in frame_files:
+                    flist.write(f"file '{f.resolve()}'\n")
+                    flist.write(f"duration {1.0 / fps}\n")
+                flist_path = flist.name
+            result = subprocess.run(
+                [
+                    "ffmpeg", "-y",
+                    "-f", "concat", "-safe", "0",
+                    "-i", flist_path,
+                    "-c:v", "libx264",
+                    "-pix_fmt", "yuv420p",
+                    "-movflags", "+faststart",
+                    output_path,
+                ],
+                capture_output=True,
+                timeout=300,
+            )
+            Path(flist_path).unlink(missing_ok=True)
+            if result.returncode == 0 and Path(output_path).exists() and Path(output_path).stat().st_size > 0:
+                return
+        except Exception:
+            pass
+
+    # --- Attempt 2: OpenCV fallback (mp4v — may not play in browser) ---
     first_frame = cv2.imread(str(frame_files[0]))
     if first_frame is None:
         return
     h, w = first_frame.shape[:2]
 
-    # Try mp4v or MJPEG (H264/avc1 may require unavailable OpenH264 library)
-    # Start with mp4v which is most compatible
     writer = None
     for fourcc_str in ["mp4v", "MJPG", "XVID"]:
         fourcc = cv2.VideoWriter_fourcc(*fourcc_str)

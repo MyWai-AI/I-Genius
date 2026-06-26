@@ -88,7 +88,7 @@ class StepperBar:
 
                 if clickable:
                     # CLICKABLE MODE: Render the REAL interactive element as the button
-                    if st.button(str(i + 1), key=f"{key_prefix}vilma_step_{i}", help=label, use_container_width=False):
+                    if st.button(str(i + 1), key=f"{key_prefix}vilma_step_{i}", help=label, width="content"):
                         clicked = i
 
                     # Render textual label below the circular button

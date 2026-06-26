@@ -16,6 +16,8 @@ if str(_project_root) not in sys.path:
 
 from src.streamlit_template.new_ui.Common.styles import COLORS, inject_custom_css, get_logo_base64
 from src.streamlit_template.new_ui.pages.Common.local_page import render_local_page
+from src.streamlit_template.new_ui.pages.Common.fiware_page import render_fiware_page
+from src.streamlit_template.new_ui.pages.Common.skill_reuse_page import render_skill_reuse_page
 from src.streamlit_template.new_ui.pages.Generic.pipeline_page import render_pipeline_page
 from src.streamlit_template.new_ui.pages.BAG.bag_pipeline_page import render_bag_pipeline_page
 from src.streamlit_template.new_ui.pages.SVO.svo_pipeline_page import render_svo_pipeline_page
@@ -28,6 +30,13 @@ OPTIONS = [
         "logo": "LOCAL.png",
         "description": "Process local video, BAG, SVO, or prepared ZIP inputs and generate reusable robot trajectories.",
         "color": COLORS["accent"],
+    },
+    {
+        "id": "fiware",
+        "title": "FIWARE Integration",
+        "logo": "LOCAL.png",
+        "description": "Northbound NGSI-LD execution tracking via Orion-LD. Register and monitor trajectory executions for IT-level observability (ARISE alignment).",
+        "color": COLORS.get("secondary", COLORS["accent"]),
     },
 ]
 
@@ -44,26 +53,26 @@ def render_landing_page() -> None:
         unsafe_allow_html=True,
     )
 
-    empty_col1, col1, empty_col2 = st.columns([2, 3, 2], gap="medium")
-    with col1:
-        opt = OPTIONS[0]
-        logo_b64 = get_logo_base64(opt["logo"])
-        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="option-logo">' if logo_b64 else ""
-        st.markdown(
-            f"""
-            <div class="card-wrapper">
-            <div class="option-card">
-            <div class="logo-container">{logo_html}</div>
-            <div class="option-title">{opt['title']}</div>
-            <div class="option-description">{opt['description']}</div>
-            </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("Start Local Workspace", key="btn_local", width="stretch"):
-            st.session_state["selected_platform"] = "local"
-            st.rerun()
+    cols = st.columns([1, 1], gap="medium")
+    for idx, opt in enumerate(OPTIONS):
+        with cols[idx % 2]:
+            logo_b64 = get_logo_base64(opt["logo"])
+            logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="option-logo">' if logo_b64 else ""
+            st.markdown(
+                f"""
+                <div class="card-wrapper">
+                <div class="option-card">
+                <div class="logo-container">{logo_html}</div>
+                <div class="option-title">{opt['title']}</div>
+                <div class="option-description">{opt['description']}</div>
+                </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.button(f"Open {opt['title']}", key=f"btn_{opt['id']}", width="stretch"):
+                st.session_state["selected_platform"] = opt["id"]
+                st.rerun()
 
 
 def main() -> None:
@@ -81,12 +90,16 @@ def main() -> None:
 
     if selected_platform == "local":
         render_local_page()
+    elif selected_platform == "fiware":
+        render_fiware_page()
     elif selected_platform == "pipeline":
         render_pipeline_page()
     elif selected_platform == "bag_pipeline":
         render_bag_pipeline_page()
     elif selected_platform == "svo_pipeline":
         render_svo_pipeline_page()
+    elif selected_platform == "skill_reuse":
+        render_skill_reuse_page()
     else:
         render_landing_page()
 

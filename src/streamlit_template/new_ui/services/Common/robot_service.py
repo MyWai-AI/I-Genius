@@ -12,25 +12,40 @@ from typing import Optional, Dict, Any, List, Union
 
 logger = logging.getLogger(__name__)
 
-def resolve_robot_path(base_dir: Union[str, Path]) -> Optional[Path]:
+
+def pick_best_urdf(urdfs) -> Optional[Path]:
+    """Return the best URDF from a list of candidates.
+
+    Preference order:
+    1. Non-sanitized URDFs (no ``_sanitized`` in filename) — sanitized copies
+       often contain hardcoded absolute Windows paths that break in Docker or
+       on other machines.
+    2. Among clean candidates, prefer the one whose stem matches its parent
+       directory name (e.g. ``openarm/openarm.urdf``).
+    3. Fall back to the first candidate if all are sanitized.
     """
-    Find the primary URDF file within a directory.
-    scans recursively for .urdf files.
+    if not urdfs:
+        return None
+    paths = [Path(u) for u in urdfs]
+    clean = [p for p in paths if "_sanitized" not in p.name]
+    candidates = clean if clean else paths
+    for p in candidates:
+        if p.stem == p.parent.name:
+            return p
+    return candidates[0]
+
+
+def resolve_robot_path(base_dir: Union[str, Path]) -> Optional[Path]:
+    """Find the primary URDF file within a directory.
+
+    Scans recursively for ``.urdf`` files and uses :func:`pick_best_urdf` to
+    prefer non-sanitized, directory-named files.
     """
     base_dir = Path(base_dir)
     if not base_dir.exists():
         return None
-        
     urdfs = list(base_dir.rglob("*.urdf"))
-    
-    # Filter out sanitized urdfs if they exist alongside originals
-    # valid_urdfs = [u for u in urdfs if "_sanitized" not in u.name]
-    # But for now, we just pick the first one found or prefer one without underscore?
-    # Actually, simpler is just taking the first one.
-    
-    if urdfs:
-        return urdfs[0]
-    return None
+    return pick_best_urdf(urdfs)
 
 def hydrate_urdf_with_meshes(urdf_path: Union[str, Path], base_dir: Optional[Path] = None) -> Optional[str]:
     """

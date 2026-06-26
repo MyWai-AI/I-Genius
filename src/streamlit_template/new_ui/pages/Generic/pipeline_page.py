@@ -557,16 +557,15 @@ def render_pipeline_page():
 
             # === ACTION BUTTONS ===
             if traj_points:
-                from src.streamlit_template.new_ui.services.Common.robot_action_service import save_animation, publish_trajectory_dds
-                with st.popover("Action", use_container_width=False):
-                    st.markdown("#### Save Animation")
-                    anim_name = st.text_input("Animation name", value="PipelineAction", key="gen_anim_name")
-                    if st.button("Save Animation", key="gen_save_anim"):
-                        ok, msg = save_animation(urdf_path_local, traj_points, anim_name)
-                        if ok:
-                            st.success(msg)
-                        else:
-                            st.error(msg)
+                from src.streamlit_template.new_ui.services.Common.robot_action_service import publish_trajectory_dds
+                with st.popover("Action", width="content"):
+                    st.markdown("#### Generate New Trajectory")
+                    if st.button("Generate New Trajectory", key="gen_generate_new_trajectory", width="stretch"):
+                        st.session_state["skill_reuse_source_platform"] = "pipeline"
+                        if st.session_state.get("generic_session_id"):
+                            st.session_state["svo_session_id"] = st.session_state["generic_session_id"]
+                        st.session_state["selected_platform"] = "skill_reuse"
+                        st.rerun()
 
                     st.markdown("---")
                     st.markdown("#### Push to Robot")
@@ -875,7 +874,7 @@ def render_pipeline_page():
                 fig.update_yaxes(title_text="Y [m]", row=2, col=1)
                 fig.update_yaxes(title_text="Z [m]", row=3, col=1)
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
                 
                 # Render Slider with CSS padding to match Plotly margin (l=60)
                 st.markdown("""
@@ -899,20 +898,20 @@ def render_pipeline_page():
                     )
 
             else:
-                st.plotly_chart(res["fig"], use_container_width=True)
+                st.plotly_chart(res["fig"], width="stretch")
         
         # TRAJECTORY IMAGE (fallback)
         elif rtype == "dmp_image":
             img_path = Path(res.get("image", ""))
             if img_path.exists():
-                st.image(str(img_path.resolve()), use_container_width=True)
+                st.image(str(img_path.resolve()), width="stretch")
             else:
                 st.warning("Trajectory image not found.")
         
         # DMP 3D INTERACTIVE PLOT with click-to-seek
         elif rtype == "dmp3d":
             # Fallback if standard layout is used (e.g. if sync_viewer failed in top-level block)
-            st.plotly_chart(res["fig"], use_container_width=True)
+            st.plotly_chart(res["fig"], width="stretch")
         
         # ROBOT 3D ANIMATION
         elif rtype == "robot3d":

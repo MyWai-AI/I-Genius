@@ -639,7 +639,7 @@ def render_skill_reuse_page():
             st.image(
                 rgb_show,
                 caption="Green=Anchor | Orange=Target | Blue=Other | Magenta=Pipeline release | Red=Custom release",
-                use_container_width=True,
+                width="stretch",
             )
             if release_mode_state.startswith("Custom") and streamlit_image_coordinates is None:
                 st.info("Install streamlit-image-coordinates to enable click-to-select release on frame.")
@@ -738,7 +738,6 @@ def render_skill_reuse_page():
         get_robot_transport_options,
         publish_cartesian_trajectory_vulcanexus,
         publish_trajectory_dds,
-        save_animation,
     )
     from src.streamlit_template.components.sync_viewer import sync_viewer
 
@@ -789,7 +788,7 @@ def render_skill_reuse_page():
             except Exception as e:
                 st.error(f"Failed to render DMP plot: {e}")
 
-            if st.button("Close", key=f"sr_dmp_dialog_close_{stem}", use_container_width=True):
+            if st.button("Close", key=f"sr_dmp_dialog_close_{stem}", width="stretch"):
                 st.session_state.pop("sr_open_dmp_dialog", None)
                 st.rerun()
 
@@ -815,7 +814,7 @@ def render_skill_reuse_page():
                     except Exception as e:
                         st.session_state[_static_key] = {"__error": str(e)}
 
-            if st.button("Start Animation", key=f"sr_robot_dialog_start_{stem}", type="primary", use_container_width=True):
+            if st.button("Start Animation", key=f"sr_robot_dialog_start_{stem}", type="primary", width="stretch"):
                 if _anim_key not in st.session_state:
                     with st.spinner("Computing IK for robot playback..."):
                         try:
@@ -846,12 +845,12 @@ def render_skill_reuse_page():
 
             btn1, btn2 = st.columns(2)
             with btn1:
-                if st.button("Reset Preview", key=f"sr_robot_dialog_reset_{stem}", use_container_width=True):
+                if st.button("Reset Preview", key=f"sr_robot_dialog_reset_{stem}", width="stretch"):
                     st.session_state[_play_key] = False
                     st.rerun()
 
             with btn2:
-                if st.button("Close", key=f"sr_robot_dialog_close_{stem}", use_container_width=True):
+                if st.button("Close", key=f"sr_robot_dialog_close_{stem}", width="stretch"):
                     st.session_state.pop("sr_open_robot_dialog", None)
                     st.session_state.pop(_play_key, None)
                     st.session_state.pop(_static_key, None)
@@ -939,7 +938,7 @@ def render_skill_reuse_page():
             a1, a2, a3 = st.columns(3)
 
             with a1:
-                if st.button("👁", key=f"sr_dmp_icon_{stem}", help="Show DMP plot", use_container_width=True):
+                if st.button("👁", key=f"sr_dmp_icon_{stem}", help="Show DMP plot", width="stretch"):
                     st.session_state["sr_open_dmp_dialog"] = {
                         "stem": stem,
                         "npy_path": str(npy_file),
@@ -949,7 +948,7 @@ def render_skill_reuse_page():
                     st.session_state.pop("sr_open_robot_dialog", None)
 
             with a2:
-                if st.button("🤖", key=f"sr_robot_icon_{stem}", help="Show robot animation", use_container_width=True):
+                if st.button("🤖", key=f"sr_robot_icon_{stem}", help="Show robot animation", width="stretch"):
                     st.session_state["sr_open_robot_dialog"] = {
                         "stem": stem,
                         "npy_path": str(npy_file),
@@ -969,14 +968,14 @@ def render_skill_reuse_page():
                         mime="text/csv",
                         key=f"sr_csv_download_{stem}",
                         help="Download CSV",
-                        use_container_width=True,
+                        width="stretch",
                     )
                 except Exception:
                     st.button(
                         "⬇",
                         key=f"sr_csv_download_disabled_{stem}",
                         disabled=True,
-                        use_container_width=True,
+                        width="stretch",
                     )
 
         st.markdown("---")
@@ -1009,9 +1008,6 @@ def render_skill_reuse_page():
     st.markdown("##### Execute Selected Trajectory")
     if len(selected_indices) > 1:
         st.warning("Multiple trajectories are selected. Actions will use the first selected row.")
-
-    anim_default = selected_stem or "skill_reuse_animation"
-    anim_name = st.text_input("Animation name", value=anim_default, key="sr_action_anim_name")
 
     transport_options = get_robot_transport_options()
     default_transport = get_default_robot_transport()
@@ -1058,7 +1054,7 @@ def render_skill_reuse_page():
             "Repeat Count",
             value=int(vulcanexus_defaults["repeat_count"]),
             min_value=1,
-            max_value=100,
+            max_value=100000,
             step=1,
             key="sr_action_vulcanexus_repeat",
         )
@@ -1077,90 +1073,71 @@ def render_skill_reuse_page():
             help="Set to 0 to skip waiting for the edge executor status.",
         )
 
-    act_col1, act_col2 = st.columns(2)
-
-    with act_col1:
-        if st.button("Save Animation", key="sr_save_animation_table", use_container_width=True):
-            if selected_file is None:
-                st.warning("Select one trajectory in the first column before saving animation.")
-            else:
+    if st.button("Push to Robot", key="sr_push_robot_table", type="primary", width="stretch"):
+        if selected_file is None:
+            st.warning("Select one trajectory in the first column before pushing to robot.")
+        elif transport == TRANSPORT_CYCLONEDDS and not Path(urdf_path).exists():
+            st.error(f"URDF not found: {urdf_path}")
+        elif transport != TRANSPORT_CYCLONEDDS:
+            with st.spinner("Publishing Cartesian trajectory via Vulcanexus LAN..."):
                 try:
-                    traj_np = np.load(str(selected_file))
-                    traj_points = [{"x": float(r[0]), "y": float(r[1]), "z": float(r[2])} for r in traj_np]
-                    ok, msg = save_animation(urdf_path, traj_points, anim_name)
+                    cart_path = np.load(str(selected_file))
+                    ok, msg = publish_cartesian_trajectory_vulcanexus(
+                        cart_path=cart_path,
+                        topic_name=dds_topic,
+                        domain_id=int(dds_domain),
+                        discovery_server=discovery_server.strip() or None,
+                        status_topic=status_topic.strip() or None,
+                        status_timeout_sec=float(status_wait_sec),
+                        repeat=int(repeat_count),
+                    )
                     if ok:
-                        st.success(f"Animation saved: {anim_name}")
+                        st.success(msg)
                     else:
                         st.error(msg)
                 except Exception as e:
-                    st.error(f"Failed to save animation: {e}")
+                    st.error(f"Failed: {e}")
+        else:
+            selected_meta = meta_by_stem.get(selected_file.stem, {})
+            grasp_idx = int(selected_meta.get("grasp_idx", 0))
+            release_idx = int(selected_meta.get("release_idx", pipeline_release_idx or 0))
 
-    with act_col2:
-        if st.button("Push to Robot", key="sr_push_robot_table", type="primary", use_container_width=True):
-            if selected_file is None:
-                st.warning("Select one trajectory in the first column before pushing to robot.")
-            elif transport == TRANSPORT_CYCLONEDDS and not Path(urdf_path).exists():
-                st.error(f"URDF not found: {urdf_path}")
-            elif transport != TRANSPORT_CYCLONEDDS:
-                with st.spinner("Publishing Cartesian trajectory via Vulcanexus LAN..."):
-                    try:
-                        cart_path = np.load(str(selected_file))
-                        ok, msg = publish_cartesian_trajectory_vulcanexus(
-                            cart_path=cart_path,
-                            topic_name=dds_topic,
-                            domain_id=int(dds_domain),
-                            discovery_server=discovery_server.strip() or None,
-                            status_topic=status_topic.strip() or None,
-                            status_timeout_sec=float(status_wait_sec),
-                            repeat=int(repeat_count),
-                        )
-                        if ok:
-                            st.success(msg)
-                        else:
-                            st.error(msg)
-                    except Exception as e:
-                        st.error(f"Failed: {e}")
-            else:
-                selected_meta = meta_by_stem.get(selected_file.stem, {})
-                grasp_idx = int(selected_meta.get("grasp_idx", 0))
-                release_idx = int(selected_meta.get("release_idx", pipeline_release_idx or 0))
+            with st.spinner("Computing IK and publishing..."):
+                try:
+                    ik_result = compute_ik_for_reuse_traj(
+                        skill_reuse_npy=str(selected_file),
+                        urdf_path=urdf_path,
+                        robot_config=robot_config,
+                        grasp_idx=grasp_idx,
+                        release_idx=release_idx,
+                    )
+                    q_traj = ik_result["q_traj"]
+                    timestamps = ik_result["frame_timestamps"]
 
-                with st.spinner("Computing IK and publishing..."):
-                    try:
-                        ik_result = compute_ik_for_reuse_traj(
-                            skill_reuse_npy=str(selected_file),
-                            urdf_path=urdf_path,
-                            robot_config=robot_config,
-                            grasp_idx=grasp_idx,
-                            release_idx=release_idx,
-                        )
-                        q_traj = ik_result["q_traj"]
-                        timestamps = ik_result["frame_timestamps"]
+                    from src.streamlit_template.core.Common.robot_playback import load_chain
 
-                        from src.streamlit_template.core.Common.robot_playback import load_chain
+                    chain = load_chain(urdf_path)
+                    joint_names = [
+                        link.name
+                        for link in chain.links
+                        if link.name != "base_link" and hasattr(link, "bounds") and link.bounds != (None, None)
+                    ]
+                    if not joint_names:
+                        joint_names = [f"joint_{i}" for i in range(q_traj.shape[1])]
 
-                        chain = load_chain(urdf_path)
-                        joint_names = [
-                            link.name
-                            for link in chain.links
-                            if link.name != "base_link" and hasattr(link, "bounds") and link.bounds != (None, None)
-                        ]
-                        if not joint_names:
-                            joint_names = [f"joint_{i}" for i in range(q_traj.shape[1])]
-
-                        ok, msg = publish_trajectory_dds(
-                            joint_names=joint_names,
-                            q_traj=q_traj,
-                            timestamps=timestamps,
-                            topic_name=dds_topic,
-                            domain_id=int(dds_domain),
-                        )
-                        if ok:
-                            st.success(msg)
-                        else:
-                            st.error(msg)
-                    except Exception as e:
-                        st.error(f"Failed: {e}")
+                    ok, msg = publish_trajectory_dds(
+                        joint_names=joint_names,
+                        q_traj=q_traj,
+                        timestamps=timestamps,
+                        topic_name=dds_topic,
+                        domain_id=int(dds_domain),
+                    )
+                    if ok:
+                        st.success(msg)
+                    else:
+                        st.error(msg)
+                except Exception as e:
+                    st.error(f"Failed: {e}")
 
 
 def _show_base_frame_only(base_frame_path, detections, anchor_idx, anchor_color, other_color, img_col):
@@ -1175,4 +1152,4 @@ def _show_base_frame_only(base_frame_path, detections, anchor_idx, anchor_color,
                      cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)
     rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
     with img_col:
-        st.image(rgb, caption="Green=Anchor (tracked) | Blue=Other", use_container_width=True)
+        st.image(rgb, caption="Green=Anchor (tracked) | Blue=Other", width="stretch")

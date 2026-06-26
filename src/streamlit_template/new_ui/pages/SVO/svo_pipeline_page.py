@@ -506,42 +506,14 @@ def render_svo_pipeline_page():
                     get_robot_transport_options,
                     publish_cartesian_trajectory_vulcanexus,
                     publish_trajectory_dds,
-                    save_animation,
                 )
-                with st.popover("Action", use_container_width=False):
-                    # --- Generate New Trajectory (base frame only, no live stream) ---
+                with st.popover("Action", width="content"):
+                    # --- Navigate to Skill Reuse page ---
                     st.markdown("#### Generate New Trajectory")
-                    _gen_offset_x = st.slider("Offset X (m)", -0.5, 0.5, 0.0, 0.01, key="svo_gen_offset_x")
-                    _gen_offset_y = st.slider("Offset Y (m)", -0.5, 0.5, 0.0, 0.01, key="svo_gen_offset_y")
-                    _gen_offset_z = st.slider("Offset Z (m)", -0.5, 0.5, 0.0, 0.01, key="svo_gen_offset_z")
-                    _gen_scale_x = st.slider("Scale X", 0.1, 3.0, 1.0, 0.05, key="svo_gen_scale_x")
-                    _gen_scale_y = st.slider("Scale Y", 0.1, 3.0, 1.0, 0.05, key="svo_gen_scale_y")
-                    _gen_scale_z = st.slider("Scale Z", 0.1, 3.0, 1.0, 0.05, key="svo_gen_scale_z")
-                    _gen_rot_z = st.slider("Rotation Z (deg)", -180.0, 180.0, 0.0, 1.0, key="svo_gen_rot_z")
-                    if st.button("🔄 Generate New Trajectory", key="svo_gen_new_traj"):
-                        _sess = paths.get("session_id")
-                        _, _r_config = _resolve_active_robot()
-                        _custom_params = {
-                            "offset": [_gen_offset_x, _gen_offset_y, _gen_offset_z],
-                            "scale": [_gen_scale_x, _gen_scale_y, _gen_scale_z],
-                            "rotation_z_deg": _gen_rot_z,
-                        }
-                        st.session_state["svo_gen_traj_custom_params"] = _custom_params
-                        st.session_state["pipeline_running"] = True
-                        statuses = st.session_state.get("pipeline_statuses", ["pending"] * 5)
-                        statuses[4] = "running"
-                        st.session_state["pipeline_statuses"] = statuses
+                    if st.button("Generate New Trajectory", key="svo_generate_new_trajectory", width="stretch"):
+                        st.session_state["skill_reuse_source_platform"] = "svo_pipeline"
+                        st.session_state["selected_platform"] = "skill_reuse"
                         st.rerun()
-
-                    st.markdown("---")
-                    st.markdown("#### Save Animation")
-                    anim_name = st.text_input("Animation name", value="PipelineAction", key="svo_anim_name")
-                    if st.button("Save Animation", key="svo_save_anim"):
-                        ok, msg = save_animation(urdf_path_local, traj_points, anim_name)
-                        if ok:
-                            st.success(msg)
-                        else:
-                            st.error(msg)
 
                     st.markdown("---")
                     st.markdown("#### Push to Robot")
@@ -581,7 +553,7 @@ def render_svo_pipeline_page():
                             "Repeat Count",
                             value=int(vulcanexus_defaults["repeat_count"]),
                             min_value=1,
-                            max_value=100,
+                            max_value=100000,
                             step=1,
                             key="svo_vulcanexus_repeat",
                         )
@@ -634,7 +606,8 @@ def render_svo_pipeline_page():
 
         timestamps = res.get("timestamps")
         sess = paths.get("session_id")
-        dmp_dir = base / "dmp" / sess if sess else base / "dmp"
+        _obj_sess = st.session_state.get("active_objects_session_id") or sess
+        dmp_dir = base / "dmp" / _obj_sess if _obj_sess else base / "dmp"
         # Prefer skill_reuse_traj (matches robot playback), fallback to object_xyz_dmp
         dmp_xyz_path = dmp_dir / "skill_reuse_traj.npy"
         if not dmp_xyz_path.exists():
@@ -858,7 +831,7 @@ def render_svo_pipeline_page():
                 fig.update_xaxes(range=[t_min, t_max])
                 fig.update_xaxes(title_text="Frame", row=3, col=1)
 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
 
                 st.markdown("""
                     <style>
@@ -879,11 +852,11 @@ def render_svo_pipeline_page():
                     format="%.0f",
                 )
             else:
-                st.plotly_chart(res["fig"], use_container_width=True)
+                st.plotly_chart(res["fig"], width="stretch")
 
         # DMP 3D (fallback)
         elif rtype == "dmp3d":
-            st.plotly_chart(res["fig"], use_container_width=True)
+            st.plotly_chart(res["fig"], width="stretch")
 
         # ROBOT 3D (fallback)
         elif rtype == "robot3d":

@@ -64,7 +64,7 @@ def get_default_robot_domain_id() -> int:
 
 def get_default_vulcanexus_discovery_server() -> str:
     return os.getenv(
-        "VILMA_VULCANEXUS_DISCOVERY_SERVER",
+        "IGENIUS_VULCANEXUS_DISCOVERY_SERVER",
         os.getenv("ROS_DISCOVERY_SERVER", DEFAULT_VULCANEXUS_DISCOVERY_SERVER),
     )
 
@@ -73,11 +73,11 @@ def get_default_vulcanexus_publish_settings() -> Dict[str, object]:
     return {
         "topic": DEFAULT_VULCANEXUS_TOPIC,
         "discovery_server": get_default_vulcanexus_discovery_server(),
-        "repeat_count": int(os.getenv("VILMA_VULCANEXUS_REPEAT", str(DEFAULT_VULCANEXUS_REPEAT))),
-        "rate_hz": float(os.getenv("VILMA_VULCANEXUS_RATE_HZ", str(DEFAULT_VULCANEXUS_RATE_HZ))),
+        "repeat_count": int(os.getenv("IGENIUS_VULCANEXUS_REPEAT", str(DEFAULT_VULCANEXUS_REPEAT))),
+        "rate_hz": float(os.getenv("IGENIUS_VULCANEXUS_RATE_HZ", str(DEFAULT_VULCANEXUS_RATE_HZ))),
         "status_topic": DEFAULT_VULCANEXUS_STATUS_TOPIC,
         "status_wait_sec": float(
-            os.getenv("VILMA_VULCANEXUS_STATUS_WAIT_SEC", str(DEFAULT_VULCANEXUS_STATUS_WAIT_SEC))
+            os.getenv("IGENIUS_VULCANEXUS_STATUS_WAIT_SEC", str(DEFAULT_VULCANEXUS_STATUS_WAIT_SEC))
         ),
     }
 

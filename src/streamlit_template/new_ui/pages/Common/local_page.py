@@ -510,7 +510,7 @@ def render_local_page():
                             intrinsics_npz = camera_dir / f"{session_id}.npz"
                             video_base = svo_root / "videos" / session_id
                             video_base.mkdir(parents=True, exist_ok=True)
-                            video_out = video_base / f"{session_id}.mp4"
+                            video_out = video_base / f"{session_id}.webm"
 
                             # Convert intrinsics .npz → .npy dict (pipeline requires .npy)
                             if not intrinsics_npy.exists() and intrinsics_npz.exists():
@@ -578,6 +578,9 @@ def render_local_page():
                             if video_out.exists() and video_out.stat().st_size > 0:
                                 st.session_state["persistent_video_path"] = str(video_out.resolve())
                                 st.session_state["local_video_path"] = str(video_out.resolve())
+                            elif st.session_state.get("persistent_video_path", "").lower().endswith(".zip"):
+                                st.session_state.pop("persistent_video_path", None)
+                                st.session_state.pop("local_video_path", None)
 
                             if not validation.has_depth_meters:
                                 st.warning(
@@ -593,8 +596,35 @@ def render_local_page():
                     _sid = st.session_state.get("svo_session_id", "")
                     if _sid:
                         # Ensure persistent_video_path is set (may be lost on page reload)
-                        _vout = Path("data/SVO/videos") / _sid / f"{_sid}.mp4"
+                        _video_dir = Path("data/SVO/videos") / _sid
+                        _vout = _video_dir / f"{_sid}.webm"
+                        _legacy_mp4 = _video_dir / f"{_sid}.mp4"
                         _needs_rebuild = not _vout.exists() or _vout.stat().st_size == 0
+                        # Also rebuild if existing video uses a browser-incompatible codec (e.g. mp4v)
+                        if not _needs_rebuild:
+                            try:
+                                import imageio as _iio
+                                _meta = _iio.v3.immeta(str(_vout), plugin="pyav")
+                                _codec = (_meta.get("codec") or "").lower()
+                                if _codec and _codec not in ("h264", "hevc", "vp9", "vp8", "av1", "avc1"):
+                                    _needs_rebuild = True
+                            except Exception:
+                                try:
+                                    # Fallback: ffprobe if available
+                                    import subprocess as _sp, shutil as _sh
+                                    if _sh.which("ffprobe"):
+                                        _pr = _sp.run(
+                                            ["ffprobe", "-v", "quiet", "-select_streams", "v:0",
+                                             "-show_entries", "stream=codec_name",
+                                             "-of", "default=noprint_wrappers=1:nokey=1", str(_vout)],
+                                            capture_output=True, text=True, timeout=10,
+                                        )
+                                        _codec = _pr.stdout.strip().lower()
+                                        if _codec and _codec not in ("h264", "hevc", "vp9", "vp8", "av1"):
+                                            _needs_rebuild = True
+                                except Exception:
+                                    # Can't detect codec — force rebuild to be safe
+                                    _needs_rebuild = True
                         if _needs_rebuild:
                             _rgb_dir = Path("data/SVO/frames") / _sid
                             _fl = sorted(
@@ -609,7 +639,20 @@ def render_local_page():
                                     reconstruct_video_from_frames(
                                         _rgb_dir.resolve(), str(_vout.resolve()), fps=15
                                     )
-                        if _vout.exists() and _vout.stat().st_size > 0 and not st.session_state.get("persistent_video_path"):
+                                if _vout.exists() and _vout.stat().st_size > 0:
+                                    st.session_state["persistent_video_path"] = str(_vout.resolve())
+                                    st.session_state["local_video_path"] = str(_vout.resolve())
+                                    st.rerun()
+                        elif _legacy_mp4.exists() and st.session_state.get("persistent_video_path", "").lower().endswith(".mp4"):
+                            st.session_state["persistent_video_path"] = str(_vout.resolve())
+                            st.session_state["local_video_path"] = str(_vout.resolve())
+                            st.rerun()
+                        current_preview = st.session_state.get("persistent_video_path", "")
+                        if (
+                            _vout.exists()
+                            and _vout.stat().st_size > 0
+                            and (not current_preview or current_preview.lower().endswith(".zip"))
+                        ):
                             st.session_state["persistent_video_path"] = str(_vout.resolve())
                             st.session_state["local_video_path"] = str(_vout.resolve())
 
@@ -670,7 +713,6 @@ def render_local_page():
                         except Exception as e:
                             st.warning(f"Extraction failed (depth may be skipped): {e}")
                             # Fallback: extract frames only
-                            from src.streamlit_template.new_ui.services.Generic.frame_service import extract_and_cache_frames
                             extract_and_cache_frames(file_path)
                 
                 # Reconstruct video from extracted frames
@@ -683,7 +725,7 @@ def render_local_page():
                 )
                 
                 if frame_files and (not video_out.exists() or video_out.stat().st_size == 0):
-                    with st.spinner(f"Reconstructing video from {len(frame_files)} frames (using mp4v codec)..."):
+                    with st.spinner(f"Reconstructing video from {len(frame_files)} frames..."):
                         video_base.mkdir(parents=True, exist_ok=True)
                         try:
                             reconstruct_video_from_frames(rgb_dir, str(video_out), fps=15.0)
@@ -752,7 +794,7 @@ def render_local_page():
                     
             # Right Column: Frames & Details & Robot
             with main_col2:
-                tab1, tab2, tab3 = st.tabs(["🎞️ Frames", "ℹ️ Details", "🤖 Robot"])
+                tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎞️ Frames", "ℹ️ Details", "🤖 Robot", "🔍 AI Tools", "📐 Calibration"])
                 
                 video_path = st.session_state.get("persistent_video_path")
                 
@@ -853,280 +895,291 @@ def render_local_page():
                         else:
                             st.text("No metadata file")
 
-                    # === AI Tools (Object Detection — all file types) ===
-                    # Resolve active session and frames directory for the current file type
+                with tab4:
+                    # === AI Tools (Object Detection) — minimal ===
                     if is_svo:
-                        _active_session_id = st.session_state.get("svo_session_id", "")
-                        _active_frames_dir = Path("data/SVO/frames") / _active_session_id if _active_session_id else None
-                        _ai_tools_title = "🤖 AI Tools (SVO)"
-                        _ai_always_show = True  # SVO already has depth from hardware
+                        _at_session_id = st.session_state.get("svo_session_id", "")
+                        _at_frames_dir = Path("data/SVO/frames") / _at_session_id if _at_session_id else None
                     elif is_bag:
-                        _active_session_id = st.session_state.get("bag_session_id", "")
-                        _active_frames_dir = Path("data/BAG/frames") / _active_session_id if _active_session_id else None
-                        _ai_tools_title = "🤖 AI Tools (BAG)"
-                        _ai_always_show = True  # BAG already has depth from hardware
+                        _at_session_id = st.session_state.get("bag_session_id", "")
+                        _at_frames_dir = Path("data/BAG/frames") / _at_session_id if _at_session_id else None
                     else:
-                        _active_session_id = st.session_state.get("generic_session_id", "")
-                        _active_frames_dir = Path("data/Generic/frames") / _active_session_id if _active_session_id else None
-                        _ai_tools_title = "🤖 AI Tools"
-                        # Generic needs depth extraction first for SVO pipeline routing
-                        _generic_depth_dir = Path("data/Generic/depth_meters") / _active_session_id if _active_session_id else None
-                        _ai_always_show = bool(_generic_depth_dir and _generic_depth_dir.exists() and any(_generic_depth_dir.glob("*.npy")))
+                        _at_session_id = st.session_state.get("generic_session_id", "")
+                        _at_frames_dir = Path("data/Generic/frames") / _at_session_id if _at_session_id else None
 
-                    if _active_session_id:
-                        with st.expander(_ai_tools_title, expanded=_ai_always_show):
-                            if not is_svo and not is_bag:
-                                if _ai_always_show:
-                                    st.success(f"✓ Depth ready for session `{_active_session_id}`")
-                                else:
-                                    st.info("Upload a video above to extract frames + depth first.")
+                    if not _at_session_id:
+                        st.info("Upload a file above to enable object detection.")
+                    else:
+                        _at_frame_files = []
+                        if _at_frames_dir and _at_frames_dir.exists():
+                            _at_frame_files = sorted(
+                                list(_at_frames_dir.glob("*.jpg")) + list(_at_frames_dir.glob("*.png"))
+                            )
+                        _at_base_frame = _at_frame_files[0] if _at_frame_files else None
 
-                            # --- Object Detection Model ---
-                            st.markdown("**Object Detection Model**")
-                            _model_dir = Path("data/Common/ai_model/object")
-                            _cached_models = [p.name for p in _model_dir.glob("*.pt")] if _model_dir.exists() else []
-                            _official_models = ["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8x.pt"]
-                            _all_model_opts = _official_models + [m for m in _cached_models if m not in _official_models]
-                            _current_model = st.session_state.get("selected_object_model_path", "yolov8n.pt")
-                            _current_model_name = Path(_current_model).name if _current_model else "yolov8n.pt"
-                            _model_idx = _all_model_opts.index(_current_model_name) if _current_model_name in _all_model_opts else 0
-                            _selected_model_name = st.selectbox(
-                                "Model",
-                                options=_all_model_opts,
-                                index=_model_idx,
-                                key="ai_object_model_select",
-                                help="Select an official YOLO model or a cached custom model.",
-                            )
+                        if not _at_base_frame:
+                            st.info("Frames not extracted yet — run pipeline once first.")
+                        else:
+                            _at_dets_key = f"at_dets_{_at_session_id}"
+                            _at_model_key = f"at_model_{_at_session_id}"
 
-                            # Model file upload
-                            _uploaded_model = st.file_uploader(
-                                "Upload custom model (.pt)",
-                                type=["pt"],
-                                key="ai_object_model_upload",
-                                help="Upload a YOLOv8/OBB .pt model file. It will be cached for future use.",
-                            )
-                            if _uploaded_model is not None:
-                                _model_dir.mkdir(parents=True, exist_ok=True)
-                                _upload_path = _model_dir / _uploaded_model.name
-                                if not _upload_path.exists():
-                                    with open(str(_upload_path), "wb") as _mf:
-                                        _mf.write(_uploaded_model.getbuffer())
-                                    st.success(f"✓ Model '{_uploaded_model.name}' saved.")
-                                st.session_state["selected_object_model_path"] = str(_upload_path)
-                            else:
-                                _model_path_resolved = str(_model_dir / _selected_model_name) if (_model_dir / _selected_model_name).exists() else _selected_model_name
-                                st.session_state["selected_object_model_path"] = _model_path_resolved
+                            _at_img_col, _at_ctrl_col = st.columns([1, 1])
 
-                            # --- Detection Settings ---
-                            st.markdown("**Detection Settings**")
-                            _conf = st.slider(
-                                "Confidence threshold", 0.01, 0.95,
-                                float(st.session_state.get("selected_object_conf_threshold", 0.25)),
-                                0.01, key="ai_obj_conf",
-                            )
-                            _max_area = st.slider(
-                                "Max bbox area (% of frame)", 0.1, 100.0,
-                                float(st.session_state.get("selected_object_max_area_pct", 100.0)),
-                                0.1, key="ai_obj_max_area",
-                            )
-                            _min_area = st.slider(
-                                "Min bbox area (% of frame)", 0.0, 10.0,
-                                float(st.session_state.get("selected_object_min_area_pct", 0.0)),
-                                0.01, key="ai_obj_min_area",
-                                help="Filters out tiny false-positive detections.",
-                            )
-                            st.session_state["selected_object_conf_threshold"] = _conf
-                            st.session_state["selected_object_max_area_pct"] = _max_area
-                            st.session_state["selected_object_min_area_pct"] = _min_area
+                            with _at_ctrl_col:
+                                st.markdown("**Select Object to Track**")
 
-                            # --- Select Object to Track on Frame 0 ---
-                            st.markdown("**Select Object to Track**")
-                            _rgb_files = []
-                            if _active_frames_dir and _active_frames_dir.exists():
-                                _rgb_files = sorted(
-                                    list(_active_frames_dir.glob("frame_*.png")) + list(_active_frames_dir.glob("frame_*.jpg"))
+                                _at_model_dir = Path("data/Common/ai_model/object")
+                                _at_official = ["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8x.pt"]
+                                _at_cached = [p.name for p in _at_model_dir.glob("*.pt")] if _at_model_dir.exists() else []
+                                _at_model_opts = _at_official + [m for m in _at_cached if m not in _at_official]
+                                _at_prev_model = st.session_state.get("selected_object_model_path", "yolov8n.pt")
+                                _at_prev_name = Path(_at_prev_model).name if _at_prev_model else "yolov8n.pt"
+                                if _at_prev_name not in _at_model_opts:
+                                    _at_model_opts.insert(0, _at_prev_name)
+                                _at_selected_model = st.selectbox(
+                                    "Model",
+                                    options=_at_model_opts,
+                                    index=_at_model_opts.index(_at_prev_name) if _at_prev_name in _at_model_opts else 0,
+                                    key="at_model_select",
+                                    format_func=lambda p: f"{Path(p).name} ({'cached' if ('/' in p or chr(92) in p) else 'official'})",
+                                )
+                                _at_uploaded_model = st.file_uploader(
+                                    "Upload custom model (.pt)", type=["pt"], key="at_model_upload",
+                                )
+                                if _at_uploaded_model is not None:
+                                    _at_model_dir.mkdir(parents=True, exist_ok=True)
+                                    _at_up_path = _at_model_dir / _at_uploaded_model.name
+                                    if not _at_up_path.exists():
+                                        with open(str(_at_up_path), "wb") as _mf:
+                                            _mf.write(_at_uploaded_model.getbuffer())
+                                    _at_selected_model = str(_at_up_path)
+
+                                _at_model_resolved = (
+                                    str(_at_model_dir / _at_selected_model)
+                                    if (_at_model_dir / _at_selected_model).exists()
+                                    else _at_selected_model
+                                )
+                                st.session_state["selected_object_model_path"] = _at_model_resolved
+
+                                if st.session_state.get(_at_model_key) != _at_model_resolved:
+                                    st.session_state.pop(_at_dets_key, None)
+                                    st.session_state[_at_model_key] = _at_model_resolved
+
+                                _at_conf = st.slider("Confidence", 0.01, 0.50,
+                                    float(st.session_state.get("selected_object_conf_threshold", 0.05)), 0.01,
+                                    key="at_conf")
+                                _at_max_a = st.slider("Max Area (%)", 1.0, 100.0,
+                                    float(st.session_state.get("selected_object_max_area_pct", 15.0)), 1.0,
+                                    key="at_max_area")
+                                _at_min_a = st.slider("Min Area (%)", 0.0001, 1.0,
+                                    float(st.session_state.get("selected_object_min_area_pct", 0.0001)), format="%.4f",
+                                    key="at_min_area")
+
+                                st.session_state["selected_object_conf_threshold"] = float(_at_conf)
+                                st.session_state["selected_object_max_area_pct"] = float(_at_max_a)
+                                st.session_state["selected_object_min_area_pct"] = float(_at_min_a)
+
+                                _at_run = st.button(
+                                    "Detect on Frame 0", key="at_detect_btn", width="stretch",
                                 )
 
-                            if _rgb_files and st.button("🔍 Detect on Frame 0", key="ai_detect_frame0"):
-                                try:
-                                    import cv2 as _cv2_det
-                                    import numpy as _np_det
-                                    from ultralytics import YOLO as _YOLO_det
-                                    _det_model_path = st.session_state.get("selected_object_model_path", "yolov8n.pt")
-                                    _det_model = _YOLO_det(_det_model_path)
-                                    _frame0 = _cv2_det.imread(str(_rgb_files[0]))
-                                    _det_results = _det_model(_frame0, verbose=False, conf=_conf, imgsz=1280, max_det=100)[0]
-
-                                    _det_list = []
-                                    if _det_results.obb is not None and len(_det_results.obb) > 0:
-                                        _obb_names = _det_results.names or {}
-                                        _all_xywhr = _det_results.obb.xywhr.cpu().numpy()
-                                        _all_confs = _det_results.obb.conf.cpu().numpy()
-                                        for _di, _cls in enumerate(_det_results.obb.cls.cpu().numpy().astype(int)):
-                                            _xywhr = _all_xywhr[_di]
-                                            _rect = (
-                                                (float(_xywhr[0]), float(_xywhr[1])),
-                                                (float(_xywhr[2]), float(_xywhr[3])),
-                                                float(_np_det.degrees(_xywhr[4])),
-                                            )
-                                            _pts = _cv2_det.boxPoints(_rect)
-                                            _det_list.append({
-                                                "idx": _di,
-                                                "label": _obb_names.get(_cls, str(_cls)),
-                                                "conf": float(_all_confs[_di]),
-                                                "bbox_xyxy": [float(_np_det.min(_pts[:, 0])), float(_np_det.min(_pts[:, 1])),
-                                                              float(_np_det.max(_pts[:, 0])), float(_np_det.max(_pts[:, 1]))],
-                                                "cx": float(_xywhr[0]),
-                                                "cy": float(_xywhr[1]),
-                                            })
-                                    elif _det_results.boxes is not None and len(_det_results.boxes) > 0:
-                                        _box_names = _det_results.names or {}
-                                        _xyxy_all = _det_results.boxes.xyxy.cpu().numpy()
-                                        _conf_all = _det_results.boxes.conf.cpu().numpy()
-                                        _cls_all = _det_results.boxes.cls.cpu().numpy().astype(int) if _det_results.boxes.cls is not None else []
-                                        for _di in range(len(_xyxy_all)):
-                                            _x1, _y1, _x2, _y2 = [float(v) for v in _xyxy_all[_di]]
-                                            _det_list.append({
-                                                "idx": _di,
-                                                "label": _box_names.get(int(_cls_all[_di]), "") if len(_cls_all) > _di else "",
-                                                "conf": float(_conf_all[_di]),
-                                                "bbox_xyxy": [_x1, _y1, _x2, _y2],
-                                                "cx": (_x1 + _x2) / 2,
-                                                "cy": (_y1 + _y2) / 2,
-                                            })
-                                    _det_list.sort(key=lambda d: d["conf"], reverse=True)
-                                    st.session_state["gen_det_frame0_results"] = _det_list
-                                    st.session_state["gen_det_source_session"] = _active_session_id
-                                except Exception as _e:
-                                    st.error(f"Detection failed: {_e}")
-                            elif not _rgb_files:
-                                st.caption("No frames found yet — run extraction first.")
-
-                            # Show detection results and let user pick one
-                            _det_results_stored = st.session_state.get("gen_det_frame0_results")
-                            _det_source_sess = st.session_state.get("gen_det_source_session")
-                            if _det_results_stored is not None and _det_source_sess == _active_session_id:
-                                if not _det_results_stored:
-                                    st.warning("No objects detected on frame 0. Try lower confidence or a different model.")
-                                else:
-                                    st.markdown(f"Found **{len(_det_results_stored)}** detection(s). Select the object to track:")
-                                    for _di, _det in enumerate(_det_results_stored):
-                                        _btn_label = f"#{_di + 1}: {_det['label']} ({_det['conf']:.2f}) @ ({_det['cx']:.0f}, {_det['cy']:.0f})"
-                                        if st.button(_btn_label, key=f"ai_select_det_{_di}"):
-                                            st.session_state["selected_tracking_bbox_xyxy"] = _det["bbox_xyxy"]
-                                            st.session_state["selected_tracking_label"] = _det["label"]
-                                            st.session_state["selected_tracking_detection_index"] = _det["idx"]
-                                            st.session_state["selected_tracking_source_path"] = st.session_state.get("persistent_video_path", "")
-                                            st.session_state["selected_tracking_source_hashes"] = [_active_session_id]
-                                            st.session_state[f"tracking_bbox_{_active_session_id}"] = _det["bbox_xyxy"]
-                                            st.success(f"✓ Tracking '{_det['label']}' — bbox locked")
-                                            st.rerun()
-
-                            # Show current tracking selection
-                            _cur_bbox = st.session_state.get("selected_tracking_bbox_xyxy")
-                            _cur_label = st.session_state.get("selected_tracking_label")
-                            if _cur_bbox:
-                                st.info(f"🎯 Tracking: **{_cur_label or 'object'}** at bbox {[round(v, 1) for v in _cur_bbox]}")
-                                if st.button("✖ Clear selection", key="ai_clear_tracking"):
-                                    for _k in ["selected_tracking_bbox_xyxy", "selected_tracking_label",
-                                               "selected_tracking_detection_index", "selected_tracking_source_path",
-                                               "selected_tracking_source_hashes",
-                                               f"tracking_bbox_{_active_session_id}"]:
-                                        st.session_state.pop(_k, None)
-                                    st.rerun()
-
-                            # --- Camera-to-Robot Calibration ---
-                            st.markdown("---")
-                            st.markdown("**📐 Camera-to-Robot Calibration**")
-                            st.caption(
-                                "Optional. Upload a `cam2base_calibration.json` file to map detected object "
-                                "positions from camera space (mm) into robot base-frame coordinates (mm). "
-                                "Without it, the system uses a built-in heuristic mapping. "
-                                "The file is stored globally and applies to all sessions."
-                            )
-                            with st.expander("ℹ️ Calibration file format", expanded=False):
-                                st.markdown(
-                                    """
-The calibration file must be a JSON object with one of these keys:
-
-```json
-{ "T_cam2base": [[r00,r01,r02,tx], [r10,r11,r12,ty], [r20,r21,r22,tz], [0,0,0,1]] }
-```
-or
-```json
-{ "affine_camera_to_robot": [[r00,r01,r02,tx], ...] }
-```
-
-The value is a **4×4 homogeneous transformation matrix** (rotation + translation) that converts
-a point `[x, y, z, 1]` in camera space (millimetres) into robot base-frame coordinates (millimetres):
-
-```
-p_robot = T_cam2base @ p_camera
-```
-
-**How to generate it:** use any hand-eye calibration tool (e.g. `easy_handeye`, `ViSP`,
-OpenCV `calibrateHandEye`) with the camera mounted on or above the robot workspace.
-Record several robot end-effector poses alongside the corresponding camera observations
-of a calibration target, then solve for the rigid transform.
-"""
-                                )
-                            _calib_dir = Path("data/Common/calibration")
-                            _calib_path = _calib_dir / "cam2base_calibration.json"
-                            if _calib_path.exists():
-                                st.success(f"✓ Calibration file present: `{_calib_path}`")
-                                _calib_col1, _calib_col2 = st.columns([3, 1])
-                                with _calib_col2:
-                                    if st.button("🗑 Remove", key="ai_calib_remove"):
-                                        try:
-                                            _calib_path.unlink()
-                                            st.success("Calibration file removed.")
-                                            st.rerun()
-                                        except Exception as _e:
-                                            st.error(f"Could not remove file: {_e}")
-                                with _calib_col1:
+                            # Auto-detect on first load OR on button press
+                            if _at_dets_key not in st.session_state or _at_run:
+                                with st.spinner("Detecting..."):
                                     try:
-                                        import json as _json_calib
-                                        _calib_data = _json_calib.loads(_calib_path.read_text(encoding="utf-8"))
-                                        _matrix_key = "T_cam2base" if "T_cam2base" in _calib_data else "affine_camera_to_robot"
-                                        if _matrix_key in _calib_data:
-                                            import numpy as _np_calib
-                                            _mat = _np_calib.array(_calib_data[_matrix_key])
-                                            st.caption(f"Matrix ({_matrix_key}):")
-                                            st.code(_np_calib.array2string(_mat, precision=4, suppress_small=True))
-                                    except Exception:
-                                        pass
-                            else:
-                                st.info("No calibration file uploaded yet. Heuristic mapping will be used.")
-
-                            _calib_upload = st.file_uploader(
-                                "Upload calibration file (.json)",
-                                type=["json"],
-                                key="ai_calib_upload",
-                                help="Upload cam2base_calibration.json. Saved to data/Common/calibration/ and used by all sessions.",
-                            )
-                            if _calib_upload is not None:
-                                try:
-                                    import json as _json_calib_up
-                                    _calib_content = _calib_upload.read()
-                                    _parsed = _json_calib_up.loads(_calib_content)
-                                    _has_key = "T_cam2base" in _parsed or "affine_camera_to_robot" in _parsed
-                                    if not _has_key:
-                                        st.error(
-                                            "Invalid calibration file: must contain key `T_cam2base` or "
-                                            "`affine_camera_to_robot` with a 4×4 matrix."
+                                        import cv2 as _cv2_at
+                                        import numpy as _np_at
+                                        from ultralytics import YOLO as _YOLO_at
+                                        from src.streamlit_template.core.Common.object_detector import (
+                                            Detection as _Det_at,
                                         )
-                                    else:
-                                        _mat_key = "T_cam2base" if "T_cam2base" in _parsed else "affine_camera_to_robot"
-                                        _mat_val = _parsed[_mat_key]
-                                        if len(_mat_val) != 4 or any(len(row) != 4 for row in _mat_val):
-                                            st.error("Matrix must be 4×4.")
-                                        else:
-                                            _calib_dir.mkdir(parents=True, exist_ok=True)
-                                            _calib_path.write_bytes(_calib_content)
-                                            st.success(f"✓ Calibration saved to `{_calib_path}`")
-                                            st.rerun()
+                                        _at_bgr = _cv2_at.imread(str(_at_base_frame))
+                                        _at_h, _at_w = _at_bgr.shape[:2]
+                                        _at_yolo = _YOLO_at(_at_model_resolved)
+                                        _at_res = _at_yolo.predict(
+                                            _at_bgr, verbose=False, conf=_at_conf,
+                                            imgsz=1280, max_det=100, agnostic_nms=True,
+                                        )[0]
+                                        _at_dets_new = []
+                                        _at_names = _at_res.names or {}
+                                        _has_obb = _at_res.obb is not None and len(_at_res.obb) > 0
+                                        _has_box = _at_res.boxes is not None and len(_at_res.boxes) > 0
+                                        if _has_obb:
+                                            for _ob in _at_res.obb:
+                                                _oc = float(_ob.conf[0])
+                                                _ocls = int(_ob.cls[0]) if _ob.cls is not None else None
+                                                _olabel = _at_names.get(_ocls) if _ocls is not None else None
+                                                _xywhr = _ob.xywhr[0].cpu().numpy()
+                                                _rect = (
+                                                    (_xywhr[0], _xywhr[1]),
+                                                    (_xywhr[2], _xywhr[3]),
+                                                    float(_np_at.degrees(_xywhr[4])),
+                                                )
+                                                _pts = _cv2_at.boxPoints(_rect)
+                                                _x1 = float(_np_at.min(_pts[:, 0]))
+                                                _y1 = float(_np_at.min(_pts[:, 1]))
+                                                _x2 = float(_np_at.max(_pts[:, 0]))
+                                                _y2 = float(_np_at.max(_pts[:, 1]))
+                                                _bw, _bh = _x2 - _x1, _y2 - _y1
+                                                if _bw * _bh > _at_w * _at_h * (_at_max_a / 100):
+                                                    continue
+                                                if _bw * _bh < _at_w * _at_h * (_at_min_a / 100):
+                                                    continue
+                                                _at_dets_new.append(_Det_at(
+                                                    bbox_xyxy=_np_at.array([_x1, _y1, _x2, _y2], dtype=_np_at.float32),
+                                                    bbox_xywh=_np_at.array([_x1 + _bw / 2, _y1 + _bh / 2, _bw, _bh], dtype=_np_at.float32),
+                                                    confidence=_oc,
+                                                    label=_olabel,
+                                                ))
+                                        elif _has_box:
+                                            for _bb, _bc, _bcls in zip(_at_res.boxes.xyxy, _at_res.boxes.conf, _at_res.boxes.cls):
+                                                _bn = _bb.cpu().numpy()
+                                                _bw2, _bh2 = _bn[2] - _bn[0], _bn[3] - _bn[1]
+                                                if _bw2 * _bh2 > _at_w * _at_h * (_at_max_a / 100):
+                                                    continue
+                                                if _bw2 * _bh2 < _at_w * _at_h * (_at_min_a / 100):
+                                                    continue
+                                                _blabel = _at_names.get(int(_bcls)) if _at_names else None
+                                                _at_dets_new.append(_Det_at(
+                                                    bbox_xyxy=_bn.astype(_np_at.float32),
+                                                    bbox_xywh=_np_at.array([_bn[0] + _bw2 / 2, _bn[1] + _bh2 / 2, _bw2, _bh2], dtype=_np_at.float32),
+                                                    confidence=float(_bc),
+                                                    label=_blabel,
+                                                ))
+                                        _at_dets_new.sort(key=lambda d: d.confidence, reverse=True)
+                                        st.session_state[_at_dets_key] = _at_dets_new
+                                    except Exception as _at_e:
+                                        st.error(f"Detection failed: {_at_e}")
+
+                            _at_dets = st.session_state.get(_at_dets_key, [])
+
+                            with _at_img_col:
+                                try:
+                                    import cv2 as _cv2_draw
+                                    _at_bgr_draw = _cv2_draw.imread(str(_at_base_frame))
+                                    for _di2, _det2 in enumerate(_at_dets):
+                                        _x1d, _y1d, _x2d, _y2d = [int(v) for v in _det2.bbox_xyxy]
+                                        _cv2_draw.rectangle(_at_bgr_draw, (_x1d, _y1d), (_x2d, _y2d), (0, 0, 255), 2)
+                                        _lbl2 = _det2.label or ""
+                                        _cv2_draw.putText(
+                                            _at_bgr_draw,
+                                            f"#{_di2} {_lbl2} {_det2.confidence:.2f}",
+                                            (_x1d, max(_y1d - 6, 12)),
+                                            _cv2_draw.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 255), 2,
+                                        )
+                                    _at_rgb_draw = _cv2_draw.cvtColor(_at_bgr_draw, _cv2_draw.COLOR_BGR2RGB)
+                                    _at_cap = "Base frame — detected objects" if _at_dets else "Base frame (no detections)"
+                                    st.image(_at_rgb_draw, caption=_at_cap, width="stretch")
+                                except Exception:
+                                    st.image(str(_at_base_frame), caption="Frame 0", width="stretch")
+
+                            with _at_ctrl_col:
+                                if not _at_dets:
+                                    st.warning("No objects detected. Try lower confidence or click Detect on Frame 0.")
+                                else:
+                                    _at_box_labels = [
+                                        (
+                                            f"#{i} {d.label} — {d.confidence:.2f}"
+                                            if d.label
+                                            else f"#{i} — {d.confidence:.2f}"
+                                        )
+                                        for i, d in enumerate(_at_dets)
+                                    ]
+                                    _at_sel_idx = st.selectbox(
+                                        "Select object to track",
+                                        options=list(range(len(_at_dets))),
+                                        format_func=lambda i: _at_box_labels[i],
+                                        key=f"at_sel_{_at_session_id}",
+                                    )
+                                    _at_sel_det = _at_dets[_at_sel_idx]
+                                    _at_sel_bbox = _at_sel_det.bbox_xyxy.tolist()
+                                    st.session_state["selected_tracking_bbox_xyxy"] = _at_sel_bbox
+                                    st.session_state["selected_tracking_label"] = _at_sel_det.label
+                                    st.session_state["selected_tracking_detection_index"] = int(_at_sel_idx)
+                                    st.session_state["selected_tracking_source_hashes"] = [_at_session_id]
+                                    st.session_state[f"tracking_bbox_{_at_session_id}"] = _at_sel_bbox
+                                    st.caption(f"bbox: {[round(v, 1) for v in _at_sel_bbox]}")
+
+                                _at_cur_bbox = st.session_state.get("selected_tracking_bbox_xyxy")
+                                _at_cur_label = st.session_state.get("selected_tracking_label")
+                                if _at_cur_bbox:
+                                    st.info(f"Tracking: **{_at_cur_label or 'object'}** selected")
+                                    if st.button("Clear selection", key="at_clear_tracking"):
+                                        for _k in [
+                                            "selected_tracking_bbox_xyxy",
+                                            "selected_tracking_label",
+                                            "selected_tracking_detection_index",
+                                            f"tracking_bbox_{_at_session_id}",
+                                        ]:
+                                            st.session_state.pop(_k, None)
+                                        st.rerun()
+
+                with tab5:
+                    # === Camera-to-Robot Calibration ===
+                    st.markdown("#### Camera-to-Robot Calibration")
+                    st.caption(
+                        "Optional. Upload a cam2base_calibration.json to map detected object "
+                        "positions from camera space (mm) into robot base-frame coordinates (mm). "
+                        "Stored globally and applies to all sessions."
+                    )
+                    with st.expander("File format", expanded=False):
+                        st.code(
+                            '{ "T_cam2base": [[r00,r01,r02,tx], [r10,r11,r12,ty], [r20,r21,r22,tz], [0,0,0,1]] }\n'
+                            "# or\n"
+                            '{ "affine_camera_to_robot": [[r00,r01,r02,tx], ...] }',
+                            language="json",
+                        )
+                        st.caption(
+                            "4x4 homogeneous matrix (rotation + translation). "
+                            "Generate with easy_handeye, ViSP, or OpenCV calibrateHandEye."
+                        )
+                    _calib_dir = Path("data/Common/calibration")
+                    _calib_path = _calib_dir / "cam2base_calibration.json"
+                    if _calib_path.exists():
+                        st.success(f"Calibration file present: {_calib_path}")
+                        _c1, _c2 = st.columns([3, 1])
+                        with _c2:
+                            if st.button("Remove", key="calib_remove"):
+                                try:
+                                    _calib_path.unlink()
+                                    st.rerun()
                                 except Exception as _e:
-                                    st.error(f"Failed to parse calibration file: {_e}")
+                                    st.error(f"Could not remove: {_e}")
+                        with _c1:
+                            try:
+                                import json as _jc
+                                import numpy as _nc
+                                _cd = _jc.loads(_calib_path.read_text(encoding="utf-8"))
+                                _mk = "T_cam2base" if "T_cam2base" in _cd else "affine_camera_to_robot"
+                                if _mk in _cd:
+                                    st.caption(f"Matrix ({_mk}):")
+                                    st.code(_nc.array2string(_nc.array(_cd[_mk]), precision=4, suppress_small=True))
+                            except Exception:
+                                pass
+                    else:
+                        st.info("No calibration file uploaded. Heuristic mapping will be used.")
+                    _calib_upload = st.file_uploader(
+                        "Upload cam2base_calibration.json", type=["json"], key="calib_upload",
+                    )
+                    if _calib_upload is not None:
+                        try:
+                            import json as _jcu
+                            _cc = _calib_upload.read()
+                            _cp = _jcu.loads(_cc)
+                            if "T_cam2base" not in _cp and "affine_camera_to_robot" not in _cp:
+                                st.error("Must contain key T_cam2base or affine_camera_to_robot.")
+                            else:
+                                _mk2 = "T_cam2base" if "T_cam2base" in _cp else "affine_camera_to_robot"
+                                _mv = _cp[_mk2]
+                                if len(_mv) != 4 or any(len(row) != 4 for row in _mv):
+                                    st.error("Matrix must be 4x4.")
+                                else:
+                                    _calib_dir.mkdir(parents=True, exist_ok=True)
+                                    _calib_path.write_bytes(_cc)
+                                    st.success(f"Saved to {_calib_path}")
+                                    st.rerun()
+                        except Exception as _e:
+                            st.error(f"Failed to parse: {_e}")
 
                 with tab3:
                     # Generic Robot Preview
@@ -1271,5 +1324,7 @@ of a calibration target, then solve for the rigid transform.
 
         else:
             st.info("Please upload a video to analyze.")
+
+  
 
     render_local_content()

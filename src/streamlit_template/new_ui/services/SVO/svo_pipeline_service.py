@@ -736,6 +736,24 @@ def handle_svo_objects(
             depth_path = _depth_by_frame.get(frame_num)
 
             bgr_p1 = cv2.imread(str(fname))
+            if bgr_p1 is None:
+                # Frame file missing or unreadable (e.g. failed/partial download).
+                # Hold the previous detection so the rest of the pipeline stays
+                # aligned; avoids "NoneType has no attribute 'shape'" crash and
+                # the "Not supported for the square ROI" error from YOLO preprocessing.
+                logger.warning(f"handle_svo_objects: could not read frame {fname} — skipping (holding previous)")
+                _valid_detection_mask.append(False)
+                _selected_debug_rows.append({
+                    "frame_idx": _fidx, "frame_num": frame_num, "image_file": fname.name,
+                    "detected": 0, "held_previous": 1 if trajectory_3d else 0,
+                    "reason": "unreadable_frame", "candidate_count": 0,
+                    "label_candidate_count": 0, "selected_conf": "", "selected_label": "",
+                    "selected_track_id": "", "cx": "", "cy": "", "w": "", "h": "",
+                    "z_m": "", "gap_from_last_detection": "",
+                })
+                trajectory_3d.append(trajectory_3d[-1] if trajectory_3d else [0, 0, 0])
+                _draw_data.append(None)
+                continue
             if depth_path and depth_path.exists():
                 depth = np.load(str(depth_path))
             else:
@@ -1421,13 +1439,6 @@ def handle_svo_trajectory(base_path: Path, session_id: str = None):
                     },
                     f, indent=2,
                 )
-            if not (_grasp_valid and _release_valid):
-                st.warning(
-                    "Grasp/release uses at least one held object frame. "
-                    f"grasp_detected={_grasp_valid}, release_detected={_release_valid}. "
-                    "Check selected_detection_debug.csv for the missing range."
-                )
-
     # --- Script 09: Extract skill phases (use HAND trajectory, not reconstructed) ---
     with st.spinner("Extracting skill phases (Reach, Move)..."):
         t_len = min(len(hand_smooth), len(reconstructed))
@@ -1616,6 +1627,24 @@ def _generate_skill_reuse_dmp(dmp_dir: Path, plot_dir: Path, seg_dir: Path):
     with open(str(dmp_dir / "skill_reuse_traj.json"), 'w', encoding='utf-8') as f:
         json.dump(skill_traj.tolist(), f)
 
+    # --- Save segment-boundary metadata so viewer/robot step can read it directly ---
+    _post_release_len = len(post_release_segment) if len(post_release_segment) > 0 else POST_RELEASE_HOLD
+    _post_release_source = "hand_trajectory" if (post_release_traj_path.exists() and
+                           len(np.load(str(post_release_traj_path))) > 0) else "hold"
+    with open(str(dmp_dir / "skill_reuse_traj_metadata.json"), "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "reach_len": int(len(reach)),
+                "move_len": int(len(move)),
+                "post_release_len": int(_post_release_len),
+                "post_release_source": _post_release_source,
+                "grasp_idx": int(len(reach)),
+                "release_idx": int(len(reach) + 1 + len(move)),
+            },
+            f,
+            indent=2,
+        )
+
     # --- Plot (matches script 13) ---
     try:
         import matplotlib
@@ -1649,7 +1678,13 @@ def handle_svo_dmp(base_path: Path, session_id: str = None):
     """Step 4: DMP Learning."""
     _init_step_results()
 
-    if session_id:
+    # Route seg/dmp/plots through versioned objects session when available
+    _obj_sess = st.session_state.get("active_objects_session_id") or session_id
+    if _obj_sess:
+        seg_dir = base_path / "segmentation" / _obj_sess
+        dmp_dir = base_path / "dmp" / _obj_sess
+        plots_dir = base_path / "plots" / _obj_sess
+    elif session_id:
         seg_dir = base_path / "segmentation" / session_id
         dmp_dir = base_path / "dmp" / session_id
         plots_dir = base_path / "plots" / session_id
@@ -1928,7 +1963,12 @@ def handle_svo_robot(
     if robot_config is None:
         robot_config = {}
 
-    if session_id:
+    # Route through versioned objects session so the correct detection run is used
+    _obj_sess = st.session_state.get("active_objects_session_id") or session_id
+    if _obj_sess:
+        dmp_dir = base_path / "dmp" / _obj_sess
+        seg_dir = base_path / "segmentation" / _obj_sess
+    elif session_id:
         dmp_dir = base_path / "dmp" / session_id
         seg_dir = base_path / "segmentation" / session_id
     else:
@@ -1949,19 +1989,27 @@ def handle_svo_robot(
         cached_meshes_for_pose,
     )
 
-    # --- Load grasp_idx from segmentation (skill_reuse_traj structure) ---
+    # --- Load segment boundaries (prefer metadata JSON, fall back to .npy files) ---
     grasp_idx_robot = None
     release_idx_robot = None
+    post_release_len_robot = 0
+    _meta_path = dmp_dir / "skill_reuse_traj_metadata.json"
     try:
-        reach_path = seg_dir / "reach_traj.npy"
-        move_path = seg_dir / "move_traj.npy"
-        if reach_path.exists():
-            reach_len = len(np.load(str(reach_path)))
-            grasp_idx_robot = reach_len  # grasp_pos sits right after reach
-            if move_path.exists():
-                move_len = len(np.load(str(move_path)))
-                # In skill_reuse_traj: [reach, grasp_pos, move, release_pos, post_release]
-                release_idx_robot = reach_len + 1 + move_len
+        if _meta_path.exists():
+            with open(str(_meta_path), encoding="utf-8") as _mf:
+                _meta = json.load(_mf)
+            grasp_idx_robot = int(_meta["grasp_idx"])
+            release_idx_robot = int(_meta["release_idx"])
+            post_release_len_robot = int(_meta.get("post_release_len", 0))
+        else:
+            reach_path = seg_dir / "reach_traj.npy"
+            move_path = seg_dir / "move_traj.npy"
+            if reach_path.exists():
+                reach_len = len(np.load(str(reach_path)))
+                grasp_idx_robot = reach_len
+                if move_path.exists():
+                    move_len = len(np.load(str(move_path)))
+                    release_idx_robot = reach_len + 1 + move_len
     except Exception:
         pass
 
@@ -1997,9 +2045,12 @@ def handle_svo_robot(
     else:
         rgb_dir = base_path / "frames"
     video_fps = 15.0
-    num_video_frames = sum(len(list(rgb_dir.glob(ext))) for ext in ["*.png", "*.jpg", "*.jpeg"]) if rgb_dir.exists() else num_frames
-    video_duration = num_video_frames / video_fps
-    
+    num_video_frames = (
+        sum(len(list(rgb_dir.glob(ext))) for ext in ["*.png", "*.jpg", "*.jpeg"])
+        if rgb_dir.exists()
+        else num_frames
+    )
+
     # Map robot trajectory points synced with video up to release_idx
     frame_timestamps = []
     sr_release_idx = release_idx_robot if release_idx_robot is not None else num_frames - 1
@@ -2023,5 +2074,13 @@ def handle_svo_robot(
         "cart_path": cart_path,
         "grasp_idx": grasp_idx_robot,
         "release_idx": release_idx_robot,
+        "post_release_len": post_release_len_robot,
     }
-    return {"cart_path": cart_path, "q_traj": q_traj, "frame_timestamps": frame_timestamps, "grasp_idx": grasp_idx_robot, "release_idx": release_idx_robot}
+    return {
+        "cart_path": cart_path,
+        "q_traj": q_traj,
+        "frame_timestamps": frame_timestamps,
+        "grasp_idx": grasp_idx_robot,
+        "release_idx": release_idx_robot,
+        "post_release_len": post_release_len_robot,
+    }

@@ -108,8 +108,10 @@ def render_video_player(
         path = os.path.abspath(str(path))
         
     exists = os.path.exists(path) if path else False
+    playable_exts = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".m4v"}
+    is_playable_video = bool(path) and os.path.splitext(path)[1].lower() in playable_exts
     
-    if exists:
+    if exists and is_playable_video:
         # Seek logic
         seek_time = st.session_state.get("video_seek_time", 0)
         st.video(path, start_time=int(seek_time))
@@ -120,6 +122,8 @@ def render_video_player(
         else:
              st.caption(f"Playing: {selected_video.get('name', 'Unknown')}")
              
+    elif exists:
+        st.info(f"No playable preview video is available for: {selected_video.get('name', 'Video')}")
     else:
         # File missing
         st.info(f"File not found: {selected_video.get('name', 'Video')}")

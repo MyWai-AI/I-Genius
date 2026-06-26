@@ -399,17 +399,13 @@ def render_bag_pipeline_page():
                     get_robot_transport_options,
                     publish_cartesian_trajectory_vulcanexus,
                     publish_trajectory_dds,
-                    save_animation,
                 )
-                with st.popover("Action", use_container_width=False):
-                    st.markdown("#### Save Animation")
-                    anim_name = st.text_input("Animation name", value="PipelineAction", key="bag_anim_name")
-                    if st.button("Save Animation", key="bag_save_anim"):
-                        ok, msg = save_animation(urdf_path_local, traj_points, anim_name)
-                        if ok:
-                            st.success(msg)
-                        else:
-                            st.error(msg)
+                with st.popover("Action", width="content"):
+                    st.markdown("#### Generate New Trajectory")
+                    if st.button("Generate New Trajectory", key="bag_generate_new_trajectory", width="stretch"):
+                        st.session_state["skill_reuse_source_platform"] = "bag_pipeline"
+                        st.session_state["selected_platform"] = "skill_reuse"
+                        st.rerun()
 
                     st.markdown("---")
                     st.markdown("#### Push to Robot")
@@ -712,7 +708,7 @@ def render_bag_pipeline_page():
                 fig.update_xaxes(range=[t_min, t_max])
                 fig.update_xaxes(title_text="Frame", row=3, col=1)
 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
 
                 st.markdown("""
                     <style>
@@ -733,13 +729,13 @@ def render_bag_pipeline_page():
                     format="%.0f",
                 )
             else:
-                st.plotly_chart(res["fig"], use_container_width=True)
+                st.plotly_chart(res["fig"], width="stretch")
 
 
 
         # DMP 3D (fallback)
         elif rtype == "dmp3d":
-            st.plotly_chart(res["fig"], use_container_width=True)
+            st.plotly_chart(res["fig"], width="stretch")
 
         # ROBOT 3D (fallback)
         elif rtype == "robot3d":

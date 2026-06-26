@@ -114,6 +114,8 @@ def reconstruct_rgb_video(
             writer.write(frame)
     writer.release()
 
+    _convert_to_h264_if_needed(output_path)
+
     logger.info(f"RGB video written: {output_path} ({len(frame_files)} frames @ {fps} fps)")
     return output_path
 

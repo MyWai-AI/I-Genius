@@ -134,17 +134,14 @@ def render_timeline_range_control_bounds(min_idx, max_idx, key_prefix="default")
 
     range_key = f"{key_prefix}_timeline_range"
 
-    if range_key not in st.session_state:
-        st.session_state[range_key] = (min_idx, max_idx)
-
     selected = st.session_state.get(range_key, (min_idx, max_idx))
     selected_start, selected_end = _normalize_range(min_idx, max_idx, selected)
+    st.session_state[range_key] = (selected_start, selected_end)
 
     st.slider(
         "Timeline frame range",
         min_value=min_idx,
         max_value=max_idx,
-        value=(selected_start, selected_end),
         key=range_key,
     )
     return True
