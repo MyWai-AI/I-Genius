@@ -1,0 +1,7 @@
+robot_ip: 192.168.57.2
+
+ros:
+  domain_id: 42
+
+files:
+  trajectory_csv: data/trajectories/received_trajectory.csv

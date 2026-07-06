@@ -1,0 +1,21 @@
+{
+  "source": "From colleague final_calibration_result.yaml / load_cam2base_trans() screenshot",
+  "units": "millimeters",
+  "notes": [
+    "T_cam2base maps camera XYZ to Fairino base XYZ.",
+    "Translation includes the correction shown in the screenshot: err_cam2base = [155, -50, -28].",
+    "Verify one known camera point against the real robot/table before executing contact motion."
+  ],
+  "T_cam2base": [
+    [-0.702679698, 0.683491575, 0.1976879, -423.524069],
+    [0.70374712, 0.708572448, 0.0516243775, -810.929728],
+    [-0.104791379, 0.175397699, -0.978904701, 1590.34233],
+    [0.0, 0.0, 0.0, 1.0]
+  ],
+  "affine_camera_to_robot": [
+    [-0.702679698, 0.683491575, 0.1976879, -423.524069],
+    [0.70374712, 0.708572448, 0.0516243775, -810.929728],
+    [-0.104791379, 0.175397699, -0.978904701, 1590.34233]
+  ],
+  "default_rpy": [178.5136413574218, -1.880074620246887, 12.12576389312744]
+}

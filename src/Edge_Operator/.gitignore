@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+
+# UV
+.venv/
+
+# Logs
+logs/*.log
+*.log
+
+# Runtime data
+data/*.csv
+data/trajectories/*.csv
+
+# VS Code
+.vscode/
+
+# Streamlit
+.streamlit/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Fairino SDK build files
+fairino-python-sdk-main/**/build/
+fairino-python-sdk-main/**/example/
+fairino-python-sdk-main/**/*.log

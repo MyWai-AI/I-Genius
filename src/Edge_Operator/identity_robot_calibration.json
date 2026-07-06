@@ -1,0 +1,10 @@
+{
+  "source": "Identity transform for CSV files that are already in Fairino robot base millimeters.",
+  "units": "millimeters",
+  "affine_camera_to_robot": [
+    [1.0, 0.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0, 0.0],
+    [0.0, 0.0, 1.0, 0.0]
+  ],
+  "default_rpy": [178.5136413574218, -1.880074620246887, 12.12576389312744]
+}
