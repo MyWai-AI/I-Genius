@@ -1,139 +1,151 @@
 # Installation
 
-Use this on a fresh Ubuntu 22.04 developer/server machine:
+This repository has two separate runtime layers:
+
+- the I-Genius/VILMA application, run locally or with Docker Compose
+- ROS 2 / Vulcanexus / Fast DDS helpers under `scripts/vulcanexus/`, run only when publishing or receiving robot trajectories
+
+The application Dockerfile does not install Vulcanexus. The base Compose file starts only the application service named `vilma-agent`.
+
+## Prerequisites
+
+- Ubuntu 22.04 or a compatible Linux host
+- Python 3.10 or newer for local development
+- `uv` for Python dependency management
+- Docker Engine and the Docker Compose plugin for container deployment
+- ROS 2 Humble or Vulcanexus on hosts that run the ROS 2 publisher or edge receiver directly
+- NVIDIA Container Toolkit only when using `docker-compose.gpu.yml`
+
+## Environment File
+
+Create a local `.env` from the tracked template:
 
 ```bash
-git clone <repo>
-cd vilma-agent
-cp .env.example .env
-# edit .env and set MYWAI_ARTIFACTS_MAIL / MYWAI_ARTIFACTS_TOKEN
-./install_dependencies.sh --skip-uv-sync
-docker compose --env-file .env up -d --build
+cp .env.template .env
 ```
 
-This prepares host dependencies and starts:
+The canonical ROS 2 / DDS defaults are:
 
-- `vilma-agent`
-- `vulcanexus_humble`
-- `zenoh_cloud`
-
-The app is available on `http://localhost:9002`.
-
-For the repo-managed one-command path, use:
-
-```bash
-./setup.sh --start-app
+```env
+ROS_DOMAIN_ID=42
+RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ROS_LOCALHOST_ONLY=0
 ```
 
-That preserves the manual-container-compatible bootstrap flow and starts the
-existing app Compose service.
+Set `ROS_DISCOVERY_SERVER=<server-ip>:14520` only for deployments that use a Fast DDS Discovery Server.
 
-## Private Package Credentials
-
-Python dependency installation requires the private MyWai package feed. Add
-these values to `.env` or pass them in the environment before running setup:
+## Local Application
 
 ```bash
-MYWAI_ARTIFACTS_MAIL=you@example.com \
-MYWAI_ARTIFACTS_TOKEN=<token> \
-./setup.sh
-```
-
-If setup already ran without credentials, add them to `.env` and run:
-
-```bash
-./install_dependencies.sh --skip-system
-```
-
-## Start the App Locally
-
-For a local non-container app run after `uv sync` succeeds:
-
-```bash
+python3 -m venv .venv
 source .venv/bin/activate
-streamlit run src/streamlit_template/new_ui/pages/Common/landing_page.py \
+pip install --upgrade pip uv
+uv sync
+uv run streamlit run src/streamlit_template/new_ui/pages/Common/landing_page.py \
   --server.port 8504 \
   --server.address 0.0.0.0
 ```
 
-Open `http://localhost:8504`.
+Open:
 
-## Start the Existing Docker App
-
-The deployment Compose workflow starts the server stack:
-
-```bash
-docker compose --env-file .env up -d --build
+```text
+http://localhost:8504
 ```
 
-To restart only the app service:
+## Docker Application
+
+Start the application service:
 
 ```bash
-docker compose --env-file .env up -d vilma-agent
+docker compose up -d --build
 ```
 
-The container maps host port `9002` to Streamlit port `8504`.
+The service is:
 
-## Edge Machine Setup
+```text
+vilma-agent
+```
 
-On an Edge/robot-side Ubuntu 22.04 machine:
+The app is available at:
+
+```text
+http://localhost:9002
+```
+
+To validate the service set:
 
 ```bash
-git clone <repo>
-cd vilma-agent
-./install_dependencies.sh --skip-uv-sync
-docker compose --env-file .env --profile edge up -d zenoh_edge edge_receiver
+docker compose config --services
 ```
 
-This starts `zenoh_edge` and the generic `edge_receiver` container. To run the
-receiver directly on a ROS 2 host instead:
+Expected output:
+
+```text
+vilma-agent
+```
+
+## GPU Overlay
+
+Use the GPU overlay only on hosts with NVIDIA Container Toolkit installed:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+```
+
+The overlay augments `vilma-agent` with GPU visibility. It does not add middleware services.
+
+## ROS 2 / Vulcanexus Helpers
+
+The reusable module exposes standard ROS 2 / DDS interfaces. DDS discovery and network routing are deployment-specific and are configured according to the target network topology.
+
+Trajectory contract:
+
+| Setting | Value |
+|---|---|
+| `ROS_DOMAIN_ID` | `42` |
+| `RMW_IMPLEMENTATION` | `rmw_fastrtps_cpp` |
+| `ROS_LOCALHOST_ONLY` | `0` |
+| Topic | `/learned_trajectory` |
+| Message | `geometry_msgs/msg/PoseArray` |
+
+Publisher helper:
+
+```bash
+bash scripts/vulcanexus/docker_publish_traj.sh
+```
+
+Edge receiver helper:
 
 ```bash
 source /opt/ros/humble/setup.bash
 export ROS_DOMAIN_ID=42
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_LOCALHOST_ONLY=0
-bash ./scripts/vulcanexus/run_edge_receiver.sh
+bash scripts/vulcanexus/run_edge_receiver.sh
 ```
 
-## Setup Script Roles
-
-`setup.sh` remains available for compatibility with hosts that already have
-manually-created containers.
-
-| Role | Starts |
-|---|---|
-| `server` | `vulcanexus_humble`, `zenoh_cloud` |
-| `edge` | `zenoh_edge` |
-| `all` | all three infrastructure containers |
-| `none` | no infrastructure containers |
-
-Examples:
+Fast DDS Discovery Server helper:
 
 ```bash
-./setup.sh --role server
-./setup.sh --role edge --install-ros2
-./setup.sh --role all
-./setup.sh --role none --skip-infra
+FASTDDS_UDP_ADDRESS=<server-ip> \
+FASTDDS_UDP_PORT=14520 \
+bash scripts/vulcanexus/docker_run_fastdds_discovery_server.sh
 ```
 
-## Verify
+DDS Router is a DDS-native option for routed server-to-edge deployments:
 
 ```bash
-docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'
+CLOUD_PUBLIC_HOST=<public-host-or-ip> bash scripts/vulcanexus/render_ddsrouter_wan_config.sh cloud
+CLOUD_PUBLIC_HOST=<public-host-or-ip> bash scripts/vulcanexus/render_ddsrouter_wan_config.sh edge
+bash scripts/vulcanexus/docker_run_ddsrouter.sh
 ```
 
-Expected server containers:
+## FIWARE
 
-```text
-vilma-agent
-vulcanexus_humble
-zenoh_cloud
+FIWARE / Orion-LD is optional and separate from robot trajectory delivery:
+
+```bash
+docker compose -f docker-compose.fiware.yml up -d
 ```
 
-Expected Edge container:
-
-```text
-zenoh_edge
-vilma_edge_receiver
-```
+Orion-LD listens on `http://localhost:1026`. FIWARE stores execution metadata and lifecycle/status information. Raw robot trajectory delivery remains on ROS 2 / DDS, and this repository does not implement the DDS-NGSI-LD Enabler.

@@ -2,7 +2,6 @@
 Robot Action Service — Save Animation & Push to Robot (DDS/Vulcanexus).
 """
 import csv
-import importlib.util
 import json
 import logging
 import os
@@ -14,8 +13,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-TRANSPORT_VULCANEXUS = "Vulcanexus LAN (PoseArray)"
-TRANSPORT_CYCLONEDDS = "CycloneDDS JointTrajectory"
+TRANSPORT_VULCANEXUS = "Vulcanexus ROS 2 / Fast DDS (PoseArray)"
 
 DEFAULT_ROS_DOMAIN_ID = 42
 DEFAULT_VULCANEXUS_TOPIC = "/learned_trajectory"
@@ -32,10 +30,6 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[5]
 
 
-def has_cyclonedds() -> bool:
-    return importlib.util.find_spec("cyclonedds") is not None
-
-
 def has_vulcanexus_publisher() -> bool:
     return (_repo_root() / "scripts" / "vulcanexus" / "docker_publish_traj.sh").is_file()
 
@@ -45,17 +39,11 @@ def has_vulcanexus_status_subscriber() -> bool:
 
 
 def get_robot_transport_options() -> List[str]:
-    options: List[str] = []
-    if has_vulcanexus_publisher():
-        options.append(TRANSPORT_VULCANEXUS)
-    options.append(TRANSPORT_CYCLONEDDS)
-    return options
+    return [TRANSPORT_VULCANEXUS]
 
 
 def get_default_robot_transport() -> str:
-    if has_vulcanexus_publisher():
-        return TRANSPORT_VULCANEXUS
-    return TRANSPORT_CYCLONEDDS
+    return TRANSPORT_VULCANEXUS
 
 
 def get_default_robot_domain_id() -> int:
@@ -386,7 +374,7 @@ def publish_cartesian_trajectory_vulcanexus(
     metadata_source: Optional[str] = None,
 ) -> Tuple[bool, str]:
     """
-    Publish a Cartesian trajectory through the existing Vulcanexus LAN helper.
+    Publish a Cartesian trajectory through the existing Vulcanexus ROS 2 / Fast DDS helper.
 
     The current edge-side tooling already subscribes to geometry_msgs/PoseArray on
     /learned_trajectory, so this function converts the active Cartesian path into a
@@ -455,12 +443,12 @@ def publish_cartesian_trajectory_vulcanexus(
         domain_id,
     )
     msg = (
-        f"Published {arr.shape[0]} Cartesian waypoints via Vulcanexus LAN on "
+        f"Published {arr.shape[0]} Cartesian waypoints via Vulcanexus ROS 2 / Fast DDS on "
         f"'{topic_name}' (domain {domain_id}). {summary}"
     )
     if metadata_rows is not None:
         source_note = f" from {metadata_source}" if metadata_source else ""
-        msg += f" Metadata sidecar enabled{source_note}."
+        msg += f" Metadata columns included in runtime CSV{source_note}."
     if status_waiter is not None:
         ok, status_msg, status_payload = _finish_vulcanexus_status_waiter(status_waiter)
         if ok:
@@ -472,107 +460,3 @@ def publish_cartesian_trajectory_vulcanexus(
         else:
             msg += f" | Edge status unavailable: {status_msg}"
     return True, msg
-
-
-def publish_trajectory_dds(
-    joint_names: List[str],
-    q_traj,
-    timestamps: List[float],
-    topic_name: str = "/joint_trajectory",
-    domain_id: int = 0,
-) -> Tuple[bool, str]:
-    """
-    Publish a joint trajectory over DDS using cyclonedds.
-
-    The message structure mirrors ROS2 trajectory_msgs/JointTrajectory:
-      - joint_names: [str]
-      - points: [{positions: [float], time_from_start: {sec, nanosec}}]
-
-    Args:
-        joint_names: Ordered list of joint names.
-        q_traj: ndarray (N x num_joints) or list of lists.
-        timestamps: List of float seconds per frame.
-        topic_name: DDS topic name.
-        domain_id: DDS domain ID.
-
-    Returns:
-        (success, message)
-    """
-    try:
-        from cyclonedds.core import DomainParticipant
-        from cyclonedds.pub import DataWriter
-        from cyclonedds.topic import Topic
-        from cyclonedds.idl import IdlStruct
-        from cyclonedds.idl.types import sequence, float64
-        from dataclasses import dataclass
-    except ImportError:
-        return False, (
-            "cyclonedds is not installed. "
-            "Install it with: pip install cyclonedds"
-        )
-
-    # --- Define IDL-compatible types ---
-    @dataclass
-    class Duration(IdlStruct, typename="builtin_interfaces.msg.Duration"):
-        sec: int = 0
-        nanosec: int = 0
-
-    @dataclass
-    class JointTrajectoryPoint(IdlStruct, typename="trajectory_msgs.msg.JointTrajectoryPoint"):
-        positions: sequence[float64]
-        velocities: sequence[float64]
-        accelerations: sequence[float64]
-        effort: sequence[float64]
-        time_from_start: Duration = Duration()
-
-    @dataclass
-    class JointTrajectory(IdlStruct, typename="trajectory_msgs.msg.JointTrajectory"):
-        joint_names: sequence[str]
-        points: sequence[JointTrajectoryPoint]
-
-    try:
-        arr = np.asarray(q_traj)  # (N, J)
-        if arr.ndim != 2:
-            return False, f"q_traj shape invalid: {arr.shape}"
-
-        # Build points
-        points = []
-        t0 = timestamps[0] if timestamps else 0.0
-        for t, q in zip(timestamps, arr):
-            dt = t - t0
-            sec = int(dt)
-            nsec = int((dt - sec) * 1e9)
-            points.append(
-                JointTrajectoryPoint(
-                    positions=q.tolist(),
-                    velocities=[],
-                    accelerations=[],
-                    effort=[],
-                    time_from_start=Duration(sec=sec, nanosec=nsec),
-                )
-            )
-
-        msg = JointTrajectory(
-            joint_names=list(joint_names),
-            points=points,
-        )
-
-        # Publish
-        dp = DomainParticipant(domain_id=domain_id)
-        tp = Topic(dp, topic_name, JointTrajectory)
-        writer = DataWriter(dp, tp)
-
-        writer.write(msg)
-        logger.info(
-            f"Published JointTrajectory on '{topic_name}' (domain {domain_id}): "
-            f"{len(points)} points, {len(joint_names)} joints"
-        )
-
-        return True, (
-            f"Published {len(points)} trajectory points for "
-            f"{len(joint_names)} joints on topic '{topic_name}' (domain {domain_id})"
-        )
-
-    except Exception as e:
-        logger.exception("DDS publish failed")
-        return False, f"Publish failed: {e}"

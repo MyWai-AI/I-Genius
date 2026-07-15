@@ -1,5 +1,5 @@
 services:
-  igenius:
+  vilma-agent:
     # GPU overlay — use with:
     #   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
     #

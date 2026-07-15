@@ -5,7 +5,7 @@ set -euo pipefail
 CONTAINER="${VULCANEXUS_CONTAINER:-vulcanexus_humble}"
 SERVER_ID="${FASTDDS_SERVER_ID:-0}"
 UDP_ADDRESS="${FASTDDS_UDP_ADDRESS:-}"
-UDP_PORT="${FASTDDS_UDP_PORT:-}"
+UDP_PORT="${FASTDDS_UDP_PORT:-14520}"
 TCP_ADDRESS="${FASTDDS_TCP_ADDRESS:-}"
 TCP_PORT="${FASTDDS_TCP_PORT:-}"
 BACKUP="${FASTDDS_BACKUP:-0}"
@@ -39,11 +39,7 @@ echo "FASTDDS_SERVER_ID=$SERVER_ID"
 if [ -n "$UDP_ADDRESS" ]; then
   echo "FASTDDS_UDP_ADDRESS=$UDP_ADDRESS"
 fi
-if [ -n "$UDP_PORT" ]; then
-  echo "FASTDDS_UDP_PORT=$UDP_PORT"
-else
-  echo "FASTDDS_UDP_PORT=11811"
-fi
+echo "FASTDDS_UDP_PORT=$UDP_PORT"
 if [ -n "$TCP_ADDRESS" ]; then
   echo "FASTDDS_TCP_ADDRESS=$TCP_ADDRESS"
 fi
@@ -55,9 +51,7 @@ DISCOVERY_ARGS=(-i "$SERVER_ID")
 if [ -n "$UDP_ADDRESS" ]; then
   DISCOVERY_ARGS+=(-l "$UDP_ADDRESS")
 fi
-if [ -n "$UDP_PORT" ]; then
-  DISCOVERY_ARGS+=(-p "$UDP_PORT")
-fi
+DISCOVERY_ARGS+=(-p "$UDP_PORT")
 if [ -n "$TCP_ADDRESS" ]; then
   DISCOVERY_ARGS+=(-t "$TCP_ADDRESS")
 fi
@@ -70,7 +64,7 @@ fi
 
 printf -v DISCOVERY_ARGS_STRING ' %q' "${DISCOVERY_ARGS[@]}"
 
-echo "Point ROS_DISCOVERY_SERVER at <server-ip>:${UDP_PORT:-11811}"
+echo "Point ROS_DISCOVERY_SERVER at <server-ip>:$UDP_PORT"
 
 docker exec -i "$CONTAINER" bash -lc "
 source /opt/vulcanexus/humble/setup.bash

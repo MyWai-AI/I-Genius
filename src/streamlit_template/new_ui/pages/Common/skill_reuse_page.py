@@ -731,13 +731,10 @@ def render_skill_reuse_page():
         return
 
     from src.streamlit_template.new_ui.services.Common.robot_action_service import (
-        TRANSPORT_CYCLONEDDS,
         get_default_robot_domain_id,
         get_default_robot_transport,
         get_default_vulcanexus_publish_settings,
-        get_robot_transport_options,
         publish_cartesian_trajectory_vulcanexus,
-        publish_trajectory_dds,
     )
     from src.streamlit_template.components.sync_viewer import sync_viewer
 
@@ -1009,14 +1006,11 @@ def render_skill_reuse_page():
     if len(selected_indices) > 1:
         st.warning("Multiple trajectories are selected. Actions will use the first selected row.")
 
-    transport_options = get_robot_transport_options()
     default_transport = get_default_robot_transport()
     vulcanexus_defaults = get_default_vulcanexus_publish_settings()
-    transport = st.selectbox(
-        "Transport",
-        transport_options,
-        index=transport_options.index(default_transport),
-        key="sr_action_transport",
+    st.caption(
+        f"Transport: {default_transport}. Publishes the selected Skill Reuse "
+        "Cartesian trajectory as `geometry_msgs/msg/PoseArray`."
     )
 
     cfg_col1, cfg_col2 = st.columns(2)
@@ -1029,57 +1023,46 @@ def render_skill_reuse_page():
             step=1,
             key="sr_action_dds_domain",
         )
-    if transport == TRANSPORT_CYCLONEDDS:
-        with cfg_col1:
-            dds_topic = st.text_input("Topic", value="/joint_trajectory", key="sr_action_dds_topic")
-        discovery_server = ""
-        repeat_count = 1
-        status_topic = ""
-        status_wait_sec = 0.0
-    else:
-        with cfg_col1:
-            dds_topic = st.text_input(
-                "Topic",
-                value=str(vulcanexus_defaults["topic"]),
-                key="sr_action_vulcanexus_topic",
-            )
-        st.caption("Proven path: same-LAN Vulcanexus Discovery Server on `server1` plus `/learned_trajectory` PoseArray.")
-        discovery_server = st.text_input(
-            "Discovery Server",
-            value=str(vulcanexus_defaults["discovery_server"]),
-            key="sr_action_vulcanexus_discovery_server",
-            help="Known-good LAN default is server1 on 192.168.0.10:14520. Override with env if needed.",
+    with cfg_col1:
+        dds_topic = st.text_input(
+            "Topic",
+            value=str(vulcanexus_defaults["topic"]),
+            key="sr_action_vulcanexus_topic",
         )
-        repeat_count = st.number_input(
-            "Repeat Count",
-            value=int(vulcanexus_defaults["repeat_count"]),
-            min_value=1,
-            max_value=100000,
-            step=1,
-            key="sr_action_vulcanexus_repeat",
-        )
-        status_topic = st.text_input(
-            "Status Topic",
-            value=str(vulcanexus_defaults["status_topic"]),
-            key="sr_action_vulcanexus_status_topic",
-        )
-        status_wait_sec = st.number_input(
-            "Wait For Status (sec)",
-            value=float(vulcanexus_defaults["status_wait_sec"]),
-            min_value=0.0,
-            max_value=60.0,
-            step=1.0,
-            key="sr_action_vulcanexus_status_wait",
-            help="Set to 0 to skip waiting for the edge executor status.",
-        )
+    discovery_server = st.text_input(
+        "Discovery Server",
+        value=str(vulcanexus_defaults["discovery_server"]),
+        key="sr_action_vulcanexus_discovery_server",
+        help="Optional Fast DDS Discovery Server endpoint, for example <server-ip>:14520.",
+    )
+    repeat_count = st.number_input(
+        "Repeat Count",
+        value=int(vulcanexus_defaults["repeat_count"]),
+        min_value=1,
+        max_value=100000,
+        step=1,
+        key="sr_action_vulcanexus_repeat",
+    )
+    status_topic = st.text_input(
+        "Status Topic",
+        value=str(vulcanexus_defaults["status_topic"]),
+        key="sr_action_vulcanexus_status_topic",
+    )
+    status_wait_sec = st.number_input(
+        "Wait For Status (sec)",
+        value=float(vulcanexus_defaults["status_wait_sec"]),
+        min_value=0.0,
+        max_value=60.0,
+        step=1.0,
+        key="sr_action_vulcanexus_status_wait",
+        help="Set to 0 to skip waiting for the edge executor status.",
+    )
 
     if st.button("Push to Robot", key="sr_push_robot_table", type="primary", width="stretch"):
         if selected_file is None:
             st.warning("Select one trajectory in the first column before pushing to robot.")
-        elif transport == TRANSPORT_CYCLONEDDS and not Path(urdf_path).exists():
-            st.error(f"URDF not found: {urdf_path}")
-        elif transport != TRANSPORT_CYCLONEDDS:
-            with st.spinner("Publishing Cartesian trajectory via Vulcanexus LAN..."):
+        else:
+            with st.spinner("Publishing Cartesian trajectory via Vulcanexus ROS 2 / Fast DDS..."):
                 try:
                     cart_path = np.load(str(selected_file))
                     ok, msg = publish_cartesian_trajectory_vulcanexus(
@@ -1090,47 +1073,6 @@ def render_skill_reuse_page():
                         status_topic=status_topic.strip() or None,
                         status_timeout_sec=float(status_wait_sec),
                         repeat=int(repeat_count),
-                    )
-                    if ok:
-                        st.success(msg)
-                    else:
-                        st.error(msg)
-                except Exception as e:
-                    st.error(f"Failed: {e}")
-        else:
-            selected_meta = meta_by_stem.get(selected_file.stem, {})
-            grasp_idx = int(selected_meta.get("grasp_idx", 0))
-            release_idx = int(selected_meta.get("release_idx", pipeline_release_idx or 0))
-
-            with st.spinner("Computing IK and publishing..."):
-                try:
-                    ik_result = compute_ik_for_reuse_traj(
-                        skill_reuse_npy=str(selected_file),
-                        urdf_path=urdf_path,
-                        robot_config=robot_config,
-                        grasp_idx=grasp_idx,
-                        release_idx=release_idx,
-                    )
-                    q_traj = ik_result["q_traj"]
-                    timestamps = ik_result["frame_timestamps"]
-
-                    from src.streamlit_template.core.Common.robot_playback import load_chain
-
-                    chain = load_chain(urdf_path)
-                    joint_names = [
-                        link.name
-                        for link in chain.links
-                        if link.name != "base_link" and hasattr(link, "bounds") and link.bounds != (None, None)
-                    ]
-                    if not joint_names:
-                        joint_names = [f"joint_{i}" for i in range(q_traj.shape[1])]
-
-                    ok, msg = publish_trajectory_dds(
-                        joint_names=joint_names,
-                        q_traj=q_traj,
-                        timestamps=timestamps,
-                        topic_name=dds_topic,
-                        domain_id=int(dds_domain),
                     )
                     if ok:
                         st.success(msg)

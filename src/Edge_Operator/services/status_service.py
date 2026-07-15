@@ -1,22 +1,4 @@
-from pathlib import Path
 import subprocess
-
-ROOT = Path(__file__).resolve().parent.parent
-
-
-def check_zenoh():
-    try:
-        result = subprocess.run(
-            ["docker", "ps"],
-            capture_output=True,
-            text=True,
-            timeout=3,
-        )
-
-        return "zenoh_edge" in result.stdout
-
-    except Exception:
-        return False
 
 
 def check_ros2():

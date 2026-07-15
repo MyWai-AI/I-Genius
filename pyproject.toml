@@ -30,7 +30,6 @@ dependencies = [
     "scipy",
     "networkx>=3.2",
     "pyzed",
-    "cyclonedds",
 ]
 
 [project.optional-dependencies]

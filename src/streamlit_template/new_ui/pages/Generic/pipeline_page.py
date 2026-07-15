@@ -557,7 +557,6 @@ def render_pipeline_page():
 
             # === ACTION BUTTONS ===
             if traj_points:
-                from src.streamlit_template.new_ui.services.Common.robot_action_service import publish_trajectory_dds
                 with st.popover("Action", width="content"):
                     st.markdown("#### Generate New Trajectory")
                     if st.button("Generate New Trajectory", key="gen_generate_new_trajectory", width="stretch"):
@@ -570,21 +569,14 @@ def render_pipeline_page():
                     st.markdown("---")
                     st.markdown("#### Push to Robot")
                     from src.streamlit_template.new_ui.services.Common.robot_action_service import (
-                        TRANSPORT_CYCLONEDDS,
                         get_default_robot_domain_id,
-                        get_default_robot_transport,
                         get_default_vulcanexus_publish_settings,
-                        get_robot_transport_options,
                         publish_cartesian_trajectory_vulcanexus,
                     )
-                    transport_options = get_robot_transport_options()
-                    default_transport = get_default_robot_transport()
                     vulcanexus_defaults = get_default_vulcanexus_publish_settings()
-                    transport = st.selectbox(
-                        "Transport",
-                        transport_options,
-                        index=transport_options.index(default_transport),
-                        key="gen_robot_transport",
+                    st.caption(
+                        "Publishes `/learned_trajectory` as `geometry_msgs/msg/PoseArray` "
+                        "through the Vulcanexus ROS 2 / Fast DDS interface."
                     )
                     dds_domain = st.number_input(
                         "Domain ID",
@@ -594,62 +586,49 @@ def render_pipeline_page():
                         step=1,
                         key="gen_dds_domain",
                     )
-                    if transport == TRANSPORT_CYCLONEDDS:
-                        dds_topic = st.text_input("Topic", value="/joint_trajectory", key="gen_dds_topic")
-                    else:
-                        st.caption("Proven path: same-LAN Vulcanexus Discovery Server on `server1` plus `/learned_trajectory` PoseArray.")
-                        dds_topic = st.text_input(
-                            "Topic",
-                            value=str(vulcanexus_defaults["topic"]),
-                            key="gen_vulcanexus_topic",
-                        )
-                        discovery_server = st.text_input(
-                            "Discovery Server",
-                            value=str(vulcanexus_defaults["discovery_server"]),
-                            key="gen_vulcanexus_discovery_server",
-                            help="Known-good LAN default is server1 on 192.168.0.10:14520. Override with env if needed.",
-                        )
-                        repeat_count = st.number_input(
-                            "Repeat Count",
-                            value=int(vulcanexus_defaults["repeat_count"]),
-                            min_value=1,
-                            max_value=100,
-                            step=1,
-                            key="gen_vulcanexus_repeat",
-                        )
-                        status_topic = st.text_input(
-                            "Status Topic",
-                            value=str(vulcanexus_defaults["status_topic"]),
-                            key="gen_vulcanexus_status_topic",
-                        )
-                        status_wait_sec = st.number_input(
-                            "Wait For Status (sec)",
-                            value=float(vulcanexus_defaults["status_wait_sec"]),
-                            min_value=0.0,
-                            max_value=60.0,
-                            step=1.0,
-                            key="gen_vulcanexus_status_wait",
-                            help="Set to 0 to skip waiting for the edge executor status.",
-                        )
+                    dds_topic = st.text_input(
+                        "Topic",
+                        value=str(vulcanexus_defaults["topic"]),
+                        key="gen_vulcanexus_topic",
+                    )
+                    discovery_server = st.text_input(
+                        "Discovery Server",
+                        value=str(vulcanexus_defaults["discovery_server"]),
+                        key="gen_vulcanexus_discovery_server",
+                        help="Optional Fast DDS Discovery Server endpoint, for example <server-ip>:14520.",
+                    )
+                    repeat_count = st.number_input(
+                        "Repeat Count",
+                        value=int(vulcanexus_defaults["repeat_count"]),
+                        min_value=1,
+                        max_value=100,
+                        step=1,
+                        key="gen_vulcanexus_repeat",
+                    )
+                    status_topic = st.text_input(
+                        "Status Topic",
+                        value=str(vulcanexus_defaults["status_topic"]),
+                        key="gen_vulcanexus_status_topic",
+                    )
+                    status_wait_sec = st.number_input(
+                        "Wait For Status (sec)",
+                        value=float(vulcanexus_defaults["status_wait_sec"]),
+                        min_value=0.0,
+                        max_value=60.0,
+                        step=1.0,
+                        key="gen_vulcanexus_status_wait",
+                        help="Set to 0 to skip waiting for the edge executor status.",
+                    )
                     if st.button("🤖 Push to Robot", key="gen_push_robot"):
-                        if transport == TRANSPORT_CYCLONEDDS:
-                            ok, msg = publish_trajectory_dds(
-                                joint_names=joint_names_ordered,
-                                q_traj=q_traj,
-                                timestamps=timestamps,
-                                topic_name=dds_topic,
-                                domain_id=int(dds_domain),
-                            )
-                        else:
-                            ok, msg = publish_cartesian_trajectory_vulcanexus(
-                                cart_path=cart_path,
-                                topic_name=dds_topic,
-                                domain_id=int(dds_domain),
-                                discovery_server=discovery_server.strip() or None,
-                                status_topic=status_topic.strip() or None,
-                                status_timeout_sec=float(status_wait_sec),
-                                repeat=int(repeat_count),
-                            )
+                        ok, msg = publish_cartesian_trajectory_vulcanexus(
+                            cart_path=cart_path,
+                            topic_name=dds_topic,
+                            domain_id=int(dds_domain),
+                            discovery_server=discovery_server.strip() or None,
+                            status_topic=status_topic.strip() or None,
+                            status_timeout_sec=float(status_wait_sec),
+                            repeat=int(repeat_count),
+                        )
                         if ok:
                             st.success(msg)
                         else:

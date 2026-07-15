@@ -33,7 +33,10 @@ def render_push_to_robot_controls(
         key=f"{key_prefix}_dds_domain",
         disabled=controls_disabled,
     )
-    st.caption("Publishes the generated Cartesian path as `geometry_msgs/msg/PoseArray` through the Zenoh DDS bridge.")
+    st.caption(
+        "Publishes the generated Cartesian path as `geometry_msgs/msg/PoseArray` "
+        "through the Vulcanexus ROS 2 / Fast DDS interface."
+    )
     topic = st.text_input(
         "Topic",
         value=str(vulcanexus_defaults["topic"]),

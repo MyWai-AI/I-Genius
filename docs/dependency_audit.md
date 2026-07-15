@@ -1,73 +1,60 @@
 # Dependency Audit
 
-This audit covers a fresh Ubuntu 22.04 checkout and keeps the existing
-Push-to-Robot, Vulcanexus, Fast DDS, and Zenoh behavior intact.
+This audit describes the current repository state for application deployment, ROS 2 / Vulcanexus / Fast DDS trajectory transport, DDS Router helpers, and FIWARE.
 
 ## Host Prerequisites
 
 | Area | Requirement | Used by |
 |---|---|---|
-| OS | Ubuntu 22.04 Jammy | validated host target |
-| Python | Python 3.10.14 or newer, `python3-venv`, `python3-pip` | local `uv sync`, Streamlit app |
+| OS | Ubuntu 22.04 or compatible Linux | development and deployment host |
+| Python | Python 3.10 or newer | local Streamlit app and tooling |
 | Package manager | `uv` | Python dependency sync |
-| Build/system libs | `build-essential`, `git`, `curl`, `ca-certificates`, `gnupg`, `ffmpeg`, `libgl1`, `libglib2.0-0`, `iproute2` | Python wheels, OpenCV/media, diagnostics |
-| Docker | Docker Engine | app container, Vulcanexus container, Zenoh bridges |
-| Docker Compose | Docker Compose plugin (`docker compose`) | existing `docker-compose.yml` app deployment |
-| ROS 2 on host | Optional on the server; required on Edge if running `run_edge_receiver.sh` outside Docker | Edge receiver and ROS debug commands |
-| Fast DDS | `rmw_fastrtps_cpp` and optional Fast DDS Discovery Server | current ROS 2 transport defaults |
+| System libraries | `build-essential`, `git`, `curl`, `ffmpeg`, `libgl1`, `libglib2.0-0` | Python wheels and media processing |
+| Docker | Docker Engine | application container and optional FIWARE Compose |
+| Docker Compose | Docker Compose plugin | `vilma-agent` and FIWARE Compose validation |
+| ROS 2 / Vulcanexus | Humble-compatible ROS 2 environment | trajectory publisher, receiver, executor, and DDS helpers |
+| Fast DDS | `rmw_fastrtps_cpp` | canonical ROS 2 middleware implementation |
 
 ## Python Dependencies
 
-The Python environment is defined by `pyproject.toml` and `uv.lock`.
+The Python environment is defined by `pyproject.toml`.
+
 Notable runtime dependencies include:
 
-- Streamlit UI: `streamlit`, `streamlit-post-message`, Streamlit helper components.
-- Computer vision and trajectory work: `numpy`, `opencv-python-headless`, `mediapipe`, `ultralytics`, `transformers`, `timm`, `scipy`, `scikit-learn`, `plotly`.
-- Robot/model tooling: `ikpy`, `urdfpy`, `trimesh`, `pycollada`, `shapely`, `networkx`.
-- Communication helpers: `cyclonedds`, `flask`, `requests`, `python-dotenv`.
-- MyWai private package: `mywai-python-integration-kit==0.5.15+build.11277`.
-- Optional RealSense: `pyrealsense2` via `.[realsense]`.
+- Streamlit UI: `streamlit`, `streamlit-post-message`
+- Computer vision and trajectory work: `numpy`, `opencv-python-headless`, `mediapipe`, `ultralytics`, `transformers`, `timm`, `scipy`, `scikit-learn`, `plotly`
+- Robot/model tooling: `ikpy`, `urdfpy`, `trimesh`, `pycollada`, `shapely`, `networkx`
+- Communication helpers: `flask`, `requests`, `python-dotenv`
+- Optional RealSense support through the declared extra
 
-`mywai-python-integration-kit` comes from the private Azure DevOps feed, so
-`MYWAI_ARTIFACTS_MAIL` and `MYWAI_ARTIFACTS_TOKEN` are required before `uv sync`
-can complete.
+## Containers
 
-## Required Containers
+Current tracked Compose files define:
 
-| Container | Image | Role | Notes |
-|---|---|---|---|
-| `vilma-agent` | built from local `Dockerfile` | Streamlit deployment container | existing `docker-compose.yml`, port `9002:8504` |
-| `vulcanexus_humble` | `eprosima/vulcanexus:humble-desktop` | ROS 2/Vulcanexus publisher runtime | expected by `scripts/vulcanexus/docker_publish_traj.sh` |
-| `zenoh_cloud` | `eclipse/zenoh-bridge-dds:latest` | server-side DDS bridge listener | tested command: `-d 42 -l tcp/0.0.0.0:11811` |
-| `zenoh_edge` | `eclipse/zenoh-bridge-dds:latest` | Edge-side DDS bridge connector | tested endpoint: `tcp/sestrilevante.platform.myw.ai:11811` |
-| `fiware-mongo`, `fiware-orion-ld` | pinned in `docker-compose.fiware.yml` | optional FIWARE integration | not required for Push-to-Robot |
-| `edge_receiver` | `osrf/ros:humble-ros-base` | optional generic Edge receiver | Compose `edge` profile |
-| `fastdds_discovery_server` | `eprosima/vulcanexus:humble-desktop` | optional Fast DDS Discovery Server | Compose `fastdds` profile |
+| Compose file | Services | Role |
+|---|---|---|
+| `docker-compose.yml` | `vilma-agent` | Streamlit application, `9002:8504` |
+| `docker-compose.gpu.yml` | overlay for `vilma-agent` | NVIDIA GPU visibility |
+| `docker-compose.fiware.yml` | `fiware-mongo`, `fiware-orion-ld` | optional northbound metadata/status layer |
 
-`bootstrap.sh` now creates or starts the existing `vulcanexus_humble`,
-`zenoh_cloud`, and `zenoh_edge` containers without replacing manually-created
-containers of the same name.
-
-`docker-compose.yml` now also defines the fresh-machine server stack directly:
-`vilma-agent`, `vulcanexus_humble`, and `zenoh_cloud`.
+The base application Compose file does not define middleware services.
 
 ## ROS 2 / Robot Communication
 
-The tested Push-to-Robot path is:
+The reusable trajectory path is:
 
 ```text
 VILMA UI
 -> data/_runtime/vulcanexus/last_cartesian_push.csv
 -> scripts/vulcanexus/docker_publish_traj.sh
--> vulcanexus_humble
--> ROS 2 /learned_trajectory
--> zenoh_cloud
--> zenoh_edge
--> Edge ROS 2 /learned_trajectory
--> robot receiver/backend
+-> Vulcanexus ROS 2 publisher
+-> /learned_trajectory
+-> Fast DDS
+-> Edge ROS 2 receiver
+-> robot-specific backend
 ```
 
-Current defaults:
+Canonical defaults:
 
 | Setting | Value |
 |---|---|
@@ -79,97 +66,82 @@ Current defaults:
 | `ROS_LOCALHOST_ONLY` | `0` |
 | CSV path | `data/_runtime/vulcanexus/last_cartesian_push.csv` |
 
-The robot relay path is separate: `robot_relay/relay_server.py` is a Flask
-service for the robot PC, listens on port `5050`, and needs the Fairino Python
-SDK before real robot motion lines are enabled.
+## DDS Helper Scripts
+
+Publisher and receiver:
+
+- `scripts/vulcanexus/docker_publish_traj.sh`
+- `scripts/vulcanexus/traj_pose_array_pub.py`
+- `scripts/vulcanexus/run_edge_receiver.sh`
+- `scripts/vulcanexus/edge_receive_posearray.py`
+
+Discovery Server:
+
+- `scripts/vulcanexus/docker_run_fastdds_discovery_server.sh`
+- default UDP port `14520`
+- `ROS_DISCOVERY_SERVER=<server-ip>:14520`
+
+DDS Router:
+
+- `scripts/vulcanexus/ddsrouter_cloud.template.yaml`
+- `scripts/vulcanexus/ddsrouter_edge.template.yaml`
+- `scripts/vulcanexus/render_ddsrouter_wan_config.sh`
+- `scripts/vulcanexus/docker_run_ddsrouter.sh`
+- default WAN TCP port `45678`
+
+Fast DDS WAN TCP profiles:
+
+- `scripts/vulcanexus/fastdds_wan_tcp_server.template.xml`
+- `scripts/vulcanexus/fastdds_wan_tcp_client.template.xml`
+- `scripts/vulcanexus/render_fastdds_wan_tcp_profile.sh`
+- `scripts/vulcanexus/docker_run_fastdds_discovery_server_xml.sh`
+
+DDS Router is a DDS-native option for routed server-to-edge deployments. The repository contains helper support, but no completed cross-machine runtime validation is claimed here.
 
 ## Environment Variables
 
-Required for dependency installation:
-
-- `MYWAI_ARTIFACTS_MAIL`
-- `MYWAI_ARTIFACTS_TOKEN`
-
-Core app variables:
+Application:
 
 - `DEBUG_MODE`
-- `END_POINT`
 - `LOCAL_HOST_RUN_ENV`
-- `MYWAI_USER`
-- `MYWAI_PASSWORD`
-- `MYWAI_API_ENDPOINT`
-- `MYWAI_ENDPOINT`
-- `MYWAI_TOKEN_PLATFORM`
-- `DATA_ROOT`
 - `DATA_MAX_AGE_HOURS`
 - `DATA_CLEANUP_INTERVAL_MINUTES`
 
-ROS/Vulcanexus/Zenoh variables:
+ROS 2 / DDS:
 
 - `ROS_DOMAIN_ID`
 - `RMW_IMPLEMENTATION`
 - `ROS_LOCALHOST_ONLY`
 - `ROS_DISCOVERY_SERVER`
-- `VILMA_VULCANEXUS_DISCOVERY_SERVER`
-- `VILMA_VULCANEXUS_REPEAT`
-- `VILMA_VULCANEXUS_RATE_HZ`
-- `VILMA_VULCANEXUS_STATUS_WAIT_SEC`
-- `HOST_WORKSPACE`
-- `CONTAINER_WORKSPACE`
+- `FASTDDS_UDP_ADDRESS`
+- `FASTDDS_UDP_PORT`
 - `VULCANEXUS_CONTAINER`
 - `VULCANEXUS_SUB_CONTAINER`
-- `VULCANEXUS_IMAGE`
-- `ZENOH_BRIDGE_DDS_IMAGE`
-- `ZENOH_CLOUD_CONTAINER`
-- `ZENOH_EDGE_CONTAINER`
-- `ZENOH_CLOUD_LISTEN`
-- `ZENOH_EDGE_CONNECT`
+- `HOST_WORKSPACE`
+- `CONTAINER_WORKSPACE`
 
-Optional/feature-specific variables:
+DDS Router:
 
-- `HF_TOKEN`
-- `VILMA_FIWARE_BROKER_URL`
-- `VILMA_OBJECT_CONF`
-- `VILMA_ANCHOR_CLASS`
-- `ROBOT_IP`
-- `ROBOT_RELAY_HOST`
-- `ROBOT_RELAY_PORT`
+- `CLOUD_PUBLIC_HOST`
+- `CLOUD_LISTEN_IP`
+- `ROS_DOMAIN_ID_VALUE`
+- `WAN_PORT`
+- `DDSROUTER_CONTAINER`
+- `HOST_CONFIG_PATH`
 
-## Manual Setup Found Before Automation
+FIWARE:
 
-- Install Docker Engine and Docker Compose plugin.
-- Enable and start Docker.
-- Install Python, `uv`, and system libraries for OpenCV/media processing.
-- Create `.env` and provide private MyWai feed credentials.
-- Create `.netrc` for the Azure DevOps Python feed.
-- Run `uv sync`.
-- Manually create/start `vulcanexus_humble`.
-- Manually create/start `zenoh_cloud` on the server.
-- Manually create/start `zenoh_edge` on the Edge machine.
-- Set ROS environment variables consistently on server and Edge.
-- Install ROS 2 Humble on the Edge machine when running host-side receivers.
-- Start the Edge receiver or robot backend.
+- `IGENIUS_FIWARE_BROKER_URL`
+- `IGENIUS_FIWARE_CONTEXT_URL`
 
-## Automated Now
+## FIWARE
 
-- `.env` creation from `.env.example`.
-- Filling `HOST_WORKSPACE` for the current checkout.
-- Runtime directory creation.
-- Ubuntu base package installation.
-- Docker Engine and Compose plugin installation.
-- Docker service enable/start.
-- `uv` installation.
-- uv-managed Python 3.10.14 installation when the host `python3` is older than the pyproject requirement.
-- `.netrc` creation when MyWai feed credentials are present.
-- `uv sync` when credentials are present.
-- Optional ROS 2 Humble host install with `--install-ros2`.
-- Idempotent startup of `vulcanexus_humble`, `zenoh_cloud`, and `zenoh_edge`.
-- Compose-managed startup of the default server stack with `docker compose up -d`.
+FIWARE / Orion-LD is optional and separate from the trajectory transport. It stores execution metadata and lifecycle/status information through NGSI-LD REST. Raw trajectory delivery remains ROS 2 / DDS, and this repository does not implement the DDS-NGSI-LD Enabler.
 
-## Still Intentionally Manual
+## Intentionally Manual
 
-- Supplying private credentials and tokens.
-- Installing camera vendor SDKs such as ZED SDK when native depth support is needed.
-- Installing/configuring the Fairino Python SDK and confirming robot safety limits.
-- Choosing the production Zenoh edge endpoint for a specific network.
-- Opening firewall/security-group ports such as `11811`, `8504`, `8505`, and `5050`.
+- Supplying any private credentials or tokens
+- Installing camera vendor SDKs such as ZED SDK when native depth support is needed
+- Installing/configuring the robot SDK and validating safety limits
+- Choosing the DDS discovery or routing strategy for the target network topology
+- Opening deployment-specific firewall/security-group ports such as `14520`, `45678`, `9002`, `1026`, and `5050`

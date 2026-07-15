@@ -16,11 +16,6 @@ from services.receiver_service import (
     restart_receiver,
 )
 from services.ros2_service import ros2_connected
-from services.zenoh_service import zenoh_running
-from services.zenoh_launcher import (
-    start_zenoh,
-    stop_zenoh,
-)
 from services.robot_service import (
     robot_status,
     execute_trajectory,
@@ -67,7 +62,6 @@ if trajectory_exists:
         load_error = e
 
 robot_info = robot_status()
-zenoh_is_running = zenoh_running()
 receiver_is_running = receiver_running()
 ros2_is_connected = ros2_connected()
 robot_is_connected = robot_info["connected"]
@@ -97,8 +91,8 @@ overview_cols = st.columns(4)
 
 with overview_cols[0]:
     st.metric(
-        "Zenoh",
-        status_text(zenoh_is_running, "Running", "Stopped")
+        "DDS / ROS 2",
+        status_text(ros2_is_connected, "Connected", "Disconnected")
     )
 
 with overview_cols[1]:
@@ -123,27 +117,7 @@ st.divider()
 
 st.subheader("Connections")
 
-zenoh_col, receiver_col, robot_col = st.columns([1, 1.5, 1])
-
-with zenoh_col:
-    st.caption("Zenoh")
-    start_zenoh_col, stop_zenoh_col = st.columns(2)
-
-    with start_zenoh_col:
-        if st.button(
-            "Start Zenoh",
-            use_container_width=True
-        ):
-            start_zenoh()
-            st.rerun()
-
-    with stop_zenoh_col:
-        if st.button(
-            "Stop Zenoh",
-            use_container_width=True
-        ):
-            stop_zenoh()
-            st.rerun()
+receiver_col, robot_col = st.columns([1.5, 1])
 
 with receiver_col:
     st.caption("Receiver")
@@ -424,7 +398,7 @@ with st.expander("Debug Information"):
 
     with debug_cols[0]:
         st.metric(
-            "ROS2",
+            "ROS 2",
             status_text(ros2_is_connected, "Connected", "Disconnected")
         )
 
@@ -447,5 +421,5 @@ with st.expander("Debug Information"):
         )
 
 st.info(
-    "Workflow: Zenoh -> ROS2 Receiver -> Received Trajectory -> Trajectory Executor -> Fairino Robot"
+    "Workflow: DDS / ROS 2 -> Edge Receiver -> Received Trajectory -> Trajectory Executor -> Fairino Robot"
 )

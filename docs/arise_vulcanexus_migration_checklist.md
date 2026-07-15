@@ -1,162 +1,79 @@
 # ARISE Vulcanexus Migration Checklist
 
-This file keeps the current work organized across the two local repositories:
+This checklist records the current reusable-module alignment target for ARISE submission.
 
-- `~/vilma-agent`: experiment and validation workspace
-- `~/vilma-agent-clean`: clean upstream base for the final push branch
+## Architecture Rules
 
-The rule is simple:
+- ROS 2 / Vulcanexus / Fast DDS is the official reusable middleware interface.
+- The reusable module exposes standard ROS 2 / DDS interfaces.
+- DDS discovery and network routing are deployment-specific.
+- Valid DDS-native deployment mechanisms include native DDS discovery, Fast DDS Discovery Server, DDS Router, and Fast DDS WAN TCP configuration where supported by repository helpers.
+- FIWARE / Orion-LD is a separate northbound execution metadata and status layer.
+- FIWARE does not carry raw robot trajectories.
+- This repository does not implement the DDS-NGSI-LD Enabler.
 
-- prove behavior in `vilma-agent`
-- port only the proven subset into `vilma-agent-clean`
+## Canonical Trajectory Contract
 
-## Current Proven Runtime Milestones
+| Setting | Value |
+|---|---|
+| `ROS_DOMAIN_ID` | `42` |
+| `RMW_IMPLEMENTATION` | `rmw_fastrtps_cpp` |
+| `ROS_LOCALHOST_ONLY` | `0` |
+| Topic | `/learned_trajectory` |
+| Message | `geometry_msgs/msg/PoseArray` |
 
-These items are already validated in `vilma-agent`:
+## Repository Evidence
 
-1. VILMA generates a final robot-stage Cartesian trajectory.
-2. The VILMA `Push to Robot` action can publish through Vulcanexus.
-3. The edge VM can subscribe to `/learned_trajectory`.
-4. Manual publish from `data/_runtime/vulcanexus/last_cartesian_push.csv` works.
-5. The local Streamlit app is the correct runtime for the new publish path.
-6. The reusable split for the Comau lab setup is now defined as:
-   - generic edge receiver
-   - robot-specific backend
+Application:
 
-These items are in progress:
+- `Dockerfile`
+- `docker-compose.yml`
+- service `vilma-agent`
 
-1. Edge status feedback on `/trajectory_status`
-2. Generic edge receiver deployment for the Ubuntu 20.04 + Noetic + Humble-container case
-3. Backend handoff from receiver artifact to robot-specific execution
+Publisher:
 
-## Repo Roles
-
-### `~/vilma-agent`
-
-Use this repo for:
-
-- experiments
-- runtime debugging
-- DDS/Vulcanexus validation
-- temporary scripts and notes
-- rapid UI changes
-
-This repo is allowed to stay messy while the flow is being proven.
-
-### `~/vilma-agent-clean`
-
-Use this repo for:
-
-- the final feature branch
-- clean, reviewable commits
-- mentor-facing architecture alignment
-- the branch intended to be pushed
-
-Do not try to make `vilma-agent` itself the pushable repo.
-
-## Python Version Alignment
-
-Keep both repos on the same Python version:
-
-- `Python 3.12.9`
-
-Use this interpreter when creating the clean repo venv:
-
-```bash
-/home/vvijaykumar/.local/share/uv/python/cpython-3.12.9-linux-x86_64-gnu/bin/python3.12
-```
-
-The project install flow is still:
-
-- `uv sync`
-
-Note: `vilma-agent-clean` currently still needs the native Cyclone DDS dependency resolved before `uv sync` fully succeeds.
-
-## Ready-To-Port Files
-
-These are the first files to move into `vilma-agent-clean` once the current milestone is stable:
-
-- `src/streamlit_template/new_ui/services/Common/robot_action_service.py`
-- `src/streamlit_template/new_ui/pages/SVO/svo_pipeline_page.py`
-- `src/streamlit_template/new_ui/pages/BAG/bag_pipeline_page.py`
-- `src/streamlit_template/new_ui/pages/Generic/pipeline_page.py`
 - `scripts/vulcanexus/docker_publish_traj.sh`
-- `scripts/vulcanexus/docker_run_fastdds_discovery_server.sh`
-- `scripts/vulcanexus/docker_subscribe_traj.sh`
-- `scripts/vulcanexus/docker_wait_for_status.sh`
-- `scripts/vulcanexus/edge_receive_posearray.py`
-- `scripts/vulcanexus/run_edge_receiver.sh`
-- `scripts/vulcanexus/comau_backend_example.sh`
-- `scripts/vulcanexus/run_edge_executor.sh`
 - `scripts/vulcanexus/traj_pose_array_pub.py`
-- `scripts/vulcanexus/traj_pose_array_sub.py`
-- `scripts/vulcanexus/traj_pose_array_executor.py`
-- `scripts/vulcanexus/traj_status_sub.py`
-- `scripts/vulcanexus/README.md`
-- `README_VULCANEXUS_MACHINES.md`
-- `docs/vulcanexus_cross_machine_test.md`
 
-## Review Before Porting
+Edge receiver:
 
-These files have local changes or additions in `vilma-agent`, but they should be reviewed deliberately before moving them into the clean repo:
+- `scripts/vulcanexus/run_edge_receiver.sh`
+- `scripts/vulcanexus/edge_receive_posearray.py`
 
-- `README.md`
-- `src/streamlit_template/core/Common/robot_playback.py`
-- `src/streamlit_template/core/SVO/99_run_full_pipeline.py`
-- `src/streamlit_template/new_ui/components/Common/frame_viewer.py`
-- `src/streamlit_template/new_ui/services/Generic/pipeline_service.py`
-- `src/streamlit_template/core/SVO/14_plot_robot_execution.py`
-- `src/streamlit_template/core/SVO/06to merge_compute_object_distance_offsets.py`
+Discovery Server:
 
-These are likely mixed with unrelated experimental work and should not be ported blindly.
+- `scripts/vulcanexus/docker_run_fastdds_discovery_server.sh`
+- default UDP port `14520`
 
-## Do Not Port
+DDS Router:
 
-Do not port these into `vilma-agent-clean` unless there is a very explicit reason:
+- `scripts/vulcanexus/ddsrouter_cloud.template.yaml`
+- `scripts/vulcanexus/ddsrouter_edge.template.yaml`
+- `scripts/vulcanexus/render_ddsrouter_wan_config.sh`
+- `scripts/vulcanexus/docker_run_ddsrouter.sh`
+- default WAN TCP port `45678`
 
-- notebooks
-- local PDFs
-- raw experiment data under `data/`
-- local uploads/downloads
-- temporary runtime exports under `data/_runtime/`
-- `bag_alignment_check/`
-- one-off debug scripts in the repo root
+FIWARE:
 
-## Docker Compose Direction
+- `docker-compose.fiware.yml`
+- `src/streamlit_template/new_ui/services/Common/fiware_service.py`
+- `src/streamlit_template/new_ui/pages/Common/fiware_page.py`
 
-Do not restructure Compose until the runtime loop is complete.
+## Submission Checks
 
-The target service split should be:
+- Base Compose validates and exposes only `vilma-agent`.
+- GPU Compose overlay validates and still exposes only `vilma-agent`.
+- FIWARE Compose validates separately.
+- Current documentation does not claim middleware services are started by base Compose.
+- Push-to-Robot UI describes the Vulcanexus ROS 2 / Fast DDS interface.
+- Edge Operator workflow exposes DDS / ROS 2 receiver operation without active bridge lifecycle controls.
+- Fast DDS Discovery Server default port is `14520`.
+- DDS Router WAN TCP port remains `45678`.
+- DDS Router is described as a DDS-native option, not as a proven production default.
+- Historical deployment evidence that does not describe the current reusable architecture is not part of the current submitted documentation set.
 
-1. `vilma-ui`
-2. `trajectory-push-adapter`
-3. `edge-receiver`
-4. robot-specific backend or documented external consumer
-4. later: `northbound-api` / FIWARE adapter
+## Non-Blocking Evidence Gaps
 
-The current local success path is still:
-
-- local Streamlit from `vilma-agent`
-- Vulcanexus helper scripts on `server1`
-- edge ROS 2 / execution side
-
-## Mentor Alignment Target
-
-The final pushed branch should make these boundaries explicit:
-
-1. `VILMA` is the frontend/orchestrator
-2. `Vulcanexus` is the southbound transport adapter
-3. `Edge executor` is the robot-side adapter
-4. `FIWARE` or HTTP context/API belongs on the northbound side
-5. the reusable asset is the execution-ready trajectory plus the transport/execution adapters
-
-## Next Steps In Order
-
-1. Finish edge executor dry-run
-2. Verify `/trajectory_status` feedback
-3. Freeze the current runtime behavior
-4. Define the final Compose/service split
-5. Port the proven subset into `vilma-agent-clean`
-6. Create the final feature branch there
-7. Clean docs and architecture explanation
-8. Only then prepare mentor-facing diagrams/slides
+- Cross-machine DDS Router runtime validation must be executed and recorded before DDS Router can be called the validated production path.
+- Physical robot execution depends on robot SDK installation, safety checks, and deployment-specific operator procedure.
+- DDS network routing must be selected and validated for each target topology.

@@ -154,7 +154,7 @@ This opens the **Skill Reuse** page:
 3. Select a new target object
 4. Set the release point
 5. Click **Compute Skill Reuse Trajectory** → generates an offset-shifted trajectory
-6. Optionally push to robot via Vulcanexus/CycloneDDS
+6. Optionally push to robot via Vulcanexus ROS 2 / Fast DDS
 
 ---
 

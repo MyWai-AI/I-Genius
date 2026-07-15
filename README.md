@@ -32,6 +32,7 @@ This repository is organized around:
 - hand, object, trajectory, DMP, and robot playback pipeline steps
 - reusable documentation for preparing data outside the app
 - local runtime folders that are ignored by git
+- a ROS 2 / Vulcanexus / Fast DDS reusable trajectory interface
 
 This repository should not contain:
 
@@ -40,6 +41,26 @@ This repository should not contain:
 - private package feed files
 - generated videos, extracted frames, depth maps, or DMP runtime outputs
 - one-off notebook outputs or temporary experiment data
+
+## Reusable ROS 2 / DDS Interface
+
+The reusable module exposes standard ROS 2 / DDS interfaces. DDS discovery and network routing are deployment-specific and are configured according to the target network topology.
+
+Canonical trajectory contract:
+
+| Setting | Value |
+|---|---|
+| `ROS_DOMAIN_ID` | `42` |
+| `RMW_IMPLEMENTATION` | `rmw_fastrtps_cpp` |
+| `ROS_LOCALHOST_ONLY` | `0` |
+| Topic | `/learned_trajectory` |
+| Message | `geometry_msgs/msg/PoseArray` |
+
+The application writes a Cartesian trajectory artifact. The Vulcanexus helper scripts publish it as `geometry_msgs/msg/PoseArray`; edge-side helpers receive the topic and hand off to robot-specific backends.
+
+DDS deployment may use native DDS discovery, Fast DDS Discovery Server, DDS Router, or Fast DDS WAN TCP configuration where supported by repository helpers. DDS Router is a DDS-native option for routed server-to-edge deployments, not a claimed production default without deployment-specific validation.
+
+FIWARE / Orion-LD is separate. It stores execution metadata and lifecycle/status information, does not carry raw trajectory delivery, and this repository does not implement the DDS-NGSI-LD Enabler.
 
 ## Quick Start
 
@@ -76,6 +97,14 @@ Open:
 ```text
 http://localhost:9002
 ```
+
+The base Compose service set is only:
+
+```text
+vilma-agent
+```
+
+ROS 2 / Vulcanexus / Fast DDS helpers are operated separately from `scripts/vulcanexus/`.
 
 ## Recommended Workflow
 

@@ -3,12 +3,14 @@
 This document defines the reusable boundary between:
 
 - `vilma-agent` as the trajectory producer
-- Vulcanexus / ROS 2 as the transport layer
+- Vulcanexus / ROS 2 / Fast DDS as the transport layer
 - robot-side execution backends such as the Ubuntu 20.04 + ROS1 Noetic Comau stack
 
 ## Purpose
 
 The goal is to make the edge side reusable across multiple deployments.
+
+The reusable module exposes standard ROS 2 / DDS interfaces. DDS discovery and network routing are deployment-specific and are configured according to the target network topology.
 
 `vilma-agent` should not know how to execute on a specific robot. It should only:
 
@@ -27,6 +29,12 @@ Input topic:
 
 - `/learned_trajectory`
 - `geometry_msgs/msg/PoseArray`
+
+ROS 2 / DDS defaults:
+
+- `ROS_DOMAIN_ID=42`
+- `RMW_IMPLEMENTATION=rmw_fastrtps_cpp`
+- `ROS_LOCALHOST_ONLY=0`
 
 Status topic:
 
@@ -111,3 +119,7 @@ For the current Comau setup:
 - `scripts/vulcanexus/comau_backend_example.sh`
 
 These are additive and do not replace the existing dry-run executor flow.
+
+## FIWARE Boundary
+
+FIWARE / Orion-LD is separate from this raw trajectory contract. FIWARE stores execution metadata and lifecycle/status information through NGSI-LD REST. It does not deliver raw robot trajectories, and this repository does not implement the DDS-NGSI-LD Enabler.

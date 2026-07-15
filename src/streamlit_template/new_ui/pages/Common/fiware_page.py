@@ -28,7 +28,7 @@ def _init_fiware_state() -> None:
     st.session_state.setdefault("fiware_robot_id", "openarm")
     st.session_state.setdefault("fiware_skill_id", "trajectory-delivery")
     st.session_state.setdefault("fiware_status", "received")
-    st.session_state.setdefault("fiware_transport", "Vulcanexus LAN")
+    st.session_state.setdefault("fiware_transport", "Vulcanexus ROS 2 / Fast DDS")
     st.session_state.setdefault("fiware_pose_count", 46)
     st.session_state.setdefault("fiware_topic_name", DEFAULT_FIWARE_TOPIC_NAME)
     st.session_state.setdefault("fiware_status_topic", DEFAULT_FIWARE_STATUS_TOPIC)
@@ -122,7 +122,7 @@ def render_fiware_page() -> None:
         )
         transport = st.selectbox(
             "Transport",
-            ["Vulcanexus LAN", "CycloneDDS", "Custom"],
+            ["Vulcanexus ROS 2 / Fast DDS", "Custom"],
             key="fiware_transport",
         )
         pose_count = st.number_input(
@@ -226,7 +226,7 @@ def render_fiware_page() -> None:
                 """
                 - `TrajectoryExecution` entity: northbound view of the execution request
                 - `status`: lifecycle state visible to IT systems
-                - `transportProfile`: documents that delivery happened through Vulcanexus LAN
+                - `transportProfile`: documents the ROS 2 / DDS delivery profile
                 - `topicName` / `statusTopic`: southbound traceability
                 - `poseCount`: lightweight execution metadata
                 """

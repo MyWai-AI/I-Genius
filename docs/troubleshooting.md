@@ -1,84 +1,54 @@
 # Troubleshooting
 
-## `uv sync` Was Skipped
+## Base Compose Does Not Match the Documentation
 
-Cause: `MYWAI_ARTIFACTS_MAIL` and `MYWAI_ARTIFACTS_TOKEN` are missing.
-
-Fix:
+Validate the actual app service set:
 
 ```bash
-[ -f .env ] || cp .env.example .env
-# edit .env and fill MYWAI_ARTIFACTS_MAIL / MYWAI_ARTIFACTS_TOKEN
-./install_dependencies.sh --skip-system
+docker compose config --quiet
+docker compose config --services
 ```
 
-## Docker Permission Denied
+Expected service:
 
-The setup scripts use `sudo docker` when the current user cannot access Docker.
-For future shells without sudo:
-
-```bash
-sudo usermod -aG docker "$USER"
-newgrp docker
+```text
+vilma-agent
 ```
 
-Then verify:
+The base Compose file does not start middleware helpers. Start ROS 2 / Vulcanexus / Fast DDS tooling with the scripts under `scripts/vulcanexus/`.
+
+## GPU Compose Fails
+
+Validate the overlay:
 
 ```bash
-docker ps
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml config --quiet
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml config --services
 ```
 
-## Container Already Exists
+Expected service:
 
-`bootstrap.sh` preserves existing manual containers. If a container named
-`vulcanexus_humble`, `zenoh_cloud`, or `zenoh_edge` already exists, setup starts
-it instead of recreating it.
-
-Check status:
-
-```bash
-docker ps -a --filter name=vulcanexus_humble
-docker ps -a --filter name=zenoh_cloud
-docker ps -a --filter name=zenoh_edge
+```text
+vilma-agent
 ```
 
-If `docker compose up -d` reports that one of these container names is already
-in use, the host has a pre-existing manually-created container. Either keep
-using `./setup.sh --start-app`, which reuses existing containers, or migrate the
-container to Compose during a maintenance window:
+If the container starts but PyTorch or Ultralytics cannot see the GPU, check that the NVIDIA Container Toolkit is installed on the host.
+
+## App Port Is Not Reachable
+
+The Compose app maps host port `9002` to Streamlit port `8504`.
+
+Check:
 
 ```bash
-docker stop vulcanexus_humble zenoh_cloud
-# remove only after confirming these are the old manually-created containers
-docker rm vulcanexus_humble zenoh_cloud
-docker compose --env-file .env up -d --build
+docker compose ps
+docker compose logs --tail 100 vilma-agent
+ss -ltnp | grep -E ':(8504|9002)\b'
 ```
 
 ## Push to Robot Fails: No Subscriber
 
-Check that the server containers are running:
-
-```bash
-docker ps --filter name=vulcanexus_humble
-docker ps --filter name=zenoh_cloud
-docker logs zenoh_cloud --tail 50
-```
-
-If the app is running in the `vilma-agent` container, confirm it can access the
-host Docker daemon:
-
-```bash
-docker exec vilma-agent docker ps --filter name=vulcanexus_humble
-```
-
-If this fails, check that `/var/run/docker.sock` is mounted by Compose and that
-the image was rebuilt after the Docker CLI was added:
-
-```bash
-docker compose --env-file .env up -d --build vilma-agent
-```
-
-Check matching ROS settings on both machines:
+Confirm the canonical ROS 2 / DDS settings on publisher and receiver:
 
 ```bash
 echo "$ROS_DOMAIN_ID"
@@ -94,13 +64,9 @@ RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ROS_LOCALHOST_ONLY=0
 ```
 
-## Edge Does Not Receive `/learned_trajectory`
-
-On Edge:
+Confirm the receiver is listening for the trajectory topic:
 
 ```bash
-docker ps --filter name=zenoh_edge
-docker logs zenoh_edge --tail 50
 source /opt/ros/humble/setup.bash
 export ROS_DOMAIN_ID=42
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
@@ -108,105 +74,104 @@ export ROS_LOCALHOST_ONLY=0
 ros2 topic list
 ```
 
-If the Edge machine uses a different relay/server endpoint, update
-`ZENOH_EDGE_CONNECT` in `.env` and rerun:
+Expected trajectory contract:
+
+```text
+/learned_trajectory
+geometry_msgs/msg/PoseArray
+```
+
+## Fast DDS Discovery Server
+
+The helper default is `14520`.
+
+Start:
 
 ```bash
-./bootstrap.sh --role edge --containers-only
+FASTDDS_UDP_ADDRESS=<server-ip> \
+FASTDDS_UDP_PORT=14520 \
+bash scripts/vulcanexus/docker_run_fastdds_discovery_server.sh
 ```
 
-If the old `zenoh_edge` container was created with the wrong endpoint, remove
-and recreate only after confirming it is safe:
+On publisher and receiver:
 
 ```bash
-docker rm -f zenoh_edge
-./bootstrap.sh --role edge --containers-only
+export ROS_DISCOVERY_SERVER=<server-ip>:14520
 ```
 
-## `HOST_WORKSPACE` Points to the Wrong Directory
+If discovery still fails, check firewall rules and confirm both machines can reach the selected server IP and port.
 
-This can happen if the checkout was moved after setup.
+## DDS Router
 
-Fix:
+DDS Router is available as a DDS-native option for routed server-to-edge deployments.
+
+Render configs:
 
 ```bash
-./bootstrap.sh --env-only
+CLOUD_PUBLIC_HOST=<public-host-or-ip> bash scripts/vulcanexus/render_ddsrouter_wan_config.sh cloud
+CLOUD_PUBLIC_HOST=<public-host-or-ip> bash scripts/vulcanexus/render_ddsrouter_wan_config.sh edge
 ```
 
-Then inspect `.env` and confirm:
-
-```env
-HOST_WORKSPACE=/absolute/path/to/vilma-agent
-```
-
-## ROS 2 Setup File Missing on Edge
-
-Install ROS 2 Humble host dependencies:
+Run:
 
 ```bash
-./install_dependencies.sh --skip-uv-sync --install-ros2
+HOST_CONFIG_PATH=/tmp/ddsrouter_cloud.yaml bash scripts/vulcanexus/docker_run_ddsrouter.sh
 ```
 
-Then verify:
+Default WAN TCP port:
+
+```text
+45678
+```
+
+Do not change this port unless the deployment topology requires it and both rendered configs are updated together.
+
+## Edge Receiver Does Not Write Artifacts
+
+Run the receiver directly and watch the logs:
 
 ```bash
-test -f /opt/ros/humble/setup.bash && echo ok
+source /opt/ros/humble/setup.bash
+export ROS_DOMAIN_ID=42
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export ROS_LOCALHOST_ONLY=0
+bash scripts/vulcanexus/run_edge_receiver.sh
 ```
 
-## Docker Image Pull Fails
+The receiver writes:
 
-Check network/proxy access to Docker Hub:
+```text
+edge_receiver_output/latest_received_trajectory.csv
+edge_receiver_output/latest_received_metadata.json
+```
+
+If a Discovery Server is used, also set:
 
 ```bash
-docker pull eprosima/vulcanexus:humble-desktop
-docker pull eclipse/zenoh-bridge-dds:latest
+export ROS_DISCOVERY_SERVER=<server-ip>:14520
 ```
 
-If the host uses an HTTP proxy, configure Docker daemon proxy settings and rerun
-`./bootstrap.sh --containers-only`.
+## FIWARE / Orion-LD
+
+FIWARE is optional and separate from trajectory delivery:
+
+```bash
+docker compose -f docker-compose.fiware.yml config --quiet
+docker compose -f docker-compose.fiware.yml up -d
+```
+
+Orion-LD listens on `http://localhost:1026`. It stores execution metadata and lifecycle/status information. It does not carry raw robot trajectories.
 
 ## Port Conflicts
 
 Common ports:
 
 ```bash
-ss -ltnp | grep -E ':(8504|8505|9002|11811|5050|1026)\b'
+ss -ltnp | grep -E ':(8504|9002|14520|45678|5050|1026)\b'
 ```
 
-Resolve the conflicting service or change the relevant app/bridge port in
-`.env`.
+Resolve conflicts according to the deployment-specific network plan.
 
-## Robot Relay Works in Stub Mode Only
+## Robot Execution
 
-`robot_relay/relay_server.py` intentionally keeps Fairino SDK calls commented
-until the robot PC is configured. Install the Fairino Python SDK v2 on the robot
-PC, confirm safety parameters, then enable the SDK lines in that file for that
-robot deployment.
-
-## Useful Reset Commands
-
-Start existing infrastructure:
-
-```bash
-./bootstrap.sh --role server --containers-only
-```
-
-View logs:
-
-```bash
-docker logs vulcanexus_humble --tail 50
-docker logs zenoh_cloud --tail 50
-docker logs zenoh_edge --tail 50
-```
-
-Manual publish smoke test:
-
-```bash
-CSV_RELATIVE_PATH=data/_runtime/vulcanexus/last_cartesian_push.csv \
-REPEAT=10 \
-RATE_HZ=1 \
-ROS_DOMAIN_ID=42 \
-RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
-ROS_LOCALHOST_ONLY=0 \
-./scripts/vulcanexus/docker_publish_traj.sh
-```
+Physical robot motion is outside the reusable DDS contract. Confirm the robot SDK, safety limits, workspace bounds, and operator procedure on the robot PC before enabling any physical execution path.
